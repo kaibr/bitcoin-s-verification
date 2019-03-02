@@ -30,3 +30,5 @@ Then we can follow the [guide](https://epfl-lara.github.io/stainless/installatio
 
 ### Tutorial
 Now we can start with the [Stainless tutorial](https://epfl-lara.github.io/stainless/tutorial.html).
+
+I had to add `resolvers += "uuverifiers" at "http://logicrunch.it.uu.se:4096/~wv/maven"` to `build.sbt`, because it did not find the princess resolver.
