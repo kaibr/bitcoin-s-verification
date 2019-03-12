@@ -31,4 +31,6 @@ Then we can follow the [guide](https://epfl-lara.github.io/stainless/installatio
 ### Tutorial
 Now we can start with the [Stainless tutorial](https://epfl-lara.github.io/stainless/tutorial.html).
 
-I had to add `resolvers += "uuverifiers" at "http://logicrunch.it.uu.se:4096/~wv/maven"` to `build.sbt`, because it did not find the princess resolver.
+I had to add `resolvers += "uuverifiers" at "http://logicrunch.it.uu.se:4096/~wv/maven"` to `build.sbt`, because it did not find the princess resolver
+[![epfl-lara/stainless/issue/443](https://img.shields.io/github/issues/detail/s/epfl-lara/stainless/443.svg)](https://github.com/epfl-lara/stainless/pull/443)
+[![epfl-lara/stainless/issue/457](https://img.shields.io/github/issues/detail/s/epfl-lara/stainless/457.svg)](https://github.com/epfl-lara/stainless/pull/457).
