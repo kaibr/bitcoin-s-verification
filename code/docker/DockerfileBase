@@ -1,0 +1,10 @@
+FROM openjdk:8-jdk
+
+RUN apt update && \
+    apt install -y apt-transport-https
+
+RUN curl -s -L https://github.com/Z3Prover/z3/releases/download/z3-4.7.1/z3-4.7.1-x64-debian-8.10.zip > /tmp/z3.zip && \
+    unzip -p /tmp/z3.zip $(unzip -l /tmp/z3.zip | grep "bin/z3" | cut -d" " -f8) >/usr/local/bin/z3 && \
+    chmod +x /usr/local/bin/z3 && \
+    apt install libgomp1 && \
+    rm /tmp/z3.zip
