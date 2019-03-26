@@ -36,7 +36,9 @@ sealed abstract class CurrencyUnit
   }
 
   override def *(factor: BigInt): CurrencyUnit = {
-    Satoshis((satoshis.underlying * factor).bytes)
+//    TODO right?
+    Satoshis((satoshis.underlying.toBigInt * factor).toString(16))
+//    Satoshis((satoshis * factor).hex)
   }
 
   override def *(c: CurrencyUnit): CurrencyUnit = {

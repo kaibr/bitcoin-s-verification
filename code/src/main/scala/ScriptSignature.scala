@@ -6,14 +6,14 @@ import scala.util.{Failure, Success, Try}
   */
 sealed abstract class ScriptSignature extends Script {
 
-  /**
-    * The digital signatures contained inside of the script signature
-    * p2pkh script signatures only have one sig
-    * p2pk script signatures only have one sigs
-    * p2sh script signatures can have m sigs
-    * multisignature scripts can have m sigs
-    */
-  def signatures: Seq[ECDigitalSignature]
+//  /**
+//    * The digital signatures contained inside of the script signature
+//    * p2pkh script signatures only have one sig
+//    * p2pk script signatures only have one sigs
+//    * p2sh script signatures can have m sigs
+//    * multisignature scripts can have m sigs
+//    */
+//  def signatures: Seq[ECDigitalSignature]
 
 }
 
@@ -427,65 +427,65 @@ sealed abstract class ScriptSignature extends Script {
 
 /** Represents the empty script signature */
 case object EmptyScriptSignature extends ScriptSignature {
-  override def asm: Seq[ScriptToken] = Vector.empty
+//  override def asm: Seq[ScriptToken] = Vector.empty
   def signatures = Vector.empty
 }
 
-object ScriptSignature extends ScriptFactory[ScriptSignature] {
+//object ScriptSignature extends ScriptFactory[ScriptSignature] {
+//
+//  /** Returns an empty script signature */
+//  def empty: ScriptSignature = EmptyScriptSignature
 
-  /** Returns an empty script signature */
-  def empty: ScriptSignature = EmptyScriptSignature
+//  /** Creates a scriptSignature from the list of script tokens */
+//  def fromAsm(tokens: Seq[ScriptToken]): ScriptSignature = tokens match {
+//    case Nil => EmptyScriptSignature
+//    case _
+//      if (tokens.size > 1 && P2SHScriptSignature.isRedeemScript(
+//        tokens.last)) =>
+//      P2SHScriptSignature.fromAsm(tokens)
+//    case _
+//      if (MultiSignatureScriptSignature.isMultiSignatureScriptSignature(
+//        tokens)) =>
+//      MultiSignatureScriptSignature.fromAsm(tokens)
+//    case _ if P2PKHScriptSignature.isP2PKHScriptSig(tokens) =>
+//      P2PKHScriptSignature.fromAsm(tokens)
+//    case _ if P2PKScriptSignature.isP2PKScriptSignature(tokens) =>
+//      P2PKScriptSignature.fromAsm(tokens)
+//    case _ => NonStandardScriptSignature.fromAsm(tokens)
+//  }
 
-  /** Creates a scriptSignature from the list of script tokens */
-  def fromAsm(tokens: Seq[ScriptToken]): ScriptSignature = tokens match {
-    case Nil => EmptyScriptSignature
-    case _
-      if (tokens.size > 1 && P2SHScriptSignature.isRedeemScript(
-        tokens.last)) =>
-      P2SHScriptSignature.fromAsm(tokens)
-    case _
-      if (MultiSignatureScriptSignature.isMultiSignatureScriptSignature(
-        tokens)) =>
-      MultiSignatureScriptSignature.fromAsm(tokens)
-    case _ if P2PKHScriptSignature.isP2PKHScriptSig(tokens) =>
-      P2PKHScriptSignature.fromAsm(tokens)
-    case _ if P2PKScriptSignature.isP2PKScriptSignature(tokens) =>
-      P2PKScriptSignature.fromAsm(tokens)
-    case _ => NonStandardScriptSignature.fromAsm(tokens)
-  }
-
-  /**
-    * Creates a script signature from the given tokens and scriptPubKey
-    * @param tokens the script signature's tokens
-    * @param scriptPubKey the scriptPubKey which the script signature is trying to spend
-    * @return
-    */
-  def fromScriptPubKey(
-                        tokens: Seq[ScriptToken],
-                        scriptPubKey: ScriptPubKey): Try[ScriptSignature] = scriptPubKey match {
-    case _: P2SHScriptPubKey  => Try(P2SHScriptSignature.fromAsm(tokens))
-    case _: P2PKHScriptPubKey => Try(P2PKHScriptSignature.fromAsm(tokens))
-    case _: P2PKScriptPubKey  => Try(P2PKScriptSignature.fromAsm(tokens))
-    case _: MultiSignatureScriptPubKey =>
-      Try(MultiSignatureScriptSignature.fromAsm(tokens))
-    case _: NonStandardScriptPubKey =>
-      Try(NonStandardScriptSignature.fromAsm(tokens))
-    case s: CLTVScriptPubKey => fromScriptPubKey(tokens, s.nestedScriptPubKey)
-    case s: CSVScriptPubKey  => fromScriptPubKey(tokens, s.nestedScriptPubKey)
-    case _: WitnessScriptPubKeyV0 | _: UnassignedWitnessScriptPubKey =>
-      Success(EmptyScriptSignature)
-    case EmptyScriptPubKey =>
-      if (tokens.isEmpty) Success(EmptyScriptSignature)
-      else Try(NonStandardScriptSignature.fromAsm(tokens))
-    case _: WitnessCommitment =>
-      Failure(
-        new IllegalArgumentException(
-          "Cannot spend witness commitment scriptPubKey"))
-  }
-
-  def apply(
-             tokens: Seq[ScriptToken],
-             scriptPubKey: ScriptPubKey): Try[ScriptSignature] = {
-    fromScriptPubKey(tokens, scriptPubKey)
-  }
-}
+//  /**
+//    * Creates a script signature from the given tokens and scriptPubKey
+//    * @param tokens the script signature's tokens
+//    * @param scriptPubKey the scriptPubKey which the script signature is trying to spend
+//    * @return
+//    */
+//  def fromScriptPubKey(
+//                        tokens: Seq[ScriptToken],
+//                        scriptPubKey: ScriptPubKey): Try[ScriptSignature] = scriptPubKey match {
+//    case _: P2SHScriptPubKey  => Try(P2SHScriptSignature.fromAsm(tokens))
+//    case _: P2PKHScriptPubKey => Try(P2PKHScriptSignature.fromAsm(tokens))
+//    case _: P2PKScriptPubKey  => Try(P2PKScriptSignature.fromAsm(tokens))
+//    case _: MultiSignatureScriptPubKey =>
+//      Try(MultiSignatureScriptSignature.fromAsm(tokens))
+//    case _: NonStandardScriptPubKey =>
+//      Try(NonStandardScriptSignature.fromAsm(tokens))
+//    case s: CLTVScriptPubKey => fromScriptPubKey(tokens, s.nestedScriptPubKey)
+//    case s: CSVScriptPubKey  => fromScriptPubKey(tokens, s.nestedScriptPubKey)
+//    case _: WitnessScriptPubKeyV0 | _: UnassignedWitnessScriptPubKey =>
+//      Success(EmptyScriptSignature)
+//    case EmptyScriptPubKey =>
+//      if (tokens.isEmpty) Success(EmptyScriptSignature)
+//      else Try(NonStandardScriptSignature.fromAsm(tokens))
+//    case _: WitnessCommitment =>
+//      Failure(
+//        new IllegalArgumentException(
+//          "Cannot spend witness commitment scriptPubKey"))
+//  }
+//
+//  def apply(
+//             tokens: Seq[ScriptToken],
+//             scriptPubKey: ScriptPubKey): Try[ScriptSignature] = {
+//    fromScriptPubKey(tokens, scriptPubKey)
+//  }
+//}

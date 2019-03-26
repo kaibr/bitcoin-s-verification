@@ -129,15 +129,15 @@ object CompactSizeUInt extends Factory[CompactSizeUInt] {
 //    * [[org.bitcoins.core.protocol.script.ScriptSignature ScriptSignature]].
 //    * https://bitcoin.org/en/developer-reference#compactsize-unsigned-integers.
 //    */
-  def parseCompactSizeUInt(script: ScriptSignature): CompactSizeUInt = {
-    if (script.bytes.size <= 252) {
-      CompactSizeUInt(UInt64(script.bytes.size), 1)
-    } else if (script.bytes.size <= 0xffff) {
-      CompactSizeUInt(UInt64(script.bytes.size), 3)
-    } else if (script.bytes.size <= 0xffffffffL) {
-      CompactSizeUInt(UInt64(script.bytes.size), 5)
-    } else CompactSizeUInt(UInt64(script.bytes.size), 9)
-  }
+//  def parseCompactSizeUInt(script: ScriptSignature): CompactSizeUInt = {
+//    if (script.bytes.size <= 252) {
+//      CompactSizeUInt(UInt64(script.bytes.size), 1)
+//    } else if (script.bytes.size <= 0xffff) {
+//      CompactSizeUInt(UInt64(script.bytes.size), 3)
+//    } else if (script.bytes.size <= 0xffffffffL) {
+//      CompactSizeUInt(UInt64(script.bytes.size), 5)
+//    } else CompactSizeUInt(UInt64(script.bytes.size), 9)
+//  }
 
   private def parseLong(hex: String): Long = java.lang.Long.parseLong(hex, 16)
 

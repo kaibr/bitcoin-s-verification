@@ -8,7 +8,7 @@ sealed abstract class TransactionInput extends NetworkElement {
 
   def previousOutput: TransactionOutPoint
 
-  def scriptSignature: ScriptSignature
+//  def scriptSignature: ScriptSignature
   def sequence: UInt32
   override def bytes = RawTransactionInputParser.write(this)
 }
@@ -30,7 +30,7 @@ sealed abstract class TransactionInput extends NetworkElement {
 object TransactionInput extends Factory[TransactionInput] {
   private case class TransactionInputImpl(
                                            previousOutput: TransactionOutPoint,
-                                           scriptSignature: ScriptSignature,
+//                                           scriptSignature: ScriptSignature,
                                            sequence: UInt32)
     extends TransactionInput
 //  def empty: TransactionInput = EmptyTransactionInput
@@ -40,12 +40,15 @@ object TransactionInput extends Factory[TransactionInput] {
 
   def apply(
              outPoint: TransactionOutPoint,
-             scriptSignature: ScriptSignature,
+//             scriptSignature: ScriptSignature,
              sequenceNumber: UInt32): TransactionInput = outPoint match {
 //    case EmptyTransactionOutPoint =>
 //      CoinbaseInput(scriptSignature, sequenceNumber)
     case _: TransactionOutPoint =>
-      TransactionInputImpl(outPoint, scriptSignature, sequenceNumber)
+      TransactionInputImpl(
+        outPoint
+//        , scriptSignature
+        , sequenceNumber)
   }
 
 }
