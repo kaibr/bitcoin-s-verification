@@ -1,0 +1,5 @@
+FROM base
+
+RUN curl -s -L https://github.com/epfl-lara/stainless/releases/download/v0.1-93dbd33/stainless-0.1.0-93dbd33.jar > /tmp/stainless.jar && \
+    echo 'alias stainless="java -jar /tmp/stainless.jar"' >> ~/.bashrc
+

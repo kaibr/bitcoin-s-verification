@@ -1,0 +1,29 @@
+version: '3'
+services:
+  base:
+    build:
+      context: .
+      dockerfile: DockerfileBase
+    image: base
+  sbt:
+    build:
+      context: .
+      dockerfile: DockerfileSbt
+    working_dir: /usr/src/app
+    volumes:
+      - ..:/usr/src/app
+    depends_on:
+      - base
+    stdin_open: true
+    tty: true
+  stainless:
+    build:
+      context: .
+      dockerfile: DockerfileStainless
+    working_dir: /usr/src/app
+    volumes:
+      - ..:/usr/src/app
+    depends_on:
+      - base
+    stdin_open: true
+    tty: true
