@@ -248,4 +248,25 @@ Result of transaction check: true
 
 Thus, Bitcoin-S avoids creation of invalid transaction but not prevents acceptance of invalid transaction. 
 
+### Code location in Bitcoin-Core
+The code is located [here](https://github.com/bitcoin/bitcoin/blob/e756eca9e8bf39f0a891f1760df0a317ecb7fee8/src/consensus/tx_verify.cpp#L237).
+It looks like this is currently not implemented in Bitcoin-S-Core.
 
+### Run Bitcoin-S-Core with Stainless
+To verify the code we must pass all classes needed by the verificationpart.
+
+This returns all *.scala files in the directory.
+```bash
+$ find . -type f -name *.scala
+```
+
+This brings multiple lines on one line.
+```bash
+$ tr '\n' ' '
+```
+
+So we can call stainless with.
+```bash
+$ stainless $(find . -type f -name *.scala | tr '\n' ' ')
+```
+We should filter some test packages and packages not needed.
