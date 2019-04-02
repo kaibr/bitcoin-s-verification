@@ -267,6 +267,5 @@ $ tr '\n' ' '
 
 So we can call stainless with.
 ```bash
-$ stainless $(find . -type f -name *.scala | tr '\n' ' ')
+$ stainless -classpath ".:$(find /root/.ivy2/ -type f -name *.jar | tr '\n' ':') $(find . -type f -name *.scala | tr '\n' ' ')
 ```
-We should filter some test packages and packages not needed.
