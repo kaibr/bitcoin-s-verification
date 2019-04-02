@@ -1,7 +1,6 @@
 \chapter{Introduction}
 \label{chap:introduction}
 
-This document serves to illustrate the \LaTeX{} template on the basis of the corporate design\index{Corporate Design} of the Bern University of Applied Sciences\index{Bern University of Applied Sciences} as well as a manual for its use. It is assumed that the user already has some experience with \LaTeX{} or is willing to familiarize with the subject. In the bibliography the user finds some useful information on \LaTeX{} on various books and documents on the Internet.
 
 % Einträge im Verzeichnis erscheinen lassen ohne hier eine Referenz einzufügen
 \nocite{kopka:band1}
@@ -14,19 +13,28 @@ This document serves to illustrate the \LaTeX{} template on the basis of the cor
 \nocite{juergens:einfuehrung}
 \nocite{juergens:fortgeschritten}
 
-\section{Organising Documents}
-\label{sec:einleitung_aufbau}
+\section{Formal verification}
+\label{sec:formal_verification}
 
-This document is structured according to the documentation of a project work or a thesis\index{thesis}. In Chapter \ref{chap:instructions}, the packages used are briefly explained, and instructions are given, how the bibliography and the glossary are to be used. Chapter \ref{chap:typeareatest} presents a sample chapter to audit the type area.
+The longer and complexer a source code is, the more difficult it is to verify its correctness.
+There are two main approaches of the program verification. The commonly used one is the simulation-based verification.
 
-In figure \ref{fig:file_structure} the file structure is shown for this template.
+To simulate the software design some practical scenarios and assertions are created by a developer at the software testing stage. 
+But it not achievable to simulate all possible states and to test all possible inputs keeping the ability to observe the side effects of a specific part of code.
 
-\begin{figure}[H]
-	\centering
-		\includegraphics[scale=0.85]{images/file_structure.png}
-	\caption{File structure}
-	\label{fig:file_structure}
-\end{figure}
+Another method to find out whether a program works correct is formal verification. It is a systematic process based on mathematical modeling.
+The correctness of a program is analyzed relative to its formal specification. The high level requirements are written corresponding to the micro-architecture specification.
+With formal verification all possible input values are explored algorithmically and exhaustively. \cite{sanghavi:formal_verification}
+
+
+%In figure \ref{fig:file_structure} the file structure is shown for this template.
+
+%\begin{figure}[H]
+%	\centering
+%		\includegraphics[scale=0.85]{images/file_structure.png}
+%	\caption{File structure}
+%	\label{fig:file_structure}
+%\end{figure}
 
 \section{Contact}
 \label{sec:introduction_contact}
