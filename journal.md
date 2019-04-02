@@ -269,3 +269,8 @@ So we can call stainless with.
 ```bash
 $ stainless -classpath ".:$(find /root/.ivy2/ -type f -name *.jar | tr '\n' ':') $(find . -type f -name *.scala | tr '\n' ' ')
 ```
+`core` depends on `secp256k1jni` so we need to add it to compile files too.
+
+```BASH
+$ stainless -classpath ".:$(find /root/.ivy2/ -type f -name *.jar | tr '\n' ':')" $(find . -type f -name *.scala | tr '\n' ' ') $(find ../secp256k1jni -type f -name *.java | tr '\n' ' ')
+```
