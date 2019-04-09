@@ -36,23 +36,29 @@ With formal verification all possible input values are explored algorithmically 
 %	\label{fig:file_structure}
 %\end{figure}
 
-\section{Contact}
-\label{sec:introduction_contact}
+\section{Stainless}
+\label{sec:stainless}
 
-The manufacturers of this template welcome any suggestions for improvement. Chapter \ref{sec:introduction_suggestions} shows possible suggestions for improvement\index{suggestions}.
+Stainless is a framework developed by "Lab for Automated Reasoning and Analysis" (LARA) at EPFL's School of Computer and Communication Sciences to verify Scala programs.
+It explores all input values, reports inputs for which a program fails and demonstrates counterexamples which violate a given specification.
+The specification must be provided by a developer through giving a precondition and postcondition for functions. Constrains for input values are specified in a precondition, and for output values - in a postcondition. 
+While compiling Stainless tries to prove that for the given precondition of input the postcondition of output always holds.
+Three outcomes of the verification are possible: valid, unvalid and unknown when the framework is unable to prove or find a counterexample.
+The code to be verified should be written in Pure Scala belonging to functional programming paradigm. To extend this subset of the Scala language Stainless supports also some imperative features translating them into Pure Scala concepts.
+For more details about Stainless its official website can be explored. \cite{Stainless}
 
-\begin{table}[H]
-	\centering
-		\begin{tabular}{lll} \toprule
-			\textbf{First Name Last Name} & \textbf{E-mail} & \textbf{Function} \\ \midrule
-			Alfred Kaufmann & alfred.kaufmann@bfh.ch & Employer, Project Management, \\
-			& & Supplements, Improvements \\ \midrule
-			Fritz Dellsperger & Retired & Tips on the structure and layout \\ \midrule
-			David Burri & Contracted out & First compilation of the Template \\ \bottomrule
-		\end{tabular}
-	\caption{Contact Persons}
-	\label{tab:Contact Persons}
-\end{table}
+%\begin{table}[H]
+%	\centering
+%		\begin{tabular}{lll} \toprule
+%			\textbf{First Name Last Name} & \textbf{E-mail} & \textbf{Function} \\ \midrule
+%			Alfred Kaufmann & alfred.kaufmann@bfh.ch & Employer, Project Management, \\
+%			& & Supplements, Improvements \\ \midrule
+%			Fritz Dellsperger & Retired & Tips on the structure and layout \\ \midrule
+%			David Burri & Contracted out & First compilation of the Template \\ \bottomrule
+%		\end{tabular}
+%	\caption{Contact Persons}
+%	\label{tab:Contact Persons}
+%\end{table}
 
 
 \section{Suggestions for Improvement}
