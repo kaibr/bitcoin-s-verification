@@ -137,7 +137,7 @@ This transaction creates spends more money than it was funded by the given utxos
 
 Thus, Bitcoin-s prevents creation of a transaction that spends more than it may. 
 
-The class `bitcoin-s-core/core/src/main/scala/org/bitcoins/core/wallet/builder/TxBuilder.scala` contains the check of amounts of Inputs and Outputs by signing a transaction:
+The class `bitcoin-s-core/core/src/main/scala/org/bitcoins/core/wallet/builder/TxBuilder.scala` contains the check of amounts of Inputs and Outputs while signing a transaction:
 
 ```bash
 def sanityAmountChecks(
@@ -274,3 +274,91 @@ $ stainless -classpath ".:$(find /root/.ivy2/ -type f -name *.jar | tr '\n' ':')
 ```BASH
 $ stainless -classpath ".:$(find /root/.ivy2/ -type f -name *.jar | tr '\n' ':')" $(find . -type f -name *.scala | tr '\n' ' ') $(find ../secp256k1jni -type f -name *.java | tr '\n' ' ')
 ```
+## Analysis of the function checkTransaction() for dublicate inputs
+
+There is a check for dublicate inputs in the function checkTransaction(), so that it is not possible to have a transaction which spends the same output of a previous transaction twice, so-called double spending problem. The check is implemented in the following fragment of code:
+
+```bash
+val noDuplicateInputs = prevOutputTxIds.distinct.size == prevOutputTxIds.size
+```
+Here is tested that a transaction has not the same input several times. A `TransactionInput` contains i.a. one or several `TransactionOutPoint` that consist of an id of a previous transaction `txId` and an index of output `vout`. Thus `TransactionOutPoint` is a part of an input of a current transaction and references an output of a previous transaction which will be spent. As we can conclude from the fragment of code above, only the transaction id is taken into consideration, but not the index of output. Therefore a transaction which spends several outputs of the same transaction will not pass test of the function `checkTransaction()` and will be considered as invalid. To prove this conclusion we build this kind of transaction and test it with the function `checkTransaction()`.
+
+###Creation of an invalid Transaction referencing an output of a previous transaction twice
+
+Firstly we build a transaction which spends 5000 satoshis having one ouput of the previous transaction of a value 4000 satoshis and trying to double spend this output. Thus the function `checkTransaction()` should return `false` as a result. To create the transaction the class `bitcoin-s-core/doc/src/test/scala/TxBuilderExample.scala` mentioned above will be used. The example is adjusted with two TransactionOutPoints:
+
+```bash
+// Create TransactionOutPoints that referece the same output
+val outPoint1 = TransactionOutPoint(creditingTx.txId, UInt32.zero)
+val outPoint2 = TransactionOutPoint(creditingTx.txId, UInt32.zero)
+
+//information we need to validly sign the utxo
+val utxoSpendingInfo1 = BitcoinUTXOSpendingInfo(outPoint = outPoint1,
+                                                   output = utxo,
+                                                   signers = List(privKey),
+                                                   redeemScriptOpt = None,
+                                                   scriptWitnessOpt = None,
+                                                   hashType =
+                                                     HashType.sigHashAll)
+val utxoSpendingInfo2 = BitcoinUTXOSpendingInfo(outPoint = outPoint2,
+                                                  output = utxo,
+                                                  signers = List(privKey),
+                                                  redeemScriptOpt = None,
+                                                  scriptWitnessOpt = None,
+                                                  hashType =
+                                                    HashType.sigHashAll)
+
+//all of the utxo spending information
+val utxos: List[BitcoinUTXOSpendingInfo] = List(utxoSpendingInfo1, utxoSpendingInfo2)
+```
+
+Further the creation of a signed transaction in `TxBuilderExample` will be explained.
+
+Here the BitcoinTxBuilder with all necessary data for the transaction is created:
+
+```bash
+val txBuilder: Future[BitcoinTxBuilder] = {
+      BitcoinTxBuilder(
+        destinations = destinations,
+        utxos = utxos,
+        feeRate = feeRate,
+        changeSPK = changeSPK,
+        network = networkParams
+      )
+    }
+```
+
+If we look at the class `bitcoin-s-core/core/src/main/scala/org/bitcoins/core/wallet/builder/TxBuilder.scala` we can find there the following constructor of `BitcoinTxBuilder`:
+
+```bash
+def apply(
+      destinations: Seq[TransactionOutput],
+      utxos: Seq[BitcoinUTXOSpendingInfo],
+      feeRate: FeeUnit,
+      changeSPK: ScriptPubKey,
+      network: BitcoinNetwork): Future[BitcoinTxBuilder] = {
+    @tailrec
+    def loop(utxos: Seq[UTXOSpendingInfo], accum: UTXOMap): UTXOMap =
+      utxos match {
+        case Nil => accum
+        case h :: t =>
+          val u = BitcoinUTXOSpendingInfo(outPoint = h.outPoint,
+                                          output = h.output,
+                                          signers = h.signers,
+                                          redeemScriptOpt = h.redeemScriptOpt,
+                                          scriptWitnessOpt = h.scriptWitnessOpt,
+                                          hashType = h.hashType)
+          val result: BitcoinTxBuilder.UTXOMap = accum.updated(h.outPoint, u)
+          loop(t, result)
+      }
+    val map = loop(utxos, Map.empty)
+    BitcoinTxBuilder(destinations, map, feeRate, changeSPK, network)
+}
+```
+In the constructor the map with TransactionOutPoints as a key and BitcoinUTXOSpendingInfo as a value is created. Because our two outPoints created above in the example are equal, they are mapped in one entry in the map. So the function `sign()` fails with an error because the output value of 5000 satoshis is greater then the input value of 4000 satoshis.
+
+Thus, Bitcoin-S prevents the creation of an invalid transaction double spending the output.
+
+Obviously, if we however build this transaction with `TxBuilder` damping an error while singing, the function `checkTransaction()` returns `true` because the check of spending and crediting amounts is not implemented there. 
+
+The full implementation of the example is [here](examples-for-journal/TxBuilderExample1.scala).
