@@ -375,7 +375,7 @@ def checkNoDublicateInputs(transaction: Transaction): Boolean = {
     noDuplicateInputs
 }
 ```
-In the class `TxBuilderExample2` we create this kind of transaction taking two ouputs of the values 3000 and 4900 satoshis as an input and spending 5000 satoshis. The code of the example can be found [here](examples-for-journal/TxBuilderExample2.scala).
+In the class `TxBuilderExample2` we create this kind of transaction taking two ouputs of the values 3000 and 4900 satoshis and indexes 0 and 1 respectively as an input and spending 5000 satoshis. The code of the example can be found [here](examples-for-journal/TxBuilderExample2.scala).
 
 At the end of the example we test the created transaction with the methods checkTransaction() and checkNoDublicateInputs(). Both method return `false`. Thus, the transaction is considered as invalid though it should be valid. The output of the TxBuilderExample2:
 
