@@ -274,18 +274,19 @@ $ stainless -classpath ".:$(find /root/.ivy2/ -type f -name *.jar | tr '\n' ':')
 ```BASH
 $ stainless -classpath ".:$(find /root/.ivy2/ -type f -name *.jar | tr '\n' ':')" $(find . -type f -name *.scala | tr '\n' ' ') $(find ../secp256k1jni -type f -name *.java | tr '\n' ' ')
 ```
-## Analysis of the function checkTransaction() for dublicate inputs
+## Analysis of the method checkTransaction() for dublicate inputs
 
-There is a check for dublicate inputs in the function checkTransaction(), so that it is not possible to have a transaction which spends the same output of a previous transaction twice, so-called double spending problem. The check is implemented in the following fragment of code:
+There is a check for dublicate inputs in the method checkTransaction(), so that it is not possible to have a transaction which spends the same output of a previous transaction twice, so-called double spending problem. The check is implemented in the following fragment of code:
 
 ```bash
+val prevOutputTxIds = transaction.inputs.map(_.previousOutput.txId)
 val noDuplicateInputs = prevOutputTxIds.distinct.size == prevOutputTxIds.size
 ```
-Here is tested that a transaction has not the same input several times. A `TransactionInput` contains i.a. one or several `TransactionOutPoint` that consist of an id of a previous transaction `txId` and an index of output `vout`. Thus `TransactionOutPoint` is a part of an input of a current transaction and references an output of a previous transaction which will be spent. As we can conclude from the fragment of code above, only the transaction id is taken into consideration, but not the index of output. Therefore a transaction which spends several outputs of the same transaction will not pass test of the function `checkTransaction()` and will be considered as invalid. To prove this conclusion we build this kind of transaction and test it with the function `checkTransaction()`.
+Here is tested that a transaction has not the same input several times. A `TransactionInput` contains i.a. one or several `TransactionOutPoint` that consist of an id of a previous transaction `txId` and an index of output `vout`. Thus `TransactionOutPoint` is a part of an input of a current transaction and references an output of a previous transaction which will be spent. As we can conclude from the fragment of code above, only the transaction id is taken into consideration, but not the index of output. Therefore a transaction which spends several outputs of the same transaction will not pass test of the method `checkTransaction()` and will be considered as invalid. To prove this conclusion we build this kind of transaction and test it with the method `checkTransaction()`.
 
-###Creation of an invalid Transaction referencing an output of a previous transaction twice
+### Creation of an invalid Transaction referencing an output of a previous transaction twice
 
-Firstly we build a transaction which spends 5000 satoshis having one ouput of the previous transaction of a value 4000 satoshis and trying to double spend this output. Thus the function `checkTransaction()` should return `false` as a result. To create the transaction the class `bitcoin-s-core/doc/src/test/scala/TxBuilderExample.scala` mentioned above will be used. The example is adjusted with two TransactionOutPoints:
+Firstly we build a transaction which spends 5000 satoshis having one ouput of the previous transaction of a value 4000 satoshis and trying to double spend this output. Thus the method `checkTransaction()` should return `false` as a result. To create the transaction the class `bitcoin-s-core/doc/src/test/scala/TxBuilderExample.scala` mentioned above will be used. The example is adjusted with two TransactionOutPoints:
 
 ```bash
 // Create TransactionOutPoints that referece the same output
@@ -355,10 +356,39 @@ def apply(
     BitcoinTxBuilder(destinations, map, feeRate, changeSPK, network)
 }
 ```
-In the constructor the map with TransactionOutPoints as a key and BitcoinUTXOSpendingInfo as a value is created. Because our two outPoints created above in the example are equal, they are mapped in one entry in the map. So the function `sign()` fails with an error because the output value of 5000 satoshis is greater then the input value of 4000 satoshis.
+In the constructor the map with TransactionOutPoints as a key and BitcoinUTXOSpendingInfo as a value is created. Because our two outPoints created above in the example are equal, they are mapped in one entry in the map. So the method `sign()` fails with an error because the output value of 5000 satoshis is greater then the input value of 4000 satoshis.
 
 Thus, Bitcoin-S prevents the creation of an invalid transaction double spending the output.
 
-Obviously, if we however build this transaction with `TxBuilder` damping an error while singing, the function `checkTransaction()` returns `true` because the check of spending and crediting amounts is not implemented there. 
+Obviously, if we however build this transaction with `TxBuilder` damping an error while singing, the method `checkTransaction()` returns `true` because the check of spending and crediting amounts is not implemented there. 
 
 The full implementation of the example is [here](examples-for-journal/TxBuilderExample1.scala).
+
+### Creation and check of a valid Transaction referencing two outputs of a previous transaction
+
+Finally, we create a transaction which refereces two different outputs of a previous transaction and should be accepted as a valid transaction. So the method `checkTransaction()` should return `true`. Besides the check for dublicate inputs the funtion has some other checks. That is why we create a new method `checkNoDublicateInputs()` in the class `bitcoin-s-core/core/src/main/scala/org/bitcoins/core/script/interpreter/ScriptInterpreter.scala`, where we extract only this check, so that the result of an experiment will be clear. Here is the code of the method `checkNoDublicateInputs()`:
+
+```bash
+def checkNoDublicateInputs(transaction: Transaction): Boolean = {
+    val prevOutputTxIds = transaction.inputs.map(_.previousOutput.txId)
+    val noDuplicateInputs = prevOutputTxIds.distinct.size == prevOutputTxIds.size
+    noDuplicateInputs
+}
+```
+In the class `TxBuilderExample2` we create this kind of transaction taking two ouputs of the values 3000 and 4900 satoshis as an input and spending 5000 satoshis. The code of the example can be found [here](examples-for-journal/TxBuilderExample2.scala).
+
+At the end of the example we test the created transaction with the methods checkTransaction() and checkNoDublicateInputs(). Both method return `false`. Thus, the transaction is considered as invalid though it should be valid. The output of the TxBuilderExample2:
+
+```
+Inputs:
+TransactionInputImpl(TransactionOutPointImpl(DoubleSha256DigestImpl(ee908de5977c5bf5c19afda1c92998270c42d5f4b84f38506c4dd0e008d6b417),UInt32Impl(0)),P2PKHScriptSignature(6b483045022100f3389559a5c7d2ac4a7a3f172de26804544a7b7937af86b2723a0c5650aa7dbf02203b470d7c094992a1346a2edec19ac39ceaed8784e19761c6a958f24848f86dc2012102f7d49f680c63b0ce1797a55d693763b31d5f594d1df46619ad951f46dc192451),UInt32Impl(0))
+TransactionInputImpl(TransactionOutPointImpl(DoubleSha256DigestImpl(ee908de5977c5bf5c19afda1c92998270c42d5f4b84f38506c4dd0e008d6b417),UInt32Impl(1)),P2PKHScriptSignature(6b483045022100fadadbd7e28e896f47a1dd6eaa089931dd16735e288d0f4268eec5efa879173402205d1dad46df60701a72d3df299890b168dcf8a1fa7ff8b2ebec005d44820dbb84012103b5616d8b098891cb744805561df4f3423d760dda6694c861f50cf16e992b1fa2),UInt32Impl(0))
+
+Outputs:
+TransactionOutputImpl(5000 sat,P2PKHScriptPubKeyImpl(1976a914a00f7973fc5bd0186dfe1a285f9f8f1ada68841988ac))
+TransactionOutputImpl(2526 sat,P2PKHScriptPubKeyImpl(1976a914cd99fc6827f72aa32dcf0915ff6283e65219b85b88ac))
+
+Result of checkTransaction: false
+
+Result of checkNoDublicateInputs: false
+```
