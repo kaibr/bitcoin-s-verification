@@ -146,7 +146,8 @@ class TxBuilderExample2 extends FlatSpec with MustMatchers {
         tx.outputs.foreach(println)
 
         //check validity of a transaction
-        println("\nResult of transaction check: " + ScriptInterpreter.checkTransaction(tx))
+        println("\nResult of checkTransaction: " + ScriptInterpreter.checkTransaction(tx))
+        println("\nResult of checkNoDublicateInputs: " + ScriptInterpreter.checkNoDublicateInputs(tx))
       }
       case Failure(t) => println("------------------------- Err: " +
         t.getMessage)
