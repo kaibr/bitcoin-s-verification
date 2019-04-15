@@ -274,7 +274,7 @@ $ stainless -classpath ".:$(find /root/.ivy2/ -type f -name *.jar | tr '\n' ':')
 ```BASH
 $ stainless -classpath ".:$(find /root/.ivy2/ -type f -name *.jar | tr '\n' ':')" $(find . -type f -name *.scala | tr '\n' ' ') $(find ../secp256k1jni -type f -name *.java | tr '\n' ' ')
 ```
-## Analysis of the method checkTransaction() for dublicate inputs
+## <a name=analysis-checktx></a>Analysis of the method checkTransaction() for dublicate inputs
 
 There is a check for dublicate inputs in the method checkTransaction(), so that it is not possible to have a transaction which spends the same output of a previous transaction twice, so-called double spending problem. The check is implemented in the following fragment of code:
 
