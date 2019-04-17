@@ -204,7 +204,7 @@ def checkTransaction(transaction: Transaction): Boolean = {
 ```
 The idea of our verification is to created an invalid transaction with an Output value more than an Input and test it with the method `checkTransaction`.
 
-The previous class `bitcoin-s-core/doc/src/test/scala/TxBuilderExample.scala` is used to create an invalid transaction. To avoid the error mentioned above the method `sanityAmountChecks` in the class `bitcoin-s-core/core/src/main/scala/org/bitcoins/core/wallet/builder/TxBuilder.scala` is modified so that the amounts of Inputs and Outputs will not be checked:
+The previous class `bitcoin-s-core/doc/src/test/scala/TxBuilderExample.scala` is used to create an invalid transaction. To avoid the error mentioned above the method `sanityAmountChecks` in the class `bitcoin-s-core/core/src/main/scala/org/bitcoins/core/wallet/builder/TxBuilder.scala` is modified so that the amounts of Inputs and Outputs will not be checked, because the creation would throw an error. But Transactio creation is not the goal:
 
 ```bash
 def sanityAmountChecks(
@@ -214,7 +214,7 @@ def sanityAmountChecks(
 }
 ```
 
-Furthermore the verification of the created transaction is added to the console output in the class `TxBuilderExample.scala`. The final code of the console output is:
+Furthermore the verification of the created transaction is added to the console output in the class `TxBuilderExample.scala`. The final code of the console output is. This is just for seeing the output. No modification in the process:
 
 ```bash
 val signedTxF: Future[Transaction] = txBuilder.flatMap(_.sign)
@@ -246,7 +246,7 @@ TransactionOutputImpl(15000 sat,P2PKHScriptPubKeyImpl(1976a91463879752a407bfa144
 Result of transaction check: true
 ```
 
-Thus, Bitcoin-S avoids creation of invalid transaction but not prevents acceptance of invalid transaction. 
+Thus, Bitcoin-S avoids creation of invalid transaction but not prevents acceptance of invalid transaction in `checkTransaction`. 
 
 ### Code location in Bitcoin-Core
 The code is located [here](https://github.com/bitcoin/bitcoin/blob/e756eca9e8bf39f0a891f1760df0a317ecb7fee8/src/consensus/tx_verify.cpp#L237).
@@ -291,7 +291,7 @@ Firstly we build a transaction which spends 5000 satoshis having one ouput of th
 ```bash
 // Create TransactionOutPoints that referece the same output
 val outPoint1 = TransactionOutPoint(creditingTx.txId, UInt32.zero)
-val outPoint2 = TransactionOutPoint(creditingTx.txId, UInt32.zero)
+val outPoint2 = TransactionOutPoint(creditingTx.txId, UInt32.zero) // Same txId and same index (zero)
 
 //information we need to validly sign the utxo
 val utxoSpendingInfo1 = BitcoinUTXOSpendingInfo(outPoint = outPoint1,
