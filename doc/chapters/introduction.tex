@@ -17,15 +17,22 @@
 \label{sec:formal_verification}
 
 The longer and complexer a source code is, the more difficult it is to verify its correctness.
-There are two main approaches of the program verification. The commonly used one is the simulation-based verification.
+There are two main approaches for verification of program correctness. 
 
-To simulate the software design some practical scenarios and assertions are created by a developer at the software testing stage. 
-But it not achievable to simulate all possible states and to test all possible inputs keeping the ability to observe the side effects of a specific part of code.
+The commonly used one is the simulation-based verification.
+To simulate a software design a set of some practical scenarios and assertions is created by a developer at the software testing stage. 
+While testing it is tried to identify a design error by generating an input which can activate a bug.
+It is not achievable to simulate all possible states and to test all possible inputs. 
+Thus, a long-term test coverage model should be created to simulate a software design enough.
+Furthermore it is challenging to test a software keeping the ability to observe the side effects of a specific part of code.
+Practically, a developer runs tests, debugs appeared failures, adjustes a code of a software and extands a testbench verifying previously uncovered aspects.\cite{sanghavi:formal_verification}
 
-Another method to find out whether a program works correct is formal verification. It is a systematic process based on mathematical modeling.
-The correctness of a program is analyzed relative to its formal specification. The high level requirements are written corresponding to the micro-architecture specification.
+Another powerfull method to discover whether a program works correct is formal verification. 
+It is a systematic process based on mathematical modeling. 
+It is unnecessary to create a simulation tests. 
+Correctness of a program is analyzed relative to its formal specification.
+Formal specification is a mathematical description of a software behavior that can be provided to formal verification tools for proving it.
 With formal verification all possible input values are explored algorithmically and exhaustively. \cite{sanghavi:formal_verification}
-
 
 %In figure \ref{fig:file_structure} the file structure is shown for this template.
 
