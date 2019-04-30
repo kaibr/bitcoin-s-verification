@@ -8,7 +8,8 @@ ThisBuild / organizationName := "example"
 lazy val root = (project in file("."))
   .settings(
     name := "currencySnippet",
-    libraryDependencies += scalaTest % Test
+    libraryDependencies += scalaTest % Test,
+    libraryDependencies += scalaCheck % Test
   )
 
 // Uncomment the following for publishing to Sonatype.
