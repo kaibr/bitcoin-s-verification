@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ScalaCompilerConfiguration">
+    <profile name="sbt 1" modules="code_7068" />
+    <profile name="sbt 2" modules="root">
+      <plugins>
+        <plugin path="$USER_HOME$/.ivy2/cache/ch.epfl.lara/stainless-scalac-plugin_2.11.8/jars/stainless-scalac-plugin_2.11.8-0.1.0-47dd12764fc060ebcd46ad5f9e1b40adbe3aeaed.jar" />
+      </plugins>
+    </profile>
+  </component>
+</project>
