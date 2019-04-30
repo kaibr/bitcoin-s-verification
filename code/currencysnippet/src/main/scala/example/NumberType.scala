@@ -2,33 +2,18 @@ package example
 
 import scala.util.{Failure, Success, Try}
 
-/**
-  * Created by chris on 6/4/16.
-  */
-/**
-  * This abstract class is meant to represent a signed and unsigned number in C
-  * This is useful for dealing with codebases/protocols that rely on C's
-  * unsigned integer types
-  */
 sealed abstract class Number[T <: Number[T]]
     extends BasicArithmetic[T] {
   type A = BigInt
 
-  /** The underlying scala number used to to hold the number */
   protected def underlying: A
 
   def toInt: Int = toBigInt.bigInteger.intValueExact()
   def toLong: Long = toBigInt.bigInteger.longValueExact()
   def toBigInt: BigInt = underlying
 
-  /**
-    * This is used to determine the valid amount of bytes in a number
-    * for instance a UInt8 has an andMask of 0xff
-    * a UInt32 has an andMask of 0xffffffff
-    */
   def andMask: BigInt
 
-  /** Factory function to create the underlying T, for instance a UInt32 */
   def apply: A => T
 
   override def +(num: T): T = apply(checkResult(underlying + num.underlying))
@@ -65,17 +50,12 @@ sealed abstract class Number[T <: Number[T]]
   def &(num: T): T = apply(checkResult(underlying & num.underlying))
   def unary_- : T = apply(-underlying)
 
-  /**
-    * Checks if the given result is within the range
-    * of this number type
-    */
   private def checkResult(result: BigInt): A = {
     require((result & andMask) == result,
             "Result was out of bounds, got: " + result)
     result
   }
 
-  /** Checks if the given nubmer is within range of a Int */
   private def checkIfInt(num: T): Try[Unit] = {
     if (num.toBigInt >= Int.MaxValue || num.toBigInt <= Int.MinValue) {
       Failure(
@@ -87,16 +67,8 @@ sealed abstract class Number[T <: Number[T]]
   }
 }
 
-/**
-  * Represents a signed number in our number system
-  * Instances of this are [[Int32]] or [[Int64]]
-  */
 sealed abstract class SignedNumber[T <: Number[T]] extends Number[T]
 
-/**
-  * Represents an unsigned number in our number system
-  * Instances of this are [[UInt32]] or [[UInt64]]
-  */
 sealed abstract class UnsignedNumber[T <: Number[T]] extends Number[T]
 
 sealed abstract class UInt5 extends UnsignedNumber[UInt5] {
@@ -120,43 +92,27 @@ sealed abstract class UInt8 extends UnsignedNumber[UInt8] {
   }
 }
 
-/**
-  * Represents a uint32_t in C
-  */
 sealed abstract class UInt32 extends UnsignedNumber[UInt32] {
   override def apply: A => UInt32 = UInt32(_)
 
   override def andMask = 0xffffffffL
 }
 
-/**
-  * Represents a uint64_t in C
-  */
 sealed abstract class UInt64 extends UnsignedNumber[UInt64] {
   override def apply: A => UInt64 = UInt64(_)
   override def andMask = 0xffffffffffffffffL
 }
 
-/**
-  * Represents a int32_t in C
-  */
 sealed abstract class Int32 extends SignedNumber[Int32] {
   override def apply: A => Int32 = Int32(_)
   override def andMask = 0xffffffff
 }
 
-/**
-  * Represents a int64_t in C
-  */
 sealed abstract class Int64 extends SignedNumber[Int64] {
   override def apply: A => Int64 = Int64(_)
   override def andMask = 0xffffffffffffffffL
 }
 
-/**
-  * Represents various numbers that should be implemented
-  * inside of any companion object for a number
-  */
 trait BaseNumbers[T] {
   def zero: T
   def one: T
