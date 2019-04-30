@@ -2,33 +2,32 @@ package example
 
 import scala.util.{Failure, Success, Try}
 
-sealed abstract class Number[T <: Number[T]]
-    extends BasicArithmetic[T] {
-  type A = BigInt
+sealed abstract class Number
+    extends BasicArithmetic[Int64] {
+  //type A = BigInt
 
-  protected def underlying: A
+  protected def underlying: BigInt
 
-  def toInt: Int = toBigInt.bigInteger.intValueExact()
+  /*def toInt: Int = toBigInt.bigInteger.intValueExact()
   def toLong: Long = toBigInt.bigInteger.longValueExact()
   def toBigInt: BigInt = underlying
-
+*/
   def andMask: BigInt
 
-  def apply: A => T
+  def apply: BigInt => Int64
 
-  override def +(num: T): T = apply(checkResult(underlying + num.underlying))
+  override def +(num: Int64): Int64 = apply(checkResult(underlying + num.underlying))
 
-  private def checkResult(result: BigInt): A = {
-    require((result & andMask) == result,
-            "Result was out of bounds, got: " + result)
+  private def checkResult(result: BigInt): BigInt = {
+    require(result < andMask)
     result
   }
 }
 
-sealed abstract class SignedNumber[T <: Number[T]] extends Number[T]
+sealed abstract class SignedNumber extends Number
 
-sealed abstract class Int64 extends SignedNumber[Int64] {
-  override def apply: A => Int64 = Int64(_)
+sealed abstract class Int64 extends SignedNumber {
+  override def apply: BigInt => Int64 = Int64(_)
   override def andMask = 0xffffffffffffffffL
 }
 
@@ -39,14 +38,14 @@ trait BaseNumbers[T] {
   def max: T
 }
 
-object Int64 extends BaseNumbers[Int64] {
-  private case class Int64Impl(underlying: BigInt) extends Int64 {
+case object Int64 extends BaseNumbers[Int64] {
+  /*private case class Int64Impl(underlying: BigInt) extends Int64 {
     require(underlying >= -9223372036854775808L,
             "Number was too small for a int64, got: " + underlying)
     require(underlying <= 9223372036854775807L,
             "Number was too big for a int64, got: " + underlying)
   }
-
+*/
   lazy val zero = Int64(0)
   lazy val one = Int64(1)
 
@@ -57,3 +56,9 @@ object Int64 extends BaseNumbers[Int64] {
 
   def apply(bigInt: BigInt): Int64 = Int64Impl(bigInt)
 }
+
+case class Int64Impl(underlying: BigInt) extends Int64 {
+  require(underlying >= -9223372036854775808L)
+  require(underlying <= 9223372036854775807L)
+}
+
