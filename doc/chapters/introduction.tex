@@ -1,7 +1,6 @@
 \chapter{Introduction}
 \label{chap:introduction}
 
-This document serves to illustrate the \LaTeX{} template on the basis of the corporate design\index{Corporate Design} of the Bern University of Applied Sciences\index{Bern University of Applied Sciences} as well as a manual for its use. It is assumed that the user already has some experience with \LaTeX{} or is willing to familiarize with the subject. In the bibliography the user finds some useful information on \LaTeX{} on various books and documents on the Internet.
 
 % Einträge im Verzeichnis erscheinen lassen ohne hier eine Referenz einzufügen
 \nocite{kopka:band1}
@@ -14,37 +13,59 @@ This document serves to illustrate the \LaTeX{} template on the basis of the cor
 \nocite{juergens:einfuehrung}
 \nocite{juergens:fortgeschritten}
 
-\section{Organising Documents}
-\label{sec:einleitung_aufbau}
+\section{Formal verification}
+\label{sec:formal_verification}
 
-This document is structured according to the documentation of a project work or a thesis\index{thesis}. In Chapter \ref{chap:instructions}, the packages used are briefly explained, and instructions are given, how the bibliography and the glossary are to be used. Chapter \ref{chap:typeareatest} presents a sample chapter to audit the type area.
+The longer and complexer a source code is, the more difficult it is to verify its correctness.
+There are two main approaches for verification of program correctness. 
 
-In figure \ref{fig:file_structure} the file structure is shown for this template.
+The commonly used one is the simulation-based verification.
+To simulate a software design a set of some practical scenarios and assertions is created by a developer at the software testing stage. 
+While testing it is tried to identify a design error by generating an input which can activate a bug.
+It is not achievable to simulate all possible states and to test all possible inputs. 
+Thus, a long-term test coverage model should be created to simulate a software design enough.
+Furthermore it is challenging to test a software keeping the ability to observe the side effects of a specific part of code.
+Practically, a developer runs tests, debugs appeared failures, adjustes a code of a software and extands a testbench verifying previously uncovered aspects.\cite{sanghavi:formal_verification}
 
-\begin{figure}[H]
-	\centering
-		\includegraphics[scale=0.85]{images/file_structure.png}
-	\caption{File structure}
-	\label{fig:file_structure}
-\end{figure}
+Another powerfull method to discover whether a program works correct is formal verification. 
+It is a systematic process based on mathematical modeling. 
+It is unnecessary to create a simulation tests. 
+Correctness of a program is analyzed relative to its formal specification.
+Formal specification is a mathematical description of a software behavior that can be provided to formal verification tools for proving it.
+With formal verification all possible input values are explored algorithmically and exhaustively. \cite{sanghavi:formal_verification}
 
-\section{Contact}
-\label{sec:introduction_contact}
+%In figure \ref{fig:file_structure} the file structure is shown for this template.
 
-The manufacturers of this template welcome any suggestions for improvement. Chapter \ref{sec:introduction_suggestions} shows possible suggestions for improvement\index{suggestions}.
+%\begin{figure}[H]
+%	\centering
+%		\includegraphics[scale=0.85]{images/file_structure.png}
+%	\caption{File structure}
+%	\label{fig:file_structure}
+%\end{figure}
 
-\begin{table}[H]
-	\centering
-		\begin{tabular}{lll} \toprule
-			\textbf{First Name Last Name} & \textbf{E-mail} & \textbf{Function} \\ \midrule
-			Alfred Kaufmann & alfred.kaufmann@bfh.ch & Employer, Project Management, \\
-			& & Supplements, Improvements \\ \midrule
-			Fritz Dellsperger & Retired & Tips on the structure and layout \\ \midrule
-			David Burri & Contracted out & First compilation of the Template \\ \bottomrule
-		\end{tabular}
-	\caption{Contact Persons}
-	\label{tab:Contact Persons}
-\end{table}
+\section{Stainless}
+\label{sec:stainless}
+
+Stainless is a framework developed by "Lab for Automated Reasoning and Analysis" (LARA) at EPFL's School of Computer and Communication Sciences to verify Scala programs.
+It explores all input values, reports inputs for which a program fails and demonstrates counterexamples which violate a given specification.
+The specification must be provided by a developer through giving a precondition and postcondition for functions. Constrains for input values are specified in a precondition, and for output values - in a postcondition. 
+While compiling Stainless tries to prove that for the given precondition of input the postcondition of output always holds.
+Three outcomes of the verification are possible: valid, unvalid and unknown when the framework is unable to prove or find a counterexample.
+The code to be verified should be written in Pure Scala belonging to functional programming paradigm. To extend this subset of the Scala language Stainless supports also some imperative features translating them into Pure Scala concepts.
+For more details about Stainless its official website can be explored. \cite{Stainless}
+
+%\begin{table}[H]
+%	\centering
+%		\begin{tabular}{lll} \toprule
+%			\textbf{First Name Last Name} & \textbf{E-mail} & \textbf{Function} \\ \midrule
+%			Alfred Kaufmann & alfred.kaufmann@bfh.ch & Employer, Project Management, \\
+%			& & Supplements, Improvements \\ \midrule
+%			Fritz Dellsperger & Retired & Tips on the structure and layout \\ \midrule
+%			David Burri & Contracted out & First compilation of the Template \\ \bottomrule
+%		\end{tabular}
+%	\caption{Contact Persons}
+%	\label{tab:Contact Persons}
+%\end{table}
 
 
 \section{Suggestions for Improvement}
