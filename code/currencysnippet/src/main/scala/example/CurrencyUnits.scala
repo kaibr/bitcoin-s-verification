@@ -6,26 +6,6 @@ sealed abstract class CurrencyUnit
 
   def satoshis: Satoshis
 
-  def >=(c: CurrencyUnit): Boolean = {
-    satoshis.underlying >= c.satoshis.underlying
-  }
-
-  def >(c: CurrencyUnit): Boolean = {
-    satoshis.underlying > c.satoshis.underlying
-  }
-
-  def <(c: CurrencyUnit): Boolean = {
-    satoshis.underlying < c.satoshis.underlying
-  }
-
-  def <=(c: CurrencyUnit): Boolean = {
-    satoshis.underlying <= c.satoshis.underlying
-  }
-
-  def !=(c: CurrencyUnit): Boolean = !(this == c)
-
-  def ==(c: CurrencyUnit): Boolean = satoshis == c.satoshis
-
   override def +(c: CurrencyUnit): CurrencyUnit = {
     Satoshis(satoshis.underlying + c.satoshis.underlying)
   }
@@ -64,8 +44,6 @@ object Satoshis extends BaseNumbers[Satoshis] {
 }
 
 object CurrencyUnits {
-
-  /** The number you need to multiply BTC by to get it's satoshis */
   val btcToSatoshiScalar: Long = 100000000
   val satoshisToBTCScalar: BigDecimal = BigDecimal(1.0) / btcToSatoshiScalar
   val oneBTC: CurrencyUnit = Satoshis(Int64(btcToSatoshiScalar))

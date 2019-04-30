@@ -18,49 +18,10 @@ sealed abstract class Number[T <: Number[T]]
 
   override def +(num: T): T = apply(checkResult(underlying + num.underlying))
 
-  def >(num: T): Boolean = underlying > num.underlying
-  def >=(num: T): Boolean = underlying >= num.underlying
-  def <(num: T): Boolean = underlying < num.underlying
-  def <=(num: T): Boolean = underlying <= num.underlying
-
-  def <<(num: Int): T = this.<<(apply(num))
-  def >>(num: Int): T = this.>>(apply(num))
-
-  def <<(num: T): T = {
-    checkIfInt(num).map { _ =>
-      apply((underlying << num.toInt) & andMask)
-    }.get
-  }
-
-  def >>(num: T): T = {
-    //this check is for weird behavior with the jvm and shift rights
-    //https://stackoverflow.com/questions/47519140/bitwise-shift-right-with-long-not-equaling-zero/47519728#47519728
-    if (num.toLong > 63) apply(0)
-    else {
-      checkIfInt(num).map { _ =>
-        apply(underlying >> num.toInt)
-      }.get
-    }
-  }
-
-  def |(num: T): T = apply(checkResult(underlying | num.underlying))
-  def &(num: T): T = apply(checkResult(underlying & num.underlying))
-  def unary_- : T = apply(-underlying)
-
   private def checkResult(result: BigInt): A = {
     require((result & andMask) == result,
             "Result was out of bounds, got: " + result)
     result
-  }
-
-  private def checkIfInt(num: T): Try[Unit] = {
-    if (num.toBigInt >= Int.MaxValue || num.toBigInt <= Int.MinValue) {
-      Failure(
-        new IllegalArgumentException(
-          "Num was not in range of int, got: " + num))
-    } else {
-      Success(())
-    }
   }
 }
 
