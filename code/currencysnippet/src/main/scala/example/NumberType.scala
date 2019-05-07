@@ -12,14 +12,14 @@ sealed abstract class Number
   def toLong: Long = toBigInt.bigInteger.longValueExact()
   def toBigInt: BigInt = underlying
 */
-  def andMask: BigInt
+  //def andMask: BigInt
 
   def apply: BigInt => Int64
 
   override def +(num: Int64): Int64 = apply(checkResult(underlying + num.underlying))
 
   private def checkResult(result: BigInt): BigInt = {
-    require(result < andMask)
+    require(result <= 9223372036854775807L && result >= -9223372036854775808L, "Result was out of bounds, got: " + result)
     result
   }
 }
@@ -28,7 +28,7 @@ sealed abstract class SignedNumber extends Number
 
 sealed abstract class Int64 extends SignedNumber {
   override def apply: BigInt => Int64 = Int64(_)
-  override def andMask = 0xffffffffffffffffL
+  //override def andMask = 0xffffffffffffffffL
 }
 
 trait BaseNumbers[T] {
@@ -39,13 +39,13 @@ trait BaseNumbers[T] {
 }
 
 case object Int64 extends BaseNumbers[Int64] {
-  /*private case class Int64Impl(underlying: BigInt) extends Int64 {
-    require(underlying >= -9223372036854775808L,
-            "Number was too small for a int64, got: " + underlying)
-    require(underlying <= 9223372036854775807L,
-            "Number was too big for a int64, got: " + underlying)
-  }
-*/
+//  private case class Int64Impl(underlying: BigInt) extends Int64 {
+//    require(underlying >= -9223372036854775808L,
+//            "Number was too small for a int64, got: " + underlying)
+//    require(underlying <= 9223372036854775807L,
+//            "Number was too big for a int64, got: " + underlying)
+//  }
+
   lazy val zero = Int64(0)
   lazy val one = Int64(1)
 
@@ -58,7 +58,7 @@ case object Int64 extends BaseNumbers[Int64] {
 }
 
 case class Int64Impl(underlying: BigInt) extends Int64 {
-  require(underlying >= -9223372036854775808L)
-  require(underlying <= 9223372036854775807L)
+  require(underlying >= -9223372036854775808L)//, "Number was too small for a int64, got: " + underlying)
+  require(underlying <= 9223372036854775807L)//, "Number was too big for a int64, got: " + underlying)
 }
 
