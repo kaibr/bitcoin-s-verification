@@ -392,3 +392,16 @@ Result of checkTransaction: false
 
 Result of checkNoDublicateInputs: false
 ```
+
+### Verify the mothod "+" 
+
+Notizen
+
+Changed:
+- type A to static Int64. Stainless can not handle with abstact type member.
+- object Satoshis to case object Satoshis
+- delete doBigInt. Error: Only literal arguments are allowed for BigInt.
+
+- Stainless has its own dedicated BigInt type -> problems. In Stainless there is no constructor for BigInt with the atribute of type Long, only with Int and String. Thus, we replace Long with String. 
+
+- Deleted andMask to check the range of the number. Instead of that the range is tested explicit with maximum and minimun value of Long.
