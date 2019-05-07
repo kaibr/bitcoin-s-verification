@@ -29,6 +29,7 @@ sealed abstract class SignedNumber extends Number
 sealed abstract class Int64 extends SignedNumber {
   override def apply: BigInt => Int64 = Int64(_)
   //override def andMask = 0xffffffffffffffffL
+  def toBigInt: BigInt
 }
 
 trait BaseNumbers[T] {
@@ -60,5 +61,6 @@ case object Int64 extends BaseNumbers[Int64] {
 case class Int64Impl(underlying: BigInt) extends Int64 {
   require(underlying >= BigInt("-9223372036854775808"))//, "Number was too small for a int64, got: " + underlying)
   require(underlying <= BigInt("9223372036854775807"))//, "Number was too big for a int64, got: " + underlying)
+  override def toBigInt: BigInt = underlying
 }
 
