@@ -419,3 +419,33 @@ Got no errors with sbt anymore! But stainless.jar complains:
 Unfortunately there is neither a line number nor a file name in the output.
 
 Lets convert our longs from eg. `-9223372036854775808L` to `BigInt("-9223372036854775808")`.
+
+The error left is:
+
+```
+[ Error  ] checkResult$0 depends on missing dependencies: require$1.
+```
+
+From the code:
+
+```
+require(result <= BigInt("9223372036854775807") && result >= BigInt("-9223372036854775808"), "Result was out of bounds, got: " + result)
+```
+
+After removing the second parameter to require, it works.
+
+Finaly we get some output:
+
+```
+...
+[  Info  ]  - Result for 'precond. (call checkResult(thiss, underlying(thiss) + u ...)' VC for + @19:45:
+[Warning ]  => INVALID
+[Warning ] Found counter-example:
+[Warning ]   num: { x: Object | @unchecked isInt64(x) }    -> Int64Impl(4611686018427395623)
+[Warning ]   thiss: { x: Object | @unchecked isNumber(x) } -> Int64Impl(4611686018427387904)
+...
+[  Info  ] ╔═╡ stainless summary ╞═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+[  Info  ] ║ └───────────────────┘                                                                                                                                 ║
+[  Info  ] ║ +            precond. (call checkResult(thiss, underlying(thiss) + u ...)  invalid  U:smt-z3  src/main/scala/example/NumberType.scala:19:45     1.262 ║
+...
+```
