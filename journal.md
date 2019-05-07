@@ -441,8 +441,8 @@ Finally we get some output:
 [  Info  ]  - Result for 'precond. (call checkResult(thiss, underlying(thiss) + u ...)' VC for + @19:45:
 [Warning ]  => INVALID
 [Warning ] Found counter-example:
-[Warning ]   num: { x: Object | @unchecked isInt64(x) }    -> Int64Impl(4611686018427395623)
-[Warning ]   thiss: { x: Object | @unchecked isNumber(x) } -> Int64Impl(4611686018427387904)
+[Warning ]   num: { x: Object | @unchecked isInt64(x) }    -> Int64Impl(9223372036854775808)
+[Warning ]   thiss: { x: Object | @unchecked isNumber(x) } -> Int64Impl(0)
 ...
 [  Info  ] ╔═╡ stainless summary ╞═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
 [  Info  ] ║ └───────────────────┘                                                                                                                                 ║
