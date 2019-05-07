@@ -451,3 +451,49 @@ Finally we get some output:
 ```
 
 `sbt compile` is still happy and does not complain.
+
+The Int64Impl looks like:
+
+```scala
+case class Int64Impl(underlying: BigInt) extends Int64 {
+  require(underlying >= BigInt("-9223372036854775808"))//, "Number was too small for a int64, got: " + underlying)
+  require(underlying <= BigInt("9223372036854775807"))//, "Number was too big for a int64, got: " + underlying)
+  override def toBigInt: BigInt = underlying
+}
+```
+
+It is used in Int64:
+
+```scala
+case object Int64 extends BaseNumbers[Int64] {
+  lazy val zero = Int64(0)
+  lazy val one = Int64(1)
+
+  lazy val min = Int64(BigInt("-9223372036854775808"))
+  lazy val max = Int64(BigInt("9223372036854775807"))
+
+  def apply(bigInt: BigInt): Int64 = {
+    Int64Impl(bigInt)
+  }
+}
+```
+
+The stainless output above complains about the require in Int64Impl.apply, because it requires a BigInt in range of long but Int64 passes a BigInt of any range.
+Looks like Bitcoin-S-Core uses the require function as a runtime check to terminate the running instance when an input is invalid, while stainless tries to verify every usage of the function.
+So we have to add the same require function from Int64Impl.apply to Int64.apply so its parameters are valid for the first too.
+
+```scala
+case object Int64 extends BaseNumbers[Int64] {  lazy val zero = Int64(0)
+  lazy val one = Int64(1)
+
+  lazy val min = Int64(BigInt("-9223372036854775808"))
+  lazy val max = Int64(BigInt("9223372036854775807"))
+
+  def apply(bigInt: BigInt): Int64 = {
+    require(bigInt >= BigInt("-9223372036854775808") && bigInt <= BigInt("9223372036854775807"))
+    Int64Impl(bigInt)
+  }
+}
+```
+
+So we have to push the require function all the way up in every usage.
