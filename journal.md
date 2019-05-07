@@ -483,12 +483,8 @@ Looks like Bitcoin-S-Core uses the require function as a runtime check to termin
 So we have to add the same require function from Int64Impl.apply to Int64.apply so its parameters are valid for the first too.
 
 ```scala
-case object Int64 extends BaseNumbers[Int64] {  lazy val zero = Int64(0)
-  lazy val one = Int64(1)
-
-  lazy val min = Int64(BigInt("-9223372036854775808"))
-  lazy val max = Int64(BigInt("9223372036854775807"))
-
+case object Int64 extends BaseNumbers[Int64] {
+  ...
   def apply(bigInt: BigInt): Int64 = {
     require(bigInt >= BigInt("-9223372036854775808") && bigInt <= BigInt("9223372036854775807"))
     Int64Impl(bigInt)
