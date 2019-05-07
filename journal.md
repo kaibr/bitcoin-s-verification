@@ -416,4 +416,6 @@ Got no errors with sbt anymore! But stainless.jar complains:
 [Internal] Please inform the authors of Inox about this message
 ```
 
+Unfortunately there is neither a line number nor a file name in the output.
+
 Lets convert our longs from eg. `-9223372036854775808L` to `BigInt("-9223372036854775808")`.
