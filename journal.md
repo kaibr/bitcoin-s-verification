@@ -493,3 +493,15 @@ case object Int64 extends BaseNumbers[Int64] {
 ```
 
 So we have to push the require function all the way up in every usage.
+After doing this for every require in the extraxted code stailess works as expected.
+
+Now we can verify `def +(c: CurrencyUnit): CurrencyUnit`.
+For this we add a `require(c.satoshis.underlying == Int64.zero)` to force the parameter to be zero.
+Then we add `ensuring(res => res.underlying == this.underlying)` to the end to verify that zero is the identity element of our + function.
+
+```scala
+def +(c: CurrencyUnit): CurrencyUnit = {
+  require(c.satoshis.underlying == Int64.zero)
+  Satoshis(satoshis.underlying + c.satoshis.underlying)
+} ensuring(res => res.underlying == this.underlying)
+```
