@@ -46,7 +46,7 @@ case object Satoshis extends BaseNumbers[Satoshis] {
 case class SatoshisImpl(underlying: Int64) extends Satoshis
 
 object CurrencyUnits {
-  val btcToSatoshiScalar: Long = 100000000
+  val btcToSatoshiScalar: BigInt = 100000000
  // val satoshisToBTCScalar: BigDecimal = BigDecimal(1.0) / btcToSatoshiScalar
   val oneBTC: CurrencyUnit = Satoshis(Int64(btcToSatoshiScalar))
   val oneMBTC: CurrencyUnit = Satoshis(Int64(btcToSatoshiScalar / 1000))

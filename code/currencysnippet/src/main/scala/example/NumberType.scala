@@ -19,7 +19,7 @@ sealed abstract class Number
   override def +(num: Int64): Int64 = apply(checkResult(underlying + num.underlying))
 
   private def checkResult(result: BigInt): BigInt = {
-    require(result <= 9223372036854775807L && result >= -9223372036854775808L, "Result was out of bounds, got: " + result)
+    require(result <= BigInt("9223372036854775807") && result >= BigInt("-9223372036854775808"))//, "Result was out of bounds, got: " + result)
     result
   }
 }
@@ -49,16 +49,16 @@ case object Int64 extends BaseNumbers[Int64] {
   lazy val zero = Int64(0)
   lazy val one = Int64(1)
 
-  lazy val min = Int64(-9223372036854775808L)
-  lazy val max = Int64(9223372036854775807L)
+  lazy val min = Int64(BigInt("-9223372036854775808"))
+  lazy val max = Int64(BigInt("9223372036854775807"))
 
-  def apply(long: Long): Int64 = Int64(BigInt(long))
+  //def apply(long: Long): Int64 = Int64(BigInt(long))
 
   def apply(bigInt: BigInt): Int64 = Int64Impl(bigInt)
 }
 
 case class Int64Impl(underlying: BigInt) extends Int64 {
-  require(underlying >= -9223372036854775808L)//, "Number was too small for a int64, got: " + underlying)
-  require(underlying <= 9223372036854775807L)//, "Number was too big for a int64, got: " + underlying)
+  require(underlying >= BigInt("-9223372036854775808"))//, "Number was too small for a int64, got: " + underlying)
+  require(underlying <= BigInt("9223372036854775807"))//, "Number was too big for a int64, got: " + underlying)
 }
 
