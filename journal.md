@@ -408,9 +408,11 @@ Changed:
 
 Got no errors with sbt anymore! But stainless.jar complains:
 
+```
 [ Error  ] checkResult$0 depends on missing dependencies: require$1, long2bigInt$0.
 [ Error  ] apply$11 depends on missing dependencies: BigInt$0, apply$15.
 [ Error  ] inv$6 depends on missing dependencies: long2bigInt$0.
 [Internal] Missing some nodes in Registry: long2bigInt$0, BigInt$0, apply$15, require$1
 [Internal] Please inform the authors of Inox about this message
+```
 
