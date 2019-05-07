@@ -434,7 +434,7 @@ require(result <= BigInt("9223372036854775807") && result >= BigInt("-9223372036
 
 After removing the second parameter to require, it works.
 
-Finaly we get some output:
+Finally we get some output:
 
 ```
 ...
