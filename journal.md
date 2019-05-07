@@ -449,3 +449,5 @@ Finally we get some output:
 [  Info  ] ║ +            precond. (call checkResult(thiss, underlying(thiss) + u ...)  invalid  U:smt-z3  src/main/scala/example/NumberType.scala:19:45     1.262 ║
 ...
 ```
+
+`sbt compile` is still happy and does not complain.
