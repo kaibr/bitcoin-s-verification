@@ -39,8 +39,13 @@
 \usepackage{booktabs}													% package for nicer tables
 \usepackage{tocvsec2}													% provides means of controlling the sectional numbering
 \usepackage{dirtree}
+
 \usepackage{listings}
 \input{scala-highlighting.tex}
+
+\usepackage{soul}
+\definecolor{lightgray}{rgb}{0.90, 0.90, 0.90}
+\newcommand{\code}[1][\sethlcolor{lightgray}\hl]{#1}
 %---------------------------------------------------------------------------
 
 % Load Math Packages

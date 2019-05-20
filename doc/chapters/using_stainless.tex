@@ -1,7 +1,60 @@
 \chapter{Using Stainless}
 \label{chap:using_stainless}
+This chapter describes the setup and integration process of Stainless in a new or already existing project.
+It also shows the compatibility of Stainless with Scala as Stainless supports only a purely functional subset of Scala which they call \emph{Pure Scala}.
 
 \section{Configuration (Set-up, sbt, jar, frontends/../stainless-scalac)}
+There are two ways to integrate Stainless in a Scala project, the scala build tool (abt) plugin or the stainless.jar file.
+Both, when run, analyses the passed code and report warnings to the console about the given code.
+Stainless requires and Scala recommends Java SE Development Kit 8.
+Newer Java versions won't compile.
+
+\subsection{sbt}
+sbt for Scala is like gradle or maven for Java.
+It can compile Scala code continously or manual, manage dependencies with support for Maven-formatted repositories, mixing Scala and Java projects and much more.
+
+A simple sbt project has the following structure:
+\dirtree{%
+  .1 ..
+  .2 project.
+  .3 build.properties.
+  .3 plugins.sbt.
+  .2 src.
+  .3 main.
+  .4 scala.
+  .5 Main.scala.
+  .2 build.sbt.
+}
+\emph{build.properties} specifies the abt version used for this project.
+If the version is not available locally, sbt will download it.
+
+In \emph{plugins.sbt} new sbt plugins can be added.
+A plugin extends the build definition.
+Mostly this means adding and overriding settings.
+
+\emph{build.sbt} defines the build definition.
+There can be several projects or subprojects as sbt doc calls it.
+
+Here an example for a single project in \emph{build.sbt}:
+\begin{lstlisting}[language=scala]
+scalaVersion := "2.12.8"
+
+lazy val root = (project in file("."))
+\end{lstlisting}
+The project is called root and its source files are located in the files directory.
+Executing \code{sbt compile} should now compile the code.
+
+The Stainless webpage has a guide on how to integrate Stainless in an existing project.
+The simplifies steps are:
+\begin{itemize}
+  \item Install an external solver.
+  \item Add Stainless sbt plugin to \emph{plugins.sbt}
+  \item Enable the plugin in \emph{build.sbt} for the project.
+\end{itemize}
+After this setup, Stainless will report errors to the console, when running \code{sbt compile}.
+
+\subsection{JAR file}
+
 
 \section{Scala compatibility (Pure Scala, imperative features, dedicated BigInt, Generics...)}
 
