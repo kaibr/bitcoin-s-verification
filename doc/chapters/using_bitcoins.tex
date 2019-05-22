@@ -4,6 +4,7 @@ This chapter describes the relevant parts needed to verify that a non-coinbase t
 We will see, how to create valid and invalid transactions with Bitcoin-S-Core and how this transactions are validated against the described property.
 
 \section{Creation of a Transaction}
+Some parts of the code in this section are from Bitcoin-S-Core transaction builder example.\cite{BitcoinSCore:txbuilderexample}
 Bitcoin-S-Core has a bitcoin transcation builder class with the following signature:
 \begin{lstlisting}[language=scala]
   BitcoinTxBuilder(
