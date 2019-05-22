@@ -91,3 +91,21 @@ After calling sign on the transaction builder a valid transaction is returned.
 There is no need for a transaction input, since a transaction out point is kind of the pointer to a transaction input.
 
 \section{Validation of a Transaction (with method checkTransaction)}
+Bitcoin-S-Core offers a function called \emph{checkTransaction}.
+This is its type signature.
+\begin{lstlisting}
+  checkTransaction(transaction: Transaction): Boolean
+\end{lstlisting}
+It takes a transaction as input and returns a boolean whether the transaction is valid or not.
+There are several checks in checkTransaction.
+For example it checks if there is either no input or no output.
+In this case it returns false.
+
+The relevant parts for the property to be verified are the following two lines.
+\begin{lstlisting}
+  val prevOutputs = transaction.inputs.map(_.previousOutput)
+  val noDuplicateInputs = prevOutputs.distinct.size == prevOutputs.size
+\end{lstlisting}
+It gathers all inputs output.
+On this previous outputs it calls distinct and checks if the size stays the same.
+Distinct removes duplicates, so if there was two times the same input the size of inputs before calling distinct would be greater.
