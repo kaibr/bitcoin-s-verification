@@ -3,6 +3,90 @@
 This chapter describes the relevant parts needed to verify that a non-coinbase transaction cannot generate new coins in Bitcoin-S-Core.
 We will see, how to create valid and invalid transactions with Bitcoin-S-Core and how this transactions are validated against the described property.
 
-\section{Creating of a transaction (valid, unvalid with TxBuilder)}
+\section{Creation of a Transaction}
+Bitcoin-S-Core has a bitcoin transcation builder class with the following signature:
+\begin{lstlisting}[language=scala]
+  BitcoinTxBuilder(
+    destinations: Seq[TransactionOutput], // where we send money
+    utxos: BitcoinTxBuilder.UTXOMap,      // unspent transaction outputs
+    feeRate: FeeUnit,                     // fee rate per byte
+    changeSPK: ScriptPubKey,              // public key
+    network: BitcoinNetwork               // bitcoin network information
+  ): Future[BitcoinTxBuilder]             // sign TxBuilder to get tx
+\end{lstlisting}
+Here is how those parameters are generated.
 
-\section{Validation of a transaction (with method checkTransaction)}
+First, a previous transaction with outputs is needed to spend some money from.
+This is created here, to show the process.
+It could also be parsed from a transaction in the bitcoin network.
+A single output is sufficient for this example.
+So, first create a new keypair to sign the next transaction and have a scriptPubKey where the money is.
+Then define the amount to spend (here 10000 Satishis) collect this information in a transaction output and add it to the previous transaction.
+\begin{lstlisting}[language=scala]
+  val privKey = ECPrivateKey.freshPrivateKey
+  val creditingSPK = P2PKHScriptPubKey(pubKey = privKey.publicKey)
+
+  val amount = Satoshis(Int64(10000))
+
+  val utxo = TransactionOutput(currencyUnit = amount, scriptPubKey = creditingSPK)
+
+  val prevTx = BaseTransaction(
+    version = Int32.one,
+    inputs = List.empty,
+    outputs = List(utxo),
+    lockTime = UInt32.zero
+  )
+\end{lstlisting}
+Next, the new transaction should point to an output of the previous transaction.
+Thus, a outpoint is created with the id of the previous transaction and the index pointing to the specific output of it.
+This is collected in an utxo spending info which is then put in the list of all utxos (only one here).
+\begin{lstlisting}  
+  val outPoint = TransactionOutPoint(prevTx.txId, UInt32.zero)
+
+  val utxoSpendingInfo = BitcoinUTXOSpendingInfo(
+    outPoint = outPoint,
+    output = utxo,
+    signers = List(privKey),
+    redeemScriptOpt = None,
+    scriptWitnessOpt = None,
+    hashType = HashType.sigHashAll
+  )
+
+  val utxos = List(utxoSpendingInfo)
+\end{lstlisting}
+Then, the destination, where the money goes, is defined.
+This includes a destination script pub key, as well as a the amount to spend to it.
+\begin{lstlisting}
+  val destinationAmount = Satoshis(Int64(5000))
+
+  val destinationSPK = P2PKHScriptPubKey(pubKey = ECPrivateKey.freshPrivateKey.publicKey)
+
+  val destinations = List(
+    TransactionOutput(currencyUnit = destinationAmount, scriptPubKey = destinationSPK)
+  )
+\end{lstlisting}
+Finally. define a fee rate, the network params and create a transaction builder.
+\begin{lstlisting}
+  val feeRate = SatoshisPerByte(Satoshis.one)
+
+  val networkParams = RegTest // soem static values for testing
+
+  val txBuilder: Future[BitcoinTxBuilder] = BitcoinTxBuilder(
+    destinations = destinations,
+    utxos = utxos,
+    feeRate = feeRate,
+    changeSPK = creditingSPK,
+    network = networkParams
+  )
+\end{lstlisting}
+After calling sign on the transaction builder a valid transaction is returned.
+\begin{lstlisting}
+  val signedTxF: Future[Transaction] = txBuilder
+    .flatMap(_.sign)
+    .map {
+      tx => println(tx.hex) // transaction in hex for the bitcoin network
+    }
+\end{lstlisting}
+There is no need for a transaction input, since a transaction out point is kind of the pointer to a transaction input.
+
+\section{Validation of a Transaction (with method checkTransaction)}
