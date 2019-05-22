@@ -97,6 +97,7 @@ This is its type signature.
   checkTransaction(transaction: Transaction): Boolean
 \end{lstlisting}
 It takes a transaction as input and returns a boolean whether the transaction is valid or not.
+So for example when passing the built tx from above to this function the returned value would be true.
 There are several checks in checkTransaction.
 For example it checks if there is either no input or no output.
 In this case it returns false.
