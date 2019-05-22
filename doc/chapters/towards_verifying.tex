@@ -14,14 +14,56 @@
 \subsection{Bugfix}
 
 
-\section{Verification of Method "+" // Change this}
+\section{Verification of Method "+ 0" // Change this}
+After so many failures, we have decided to search for the smallest unit in Bitcoin-S-Core that is worthwhile to verify.
+We found the addition of two Satoshis would be a good candidate.
+To make it even more easy, we decided to verify only the addition, where we add zero to an amount of Satoshis.
+The signature looks like the following.
+\begin{lstlisting}
+  +(c: CurrencyUnit): CurrencyUnit
+\end{lstlisting}
+Where the class Satoshis extends CurrencyUnit.
+The post condition would be, that the parameter c must be zero.
+\begin{lstlisting}
+  require(c.satoshis.underlying == Int64.zero)
+\end{lstlisting}
+\emph{c.satoshis} is an abstract method of CurrencyUnit that must return an instance of the class Satoshis.
+
+\emph{c.satoshis.underlying} is also an abstract method of CurrencyUnit that must return an instance of the abstract type A.
+
+Both are implemented in Satoshis where A is set to Int64.
+So the underlying number of the parameter must be zero.
+
+Next we ensure, that the result is the same value as \emph{this}.
+\begin{lstlisting}
+  ensuring(res => res.satoshis == this.satoshis)
+\end{lstlisting}
+Here, we can directly use equals (==) on Satoshis, because its a case class and Int64, the only parameter of Satoshis is a case class too.
+
+\subsection{Rewriting Abstract Type Member}
+Stainless output:
+\begin{lstlisting}
+[ Error  ] CurrencyUnits.scala:5:3: Stainless doesn't support abstract type members
+           type A
+\end{lstlisting}
 
 \subsection{Rewriting Generics}
 
 \subsection{Rewriting Objects}
+Stainless output:
+\begin{lstlisting}
+[ Error  ] CurrencyUnits.scala:54:1: Objects cannot extend classes or implement
+           traits, use a case object instead
+           object Satoshis extends BaseNumbers[Satoshis] {
+\end{lstlisting}
 
 \subsection{Rewriting BigInt Constructor (only literal argument, no long argument, etc.)}
+Stainless output:
+\begin{lstlisting}
+[ Error  ] CurrencyUnits.scala:47:33: Only literal arguments are allowed for BigInt.
+           def toBigInt: BigInt = BigInt(toLong)
+\end{lstlisting}
 
-\subsection{Rewriting Usage of BigInt "\&"}
+\subsection{Rewriting Usage of BigInt \&-Function}
 
 \subsection{Rewriting require (funktioniert evtl?)}
