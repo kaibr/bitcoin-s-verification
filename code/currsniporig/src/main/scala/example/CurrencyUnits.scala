@@ -97,8 +97,6 @@ object Bitcoins extends BaseNumbers[Bitcoins] {
 }
 
 object CurrencyUnits {
-
-  /** The number you need to multiply BTC by to get it's satoshis */
   val btcToSatoshiScalar: Long = 100000000
   val satoshisToBTCScalar: BigDecimal = BigDecimal(1.0) / btcToSatoshiScalar
   val oneBTC: CurrencyUnit = Satoshis(Int64(btcToSatoshiScalar))
