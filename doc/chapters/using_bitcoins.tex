@@ -85,7 +85,7 @@ After calling sign on the transaction builder a valid transaction is returned.
   val signedTxF: Future[Transaction] = txBuilder
     .flatMap(_.sign)
     .map {
-      tx => println(tx.hex) // transaction in hex for the bitcoin network
+      (tx: Transaction) => println(tx.hex) // transaction in hex for the bitcoin network
     }
 \end{lstlisting}
 There is no need for a transaction input, since a transaction out point is kind of the pointer to a transaction input.
