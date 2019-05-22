@@ -69,7 +69,7 @@ Furthermore, it will be verified by Stainless that a precondition cannot be viol
 
 The following example demonstrates a simple structure of formal specification for calculating factorial.
 
-\begin{lstlisting}[caption=Example of verifying the function calculating factorial of an integer number, captionpos=b, language=Scala]
+\begin{lstlisting}[caption=Example of verifying the function calculating factorial of an integer number, label=listing:factorial, captionpos=b, language=Scala]
     def factorial(n: Int): Int = {
         require(n >= 0)
         if (n == 0) {
@@ -80,9 +80,9 @@ The following example demonstrates a simple structure of formal specification fo
     } ensuring(res => res >= 0)
 \end{lstlisting}
 
-The function recursively calculates factorial of an integer number. An input to the function is constrained in \textit{require} with positive value. A result of calculation should be also positive, what will be verified by Stainless.
-While compiling Stainless disproves the postcondition and gives the number 17 as a counterexample. A number of type Int is a 32 bit value. That is why the function factorial of 17 causes an overflow and results to a negative value. The program would work correct by changing type of a number to BigInt.
-The outcome of Stainless verification of the function factorial is shown bellow.
+The function recursively calculates factorial of an integer number. An input to the function is constrained in \textit{require} with non-negative value. A result of calculation should also be non-negative, what will be verified by Stainless.
+While compiling Stainless disproves the postcondition and gives the number 17 as a counterexample. A number of type Int is a 32 bit value. That is why calculating factorial of 17 causes an overflow and results to a negative value. The program would work correct by changing a type of a number to BigInt.
+The outcome of Stainless verification of the function factorial from Listing \ref{listing:factorial} is shown bellow.
 
 \begin{figure}[H]
 	\centering
