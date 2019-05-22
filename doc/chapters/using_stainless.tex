@@ -4,7 +4,7 @@ This chapter describes the setup and integration process of Stainless in a new o
 It also shows the compatibility of Stainless with Scala as Stainless supports only a purely functional subset of Scala which they call \emph{Pure Scala}.
 
 \section{Configuration (Set-up, sbt, jar, frontends/../stainless-scalac)}
-There are two ways to integrate Stainless in a Scala project, the scala build tool (abt) plugin or the stainless.jar file.
+There are two ways to integrate Stainless in a Scala project, the scala build tool (abt) plugin or a command line tool.
 Both, when run, analyses the passed code and report warnings to the console about the given code.
 Stainless requires and Scala recommends Java SE Development Kit 8.
 Newer Java versions won't compile.
@@ -53,8 +53,30 @@ The simplifies steps are:
 \end{itemize}
 After this setup, Stainless will report errors to the console, when running \code{sbt compile}.
 
-\subsection{JAR file}
+\subsection{Command Line Tool}
+There are two ways to use the command line tool.
 
+Either download a prebuilt JAR file from efpl-lara/stainless GitHub repository or built a binary from source.
+The prebuild versions are released by Stainless.
+The latest was released on January 14, when there was no support for Scala 2.12.
+The 'Bump Scala to 2.12.8' branch was merged on March 4.
+
+If latest features are needed, like support for Scala 2.12, the build from source is required.
+Here a short installation description.
+Full description can be found on the Stainless documentation pages.
+\begin{itemize}
+  \item Install sbt.
+  \item Check out GitHub repository.
+  \item Run \code{sbt universal:stage} inside the project.
+\end{itemize}
+This generates \emph{frontends/scalac/target/universal/stage/bin/stainless-scalac}.
+
+To check the source code with one of those either \code{java -jar downloaded.jar source.scala} or \code{stainless-scalac source.scala} must be invoked.
+The file \emph{source.scala} is the file to be checked.
+
+As compiling without a build tool, this command will become really complex for bigger projects.
+All dependencies must be on the classpath and all source files appended.
+Those are added with \code{-classpath Dep1.jar:Dep2.jar:...:DepN.jar src1.scala src2.scala ... srcM.scala}.
 
 \section{Scala compatibility (Pure Scala, imperative features, dedicated BigInt, Generics...)}
 
