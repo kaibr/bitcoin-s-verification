@@ -11,6 +11,7 @@
 
 \subsection{Findings}
 
+
 \subsection{Bugfix}
 
 
@@ -40,16 +41,48 @@ Next we ensure, that the result is the same value as \emph{this}.
 \end{lstlisting}
 Here, we can directly use equals (==) on Satoshis, because its a case class and Int64, the only parameter of Satoshis is a case class too.
 
+After writing the verification, we ran Stainless on the source files.
+It prints a lot of errors because of code incompatibility.
+So we had to rewrite it as described in the following sections.
+
 \subsection{Rewriting Abstract Type Member}
 Stainless output:
 \begin{lstlisting}
 [ Error  ] CurrencyUnits.scala:5:3: Stainless doesn't support abstract type members
            type A
 \end{lstlisting}
+This should be easy to rewrite by using generics instead of an abstract type, right?
+Unfortunately not.
+The problem is, CurrencyUnit uses its implementing class Satoshis.
+
+Simplified code.
+\begin{lstlisting}
+  sealed abstract class CurrencyUnit {
+    def +(c: CurrencyUnit): CurrencyUnit =
+      Satoshis(satoshis.underlying + c.satoshis.underlying)
+  }
+
+  sealed abstract class Satoshis extends CurrencyUnit
+\end{lstlisting}
+Thus, when we use generics, Satoshis is not of type CurrencyUnit anymore and neither of type CurrencyUnit[A], where A is the new generic type.
+Satoshis extends CurrencyUnit with type Int64, so it is of type CurrencyUnit[Int64].
+That's to specific.
+
+Since there is no easy way to fix it and the code should stay as much as possible the original, we decided to remove the abstract type.
+The verification is a bit more limited, to only Satoshis, but that's no problem, because the goal is to verify the addition of Satoshis.
+
+So by removing the abstract type and fix it to Int64 as defined by Satoshis, there was one error less in Stainless.
 
 \subsection{Rewriting Generics}
+Stainless output:
+\begin{lstlisting}
+  [ Error  ] NumberType.scala:3:30: Unknown type parameter type T
+             sealed abstract class Number[T <: Number[T]]
+
+\end{lstlisting}
 
 \subsection{Rewriting Objects}
+// TODO reason? because we can not extend case object?
 Stainless output:
 \begin{lstlisting}
 [ Error  ] CurrencyUnits.scala:54:1: Objects cannot extend classes or implement
@@ -63,6 +96,27 @@ Stainless output:
 [ Error  ] CurrencyUnits.scala:47:33: Only literal arguments are allowed for BigInt.
            def toBigInt: BigInt = BigInt(toLong)
 \end{lstlisting}
+As described before, Stainless supports only a subset of Scala.
+They provide their own dedicated BigInt library.
+This library does not have support for dynamic BigInt construction only for string literals.
+
+Again, a simplified version.
+\begin{lstlisting}
+  sealed abstract class Satoshis extends CurrencyUnit {
+    def toBigInt: BigInt = BigInt(toLong)
+    def toLong: Long = underlying.toLong
+  }
+
+  object Int64 extends BaseNumbers[Int64] {
+    private case class Int64Impl(underlying: BigInt) extends Int64
+  }
+\end{lstlisting}
+This would be really hard to refactor, because Bitcoin-S-Core tries to be as much dynamic as possible so it can be used with other cryptocurrencies too.
+Maybe it would even be impossible, because they need to parse a lot from the bitcoin network.
+
+Restricting the code one more time helps.
+\emph{toBigInt} can directly return underlying, because in case of Int64, which is what Satoshis use, it is a BigInt.
+So it does not be converted from BigInt to Long and back to BigInt.
 
 \subsection{Rewriting Usage of BigInt \&-Function}
 
