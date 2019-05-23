@@ -118,6 +118,23 @@ Restricting the code one more time helps.
 \emph{toBigInt} can directly return underlying, because in case of Int64, which is what Satoshis use, it is a BigInt.
 So it does not be converted from BigInt to Long and back to BigInt.
 
+\subsection{Rewriting Private Inner Classes}
+Stainless output (simplified):
+\begin{lstlisting}
+  [Warning ] CurrencyUnits.scala:36:3: Could not extract tree in class:
+             case private class SatoshisImpl extends Satoshis
+\end{lstlisting}
+Stainless is not able to extract private classes inside other objects.
+Bitcoin-S-core uses it a lot, because they separate the class from its implementation.
+\begin{lstlisting}
+  object Int64 extends BaseNumbers[Int64] {
+    private case class Int64Impl(underlying: BigInt) extends Int64 
+  }
+\end{lstlisting}
+This is an easy one.
+Just extract the inner class out of the object.
+This is not exactly the same code but since the class is still private it can not be extended outside of the file.
+
 \subsection{Rewriting Usage of BigInt \&-Function}
 
 \subsection{Rewriting require (funktioniert evtl?)}
