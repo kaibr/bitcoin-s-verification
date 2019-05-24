@@ -74,11 +74,16 @@ The verification is a bit more limited, to only Satoshis, but that's no problem,
 So by removing the abstract type and fix it to Int64 as defined by Satoshis, there was one error less in Stainless.
 
 \subsection{Rewriting Generics}
+// I dont understand this.. maybe just a missing feature in Stainless?
 Stainless output:
 \begin{lstlisting}
   [ Error  ] NumberType.scala:3:30: Unknown type parameter type T
              sealed abstract class Number[T <: Number[T]]
 
+\end{lstlisting}
+
+\begin{lstlisting}
+  sealed abstract class Number[T <: Number[T]] extends BasicArithmetic[T]  
 \end{lstlisting}
 
 \subsection{Rewriting Objects}
@@ -134,6 +139,25 @@ Bitcoin-S-core uses it a lot, because they separate the class from its implement
 This is an easy one.
 Just extract the inner class out of the object.
 This is not exactly the same code but since the class is still private it can not be extended outside of the file.
+
+\subsection{Rewriting Type Member}
+Stainless output:
+\begin{lstlisting}
+  [Warning ] NumberType.scala:5:3: Could not extract tree in class: type A
+             = BigInt (class scala.reflect.internal.Trees$TypeDef)
+             type A = BigInt
+\end{lstlisting}
+Since the type A is not overridden in any of its subclasses, this can simply be hard coded.
+\begin{lstlisting}
+  sealed abstract class Number {
+    type A = BigInt
+    protected def underlying: A
+    def apply: A => T
+  }
+\end{lstlisting}
+Replace every occurence of A with BigInt.
+This might be a missing feature in Stainless that should not be to hard to fix.
+There is an open issue on Github \mypound511.
 
 \subsection{Rewriting Usage of BigInt \&-Function}
 
