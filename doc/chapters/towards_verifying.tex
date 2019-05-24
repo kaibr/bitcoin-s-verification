@@ -87,7 +87,7 @@ Stainless output:
 \end{lstlisting}
 
 \subsection{Rewriting Objects}
-// TODO reason? because we can not extend case object?
+// TODO reason?
 
 Stainless output:
 \begin{lstlisting}
@@ -95,6 +95,7 @@ Stainless output:
            traits, use a case object instead
            object Satoshis extends BaseNumbers[Satoshis] {
 \end{lstlisting}
+Changing the objects that extends classes to case objects solves this problem.
 
 \subsection{Rewriting BigInt Constructor (only literal argument, no long argument, etc.)}
 Stainless output:
