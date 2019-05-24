@@ -165,7 +165,23 @@ Stainless output:
   [ Error  ] NumberType.scala:19:14: Unknown call to & on result (BigInt) with
              arguments List(Number.this.andMask) of type List(BigInt)
              require((result & andMask) == result,
-
-
 \end{lstlisting}
+Due to the restrictions on BigInt, the \& function on it is not supported too.
+\begin{lstlisting}
+  sealed abstract class Number extends BasicArithmetic[Int64] {
+    def andMask: BigInt
+
+    override def +(num: Int64): Int64 = apply(checkResult(underlying + num.underlying))
+
+    private def checkResult(result: BigInt): BigInt = {
+      require((result & andMask) == result, "Result was out of bounds, got: " + result)
+      result
+    }
+  }
+\end{lstlisting}
+This is a bound check.
+It checks, if the result of the addition is in range of the specified type (Int64 here).
+So here the \& mask can be replaced with a bound check whether the result is in range of Long.MinValue and Long.MaxValue.
+Again the code gets a bit more static but for this usecase its ok.
+
 \subsection{Rewriting require (funktioniert evtl?)}
