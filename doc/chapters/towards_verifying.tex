@@ -184,4 +184,15 @@ It checks, if the result of the addition is in range of the specified type (Int6
 So here the \& mask can be replaced with a bound check whether the result is in range of Long.MinValue and Long.MaxValue.
 Again the code gets a bit more static but for this usecase its ok.
 
-\subsection{Rewriting require (funktioniert evtl?)}
+\subsection{Rewriting require}
+Stainless output:
+\begin{lstlisting}
+  [Warning ] NumberType.scala:54:3: Could not extract tree in class:
+             scala.this.Predef.require(Int64Impl.this.underlying.<=(
+             math.this.BigInt.long2bigInt(9223372036854775807L)),
+             "Number was too big for a int64, got: ".+(Int64Impl.this.underlying))
+             (class scala.reflect.internal.Trees$Apply)
+             require(underlying <= 9223372036854775807L,
+\end{lstlisting}
+This is, because Stainless does not support require with a second String parameter.
+Removing this String fixes the error.
