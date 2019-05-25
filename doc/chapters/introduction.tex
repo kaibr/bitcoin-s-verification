@@ -54,18 +54,18 @@ One of such tools is Stainless. This framework is used in the work to verify a S
 
 Stainless is a framework developed by "Lab for Automated Reasoning and Analysis" (LARA) at EPFL's School of Computer and Communication Sciences. The framework is used to verify Scala programs.
 It verifies statically that a program satisfies a specification given by a developer and that a program will not crash at runtime.
-Stainless explores all possible input values, reports inputs for which a program fails and demonstrates counterexamples which violate a given specification.
+Stainless explores all possible input values, reports inputs for which a program fails and demonstrates counterexamples which violate a given specification.\cite{Stainless:introduction}
 
 The main functions used to write a specification are \textit{require} and \textit{ensuring}. 
 A precondition should be written at the beginning of a function body with \textit{require}. Its argument is a boolean expression which corresponds to constraint for inputs of a function being verified.
 A postcondition should be written after a function body with  \textit{ensuring}. It is a verification condition on an output of a function.
-While compiling Stainless tries to prove that the postcondition always holds, assuming a given precondition does hold.
+While compiling Stainless tries to prove that the postcondition always holds, assuming a given precondition does hold.\cite{Stainless:introduction}
 
 3 outcomes of verification with Stainless are possible: valid, unvalid and unknown. 
 If the postcondition is valid, Stainless could prove that for any inputs constrained in a precondition, the postcondition always holds.
 With invalid postcondition the framework could find at least one counterexample which satisfies a precondition but violates a postcondition.
 Also an output unknown is possible when Stainless is unable to prove a postcondition or find a counterexample. In this case a timeout or an internal error occured.
-Furthermore, it will be verified by Stainless that a precondition cannot be violated.
+Furthermore, it will be verified by Stainless that a precondition cannot be violated.\cite{Stainless:introduction}
 
 The following example demonstrates a simple structure of formal specification for calculating factorial.
 
@@ -92,8 +92,10 @@ The outcome of Stainless verification of the function factorial from Listing \re
 \end{figure}
 
 
-The code to be verified should be written in Pure Scala belonging to functional programming paradigm. To extend this subset of the Scala language Stainless supports also some imperative features translating them into Pure Scala concepts.
-For more details about Stainless its official website can be explored. \cite{Stainless}
+Stainless verifies scala programs using SMT (satisfiability modulo theories) solvers. 
+A program code will be transformed by Stainless to the Pure Scala fragment supported by Inox solver. 
+This solver was also developed by LARA and allows usage of SMT solvers such as Z3, CVC4 and Princess, adding support of other higher-level features.
+Preconditions, postconditions and assertions will be translated into SMT formulas, so a SMT solver can determine if all properties hold.
 
 %\begin{table}[H]
 %	\centering
