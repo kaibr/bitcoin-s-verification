@@ -104,9 +104,11 @@ In this case it returns false.
 
 The relevant parts for the property to be verified are the following two lines.
 \begin{lstlisting}
-  val prevOutputs = transaction.inputs.map(_.previousOutput)
-  val noDuplicateInputs = prevOutputs.distinct.size == prevOutputs.size
+  val prevOutputTxIds = transaction.inputs.map(_.previousOutput.txId)
+  val noDuplicateInputs = prevOutputTxIds.distinct.size == prevOutputTxIds.size
 \end{lstlisting}
-It gathers all inputs output.
-On this previous outputs it calls distinct and checks if the size stays the same.
-Distinct removes duplicates, so if there was two times the same input the size of inputs before calling distinct would be greater.
+It gathers all inputs output transaction ids.
+On this previous outputs ids it calls distinct and checks if the size stays the same.
+Distinct removes duplicates, so if there was two times the same input transaction id the size of those ids would be greater before calling distinct.
+
+There is a bug in those two lines, as described in the next chapter.
