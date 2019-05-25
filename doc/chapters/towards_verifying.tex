@@ -35,15 +35,15 @@ The post condition would be, that the parameter c must be zero.
 Both are implemented in Satoshis where A is set to Int64.
 So the underlying number of the parameter must be zero.
 
-Next we ensure, that the result is the same value as \emph{this}.
+To ensure that the result is the same value as \emph{this}:
 \begin{lstlisting}
   ensuring(res => res.satoshis == this.satoshis)
 \end{lstlisting}
-Here, we can directly use equals (==) on Satoshis, because its a case class and Int64, the only parameter of Satoshis is a case class too.
+Here, one can directly use equals (==) on Satoshis, because its a case class and Int64, the only parameter of Satoshis is a case class too.
 
-After writing the verification, we ran Stainless on the source files.
+After writing the verification, running Stainless on the source files was the next step.
 It prints a lot of errors because of code incompatibility.
-So we had to rewrite it as described in the following sections.
+So lets describe the code rewriting in the following sections.
 
 \subsection{Rewriting Abstract Type Member}
 Stainless output:
