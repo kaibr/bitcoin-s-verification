@@ -5,16 +5,6 @@ In this work some experiments in formal verification of Scala code will be accom
 The framework Stainless is used as a verification tool. The code of Bitcoin-S-Core, Scala implementation of Bitcoin protocol, is taken as an input for Stainless to be verified. 
 In following the main aspects of formal verification, Stainless and Bitcoin-S are described.
 
-% Einträge im Verzeichnis erscheinen lassen ohne hier eine Referenz einzufügen
-\nocite{kopka:band1}
-\nocite{raichle:bibtex_programmierung}
-\nocite{MiKTeX}
-\nocite{KOMA}
-\nocite{TeXnicCenter}
-\nocite{Marti06}
-\nocite{Erbsland08}
-\nocite{juergens:einfuehrung}
-\nocite{juergens:fortgeschritten}
 
 \section{Formal verification (formal verification vs. testing)}
 \label{sec:formal_verification}
@@ -38,15 +28,6 @@ Formal specification is a mathematical description of a software behavior that c
 
 One of such tools is Stainless. This framework is used in the work to verify a Scala code.
 
- 
-%In figure \ref{fig:file_structure} the file structure is shown for this template.
-
-%\begin{figure}[H]
-%	\centering
-%		\includegraphics[scale=0.85]{images/file_structure.png}
-%	\caption{File structure}
-%	\label{fig:file_structure}
-%\end{figure}
 
 \section{Stainless (allgemeine Beschreibung: Struktur with pre- and postconditions, Solvers, Terminierung und mögliche Outputs)}
 \label{sec:stainless}
@@ -92,27 +73,20 @@ The outcome of Stainless verification of the function factorial from Listing \re
 \end{figure}
 
 
-Stainless verifies scala programs using SMT (satisfiability modulo theories) solvers. 
-A program code will be transformed by Stainless to the Pure Scala fragment supported by Inox solver. 
+Stainless verifies scala programs using SMT (satisfiability modulo theories) solvers. A program code will be transformed by Stainless to the Pure Scala fragment supported by Inox solver. 
 This solver was also developed by LARA and allows usage of SMT solvers such as Z3, CVC4 and Princess, adding support of other higher-level features.
 Preconditions, postconditions and assertions will be translated into SMT formulas, so a SMT solver can determine if all properties hold.
-
-%\begin{table}[H]
-%	\centering
-%		\begin{tabular}{lll} \toprule
-%			\textbf{First Name Last Name} & \textbf{E-mail} & \textbf{Function} \\ \midrule
-%			Alfred Kaufmann & alfred.kaufmann@bfh.ch & Employer, Project Management, \\
-%			& & Supplements, Improvements \\ \midrule
-%			Fritz Dellsperger & Retired & Tips on the structure and layout \\ \midrule
-%			David Burri & Contracted out & First compilation of the Template \\ \bottomrule
-%		\end{tabular}
-%	\caption{Contact Persons}
-%	\label{tab:Contact Persons}
-%\end{table}
 
 
 \section{Bitcoin-S (Projekten und Packages, bitcoin-s-core, Eigenschaften zu prüfen)}
 \label{sec:bitcoin_s}
+
+In the work some fragments of the code of Bitcoin-S will be verified. Bitcoin-S is an open source Scala implementation of the Bitcoin protocol. 
+There are different projects belonging to Bitcoin-S. Protocol data structures are defined in the package \textbf{bitcoin-s-core}. This package is the main target to be verified because it specifies the base of Bitcoin protocol, and it is crucial for correct protocol functionality.
+There is also the package \textbf{bitcoind-rpc} which is a RPC client implementation to communicate with \textit{bitcoind}, daemon of Bitcoin Core running on a machine.
+Developers of Bitcoin-S are working on the implementation of a lightweight bitcoin client in the package \textbf{bitcoin-s-spv-node}.
+
+
 
 %\begin{itemize}
 %	\item Create a BFH Style Files
