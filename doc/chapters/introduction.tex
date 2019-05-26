@@ -72,6 +72,7 @@ The outcome of Stainless verification of the function factorial from Listing \re
 	\label{fig:output1}
 \end{figure}
 
+The code being verified with Stainless should be written in Pure Scala, that corresponds to the functional programming. But also some imperative features are supported by Stainless.
 
 Stainless verifies scala programs using SMT (satisfiability modulo theories) solvers. A program code will be transformed by Stainless to the Pure Scala fragment supported by Inox solver. 
 This solver was also developed by LARA and allows usage of SMT solvers such as Z3, CVC4 and Princess, adding support of other higher-level features.
@@ -81,16 +82,14 @@ Preconditions, postconditions and assertions will be translated into SMT formula
 \section{Bitcoin-S (Projekten und Packages, bitcoin-s-core, Eigenschaften zu prüfen)}
 \label{sec:bitcoin_s}
 
-In the work some fragments of the code of Bitcoin-S will be verified. Bitcoin-S is an open source Scala implementation of the Bitcoin protocol. 
+In the work some fragments of the code of Bitcoin-S has to be verified. Bitcoin-S is an open source Scala implementation of the Bitcoin protocol. 
 There are different projects belonging to Bitcoin-S. Protocol data structures are defined in the package \textbf{bitcoin-s-core}. This package is the main target to be verified because it specifies the base of Bitcoin protocol, and it is crucial for correct protocol functionality.
 There is also the package \textbf{bitcoind-rpc} which is a RPC client implementation to communicate with \textit{bitcoind}, daemon of Bitcoin Core running on a machine.
 Developers of Bitcoin-S are working on the implementation of a lightweight bitcoin client in the package \textbf{bitcoin-s-spv-node}.
+The whole list of packages can be found on the github \cite{BitcoinSProject}.
 
-
-
-%\begin{itemize}
-%	\item Create a BFH Style Files
-%	\item Template for the Compilation of presentations with \LaTeX{}
-%\end{itemize}
+Bitcoin-S is a large project implementing many functionalities. In this work one of them is going to be examinated and worked on, namely the property of the Bitcoin that a non-coinbase transaction can not generate new coins.
+Thus, the code of Bitcoin-S should be analyzied, and fragments implementing this feature should be identified.
+Afterwards, the fragments should be rewritten, so that Stainless can accept it. After that a formal specification for functions should be defined and annotated according Stainless libraries, so that Stainless can verify corrrectness of the code.
 
 
