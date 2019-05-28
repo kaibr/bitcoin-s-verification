@@ -67,8 +67,27 @@ This leads us to another finding as described in the next section.
 \section{Error Reporting with sbt and JAR}
 
 
-\section{Findings}
-
-
 \section{Bugfix}
+After so much digging and trying to understand the checkTransaction code, we found a bug even without Stainless.
 
+Here the relevant code of checkTransaction again:
+\begin{lstlisting}[language=scala]
+  val prevOutputTxIds = transaction.inputs.map(_.previousOutput.txId)
+  val noDuplicateInputs = prevOutputTxIds.distinct.size == prevOutputTxIds.size
+\end{lstlisting}
+What happens, if a TransactionOutPoint (previousOutput) references the same Transaction ID (txId) another does?
+
+According to the Bitcoin protocol this is possible.
+A transaction can have multiple outputs that should be referenceable by the next transaction.
+What should not be possible is a transaction referencing the same output twice.
+This was a bug in Bitcoin Core known as CVE-2018–17144 which was patched on September 18 2018.
+
+Here, Bitcoin-S did a bit too much and marked all transaction as invalid, if they referenced a transaction twice in the next transaction.
+The fix is, to check on TransactionOutPoint instead of TransactionOutPoint.txId, because TransactionOutPoint contains the txId as well as the output index it references.
+\begin{lstlisting}[language=scala]
+  val prevOutputs = transaction.inputs.map(_.previousOutput)
+  val noDuplicateInputs = prevOutputs.distinct.size == prevOutputs.size
+\end{lstlisting}
+Since TransactionOutPoint is a case class and Scala has a built in == for case classes there is no need to implement TransactionOutPoint.==.
+
+This was fixed in pull request \mypound435 on GitHub at April 23 2019 by us along a unit test to prevent this bug from apperaing again in the future.
