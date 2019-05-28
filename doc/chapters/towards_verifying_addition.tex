@@ -1,7 +1,7 @@
 \chapter{Towards Verifying Addition with Zero}
 After so many failures, we have decided to search for the smallest unit in Bitcoin-S-Core that is worthwhile to verify.
 We found the addition of two Satoshis would be a good candidate.
-To make it even more easy, we decided to verify only the addition, where we add zero to an amount of Satoshis.
+To make it even easier, we decided to verify only the addition, where we add zero to an amount of Satoshis.
 The signature looks like the following.
 \begin{lstlisting}
   +(c: CurrencyUnit): CurrencyUnit
@@ -22,11 +22,11 @@ To ensure that the result is the same value as \emph{this}:
 \begin{lstlisting}
   ensuring(res => res.satoshis == this.satoshis)
 \end{lstlisting}
-Here, one can directly use equals (==) on Satoshis, because its a case class and Int64, the only parameter of Satoshis is a case class too.
+Here, one can directly use equals (==) on Satoshis, because it is a case class and Int64, the only parameter of Satoshis is a case class too.
 
 After writing the verification, running Stainless on the source files was the next step.
 It prints a lot of errors because of code incompatibility.
-So lets describe the code rewriting in the following sections.
+So let's describe the code rewriting in the following sections.
 
 \section{Rewriting Abstract Type Member}
 Stainless output:
@@ -47,9 +47,9 @@ Simplified code.
 
   sealed abstract class Satoshis extends CurrencyUnit
 \end{lstlisting}
-Thus, changeing it to generics, Satoshis is not of type CurrencyUnit anymore and neither of type CurrencyUnit[A], where A is the new generic type.
+Thus, changing it to generics, Satoshis is not of type CurrencyUnit anymore and neither of type CurrencyUnit[A], where A is the new generic type.
 Satoshis extends CurrencyUnit with type Int64, so it is of type CurrencyUnit[Int64].
-That's to specific.
+That's too specific.
 
 Since there is no easy way to fix it and the code should stay as much as possible the original, removing the abstract type might be the only choice.
 The verification is a bit more limited, to only Satoshis, but that's no problem, because the goal is to verify the addition of Satoshis.
@@ -140,8 +140,8 @@ Since the type A is not overridden in any of its subclasses, this can simply be 
     def apply: A => T
   }
 \end{lstlisting}
-Replace every occurence of A with BigInt.
-This might be a missing feature in Stainless that should not be to hard to fix.
+Replace every occurrence of A with BigInt.
+This might be a missing feature in Stainless that should not be too hard to fix.
 There is an open pull request \mypound470 on Github for this issue.
 
 \section{Rewriting Usage of BigInt \&-Function}
@@ -167,7 +167,7 @@ Due to the restrictions on BigInt, the \& function on it is not supported too.
 This is a bound check.
 It checks, if the result of the addition is in range of the specified type (Int64 here).
 So here the \& mask can be replaced with a bound check whether the result is in range of Long.MinValue and Long.MaxValue.
-Again the code gets a bit more static but for this usecase its ok.
+Again the code gets a bit more static but for this use case it is OK.
 
 \section{Rewriting require}
 Stainless output:
@@ -183,9 +183,9 @@ This is, because Stainless does not support require with a second String paramet
 Removing this String fixes the error.
 
 \section{Propagate require}
-Finally the code works with Stainless.
+Finally, the code works with Stainless.
 But there is another problem.
-Bitcoin-S-Core uses require like a fail-fast method where as Stainless needs it to verify the code.
+Bitcoin-S-Core uses require like a fail-fast method whereas Stainless needs it to verify the code.
 
 Stainless output:
 \begin{lstlisting}
@@ -232,7 +232,7 @@ Stainless finds another counter example:
                  Int64Impl(9223372036854775807)
 \end{lstlisting}
 Sure, it can just add one to the maximum Int64 and the require does not hold anymore.
-The goal is to check the addition of zero so lets add a restriction for num to be zero.
+The goal is to check the addition of zero so let's add a restriction for num to be zero.
 
 Finally, it works and verifies correctly.
 
