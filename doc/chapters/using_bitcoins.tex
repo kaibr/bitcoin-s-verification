@@ -103,7 +103,7 @@ For example it checks if there is either no input or no output.
 In this case it returns false.
 
 The relevant parts for the property to be verified are the following two lines.
-\begin{lstlisting}
+\begin{lstlisting}[language=scala]
   val prevOutputTxIds = transaction.inputs.map(_.previousOutput.txId)
   val noDuplicateInputs = prevOutputTxIds.distinct.size == prevOutputTxIds.size
 \end{lstlisting}
