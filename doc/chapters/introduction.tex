@@ -1,6 +1,5 @@
 \chapter{Introduction (Aufgabestellung)}
 \label{chap:introduction}
-
 In this work some experiments in formal verification of Scala code will be accomplished. 
 The framework Stainless is used as a verification tool. The code of Bitcoin-S-Core, Scala implementation of Bitcoin protocol, is taken as an input for Stainless to be verified. 
 In following the main aspects of formal verification, Stainless and Bitcoin-S are described.
@@ -12,40 +11,47 @@ In following the main aspects of formal verification, Stainless and Bitcoin-S ar
 The longer and complexer a source code is, the more difficult it is to verify its correctness.
 There are different approaches for verification of program correctness. 
 
-The commonly used one is testing. A set of some practical scenarios and assertions is created by a developer to test a software design and implementation. 
-While testing it is checked whether the actual results match the expected results. Tests help to identify bugs and missing requirements.
+The commonly used one is testing.
+A set of some practical scenarios and assertions is created by a developer to test a software design and implementation. 
+While testing, it is checked whether the actual results match the expected results.
+Tests help to identify bugs and missing requirements.
 But it is not achievable to test all possible inputs. 
 Thus, a long-term test coverage model should be created to test a software design enough.
-Furthermore it is challenging to test a software keeping the ability to observe the side effects of a specific part of code.
-Practically, a developer runs tests, debugs appeared failures, adjustes a code of a software and extands a testbench verifying previously uncovered aspects. \cite{sanghavi:formal_verification}
+Furthermore, it is challenging to test a software keeping the ability to observe the side effects of a specific part of code.
+Practically, a developer runs tests, debugs appeared failures, adjusts a code of a software and extends a test bench verifying previously uncovered aspects. \cite{sanghavi:formal_verification}
 
-Another powerfull method to check whether a program works correct is formal verification. 
+Another powerful method to check whether a program works correct is formal verification. 
 This is a systematic process based on mathematical modeling. 
 It is unnecessary to create a simulation tests with some possible inputs. 
 With formal verification all possible input values are explored algorithmically and exhaustively.
 Correctness of a program is analyzed relative to its formal specification.
 Formal specification is a mathematical description of a software behavior that can be provided to formal verification tools for proving it. \cite{sanghavi:formal_verification}
 
-One of such tools is Stainless. This framework is used in the work to verify a Scala code.
+One of such tools is Stainless.
+This framework is used in the work to verify a Scala code.
 
 
 \section{Stainless (allgemeine Beschreibung: Struktur with pre- and postconditions, Solvers, Terminierung und mögliche Outputs)}
 \label{sec:stainless}
 
 
-Stainless is a framework developed by "Lab for Automated Reasoning and Analysis" (LARA) at EPFL's School of Computer and Communication Sciences. The framework is used to verify Scala programs.
+Stainless is a framework developed by "Lab for Automated Reasoning and Analysis" (LARA) at EPFL's School of Computer and Communication Sciences.
+The framework is used to verify Scala programs.
 It verifies statically that a program satisfies a specification given by a developer and that a program will not crash at runtime.
 Stainless explores all possible input values, reports inputs for which a program fails and demonstrates counterexamples which violate a given specification.\cite{Stainless:introduction}
 
 The main functions used to write a specification are \textit{require} and \textit{ensuring}. 
-A precondition should be written at the beginning of a function body with \textit{require}. Its argument is a boolean expression which corresponds to constraint for inputs of a function being verified.
-A postcondition should be written after a function body with  \textit{ensuring}. It is a verification condition on an output of a function.
+A precondition should be written at the beginning of a function body with \textit{require}.
+Its argument is a Boolean expression which corresponds to constraint for inputs of a function being verified.
+A postcondition should be written after a function body with \textit{ensuring}.
+It is a verification condition on an output of a function.
 While compiling Stainless tries to prove that the postcondition always holds, assuming a given precondition does hold.\cite{Stainless:introduction}
 
-3 outcomes of verification with Stainless are possible: valid, unvalid and unknown. 
+3 outcomes of verification with Stainless are possible: valid, invalid and unknown. 
 If the postcondition is valid, Stainless could prove that for any inputs constrained in a precondition, the postcondition always holds.
 With invalid postcondition the framework could find at least one counterexample which satisfies a precondition but violates a postcondition.
-Also an output unknown is possible when Stainless is unable to prove a postcondition or find a counterexample. In this case a timeout or an internal error occured.
+Also, an output unknown is possible when Stainless is unable to prove a postcondition or find a counterexample.
+In this case a timeout or an internal error occurred.
 Furthermore, it will be verified by Stainless that a precondition cannot be violated.\cite{Stainless:introduction}
 
 The following example demonstrates a simple structure of formal specification for calculating factorial.
@@ -61,8 +67,13 @@ The following example demonstrates a simple structure of formal specification fo
     } ensuring(res => res >= 0)
 \end{lstlisting}
 
-The function recursively calculates factorial of an integer number. An input to the function is constrained in \textit{require} with non-negative value. A result of calculation should also be non-negative, what will be verified by Stainless.
-While compiling Stainless disproves the postcondition and gives the number 17 as a counterexample. A number of type Int is a 32 bit value. That is why calculating factorial of 17 causes an overflow and results to a negative value. The program would work correct by changing a type of a number to BigInt.
+The function recursively calculates factorial of an integer number.
+An input to the function is constrained in \textit{require} with non-negative value.
+A result of calculation should also be non-negative, what will be verified by Stainless.
+While compiling Stainless disproves the postcondition and gives the number 17 as a counterexample.
+A number of type Int is a 32 bit value.
+That is why calculating factorial of 17 causes an overflow and results to a negative value.
+The program would work correct by changing a type of number to BigInt.
 The outcome of Stainless verification of the function factorial from Listing \ref{listing:factorial} is shown bellow.
 
 \begin{figure}[H]
@@ -74,22 +85,27 @@ The outcome of Stainless verification of the function factorial from Listing \re
 
 The code being verified with Stainless should be written in Pure Scala, that corresponds to the functional programming. But also some imperative features are supported by Stainless.
 
-Stainless verifies scala programs using SMT (satisfiability modulo theories) solvers. A program code will be transformed by Stainless to the Pure Scala fragment supported by Inox solver. 
+Stainless verifies Scala programs using SMT (satisfiability modulo theories) solvers. A program code will be transformed by Stainless to the Pure Scala fragment supported by Inox solver. 
 This solver was also developed by LARA and allows usage of SMT solvers such as Z3, CVC4 and Princess, adding support of other higher-level features.
-Preconditions, postconditions and assertions will be translated into SMT formulas, so a SMT solver can determine if all properties hold.
+Preconditions, postconditions and assertions will be translated into SMT formulas, so an SMT solver can determine if all properties hold.
 
 
 \section{Bitcoin-S (Projekten und Packages, bitcoin-s-core, Eigenschaften zu prüfen)}
 \label{sec:bitcoin_s}
 
-In the work some fragments of the code of Bitcoin-S has to be verified. Bitcoin-S is an open source Scala implementation of the Bitcoin protocol. 
-There are different projects belonging to Bitcoin-S. Protocol data structures are defined in the package \textbf{bitcoin-s-core}. This package is the main target to be verified because it specifies the base of Bitcoin protocol, and it is crucial for correct protocol functionality.
-There is also the package \textbf{bitcoind-rpc} which is a RPC client implementation to communicate with \textit{bitcoind}, daemon of Bitcoin Core running on a machine.
+In the work some fragments of the code of Bitcoin-S has to be verified.
+Bitcoin-S is an open source Scala implementation of the Bitcoin protocol. 
+There are different projects belonging to Bitcoin-S.
+Protocol data structures are defined in the package \textbf{bitcoin-s-core}.
+This package is the main target to be verified because it specifies the base of Bitcoin protocol, and it is crucial for correct protocol functionality.
+There is also the package \textbf{bitcoind-rpc} which is an RPC client implementation to communicate with \textit{bitcoind}, daemon of Bitcoin Core running on a machine.
 Developers of Bitcoin-S are working on the implementation of a lightweight bitcoin client in the package \textbf{bitcoin-s-spv-node}.
-The whole list of packages can be found on the github \cite{BitcoinSProject}.
+The whole list of packages can be found on GitHub \cite{BitcoinSProject}.
 
-Bitcoin-S is a large project implementing many functionalities. In this work one of them is going to be examinated and worked on, namely the property of the Bitcoin that a non-coinbase transaction can not generate new coins.
-Thus, the code of Bitcoin-S should be analyzied, and fragments implementing this feature should be identified.
-Afterwards, the fragments should be rewritten, so that Stainless can accept it. After that a formal specification for functions should be defined and annotated according Stainless libraries, so that Stainless can verify corrrectness of the code.
+Bitcoin-S is a large project implementing many functionalities.
+In this work one of them is going to be examined and worked on, namely the property of the Bitcoin that a non-coinbase transaction can not generate new coins.
+Thus, the code of Bitcoin-S should be analyzed, and fragments implementing this feature should be identified.
+Afterwards, the fragments should be rewritten, so that Stainless can accept it.
+After that a formal specification for functions should be defined and annotated according Stainless libraries, so that Stainless can verify correctness of the code.
 
 

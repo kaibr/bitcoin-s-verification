@@ -1,11 +1,11 @@
 \chapter{Using Bitcoin-S-Core}
 \label{chap:using_bitcoins}
 This chapter describes the relevant parts needed to verify that a non-coinbase transaction cannot generate new coins in Bitcoin-S-Core.
-We will see, how to create valid and invalid transactions with Bitcoin-S-Core and how this transactions are validated against the described property.
+We will see, how to create valid and invalid transactions with Bitcoin-S-Core and how these transactions are validated against the described property.
 
 \section{Creation of a Transaction}
 Some parts of the code in this section are from Bitcoin-S-Core transaction builder example.\cite{BitcoinSCore:txbuilderexample}
-Bitcoin-S-Core has a bitcoin transcation builder class with the following signature:
+Bitcoin-S-Core has a bitcoin transaction builder class with the following signature:
 \begin{lstlisting}[language=scala]
   BitcoinTxBuilder(
     destinations: Seq[TransactionOutput], // where we send money
@@ -21,8 +21,8 @@ First, a previous transaction with outputs is needed to spend some money from.
 This is created here, to show the process.
 It could also be parsed from a transaction in the bitcoin network.
 A single output is sufficient for this example.
-So, first create a new keypair to sign the next transaction and have a scriptPubKey where the money is.
-Then define the amount to spend (here 10000 Satishis) collect this information in a transaction output and add it to the previous transaction.
+So, first create a new key pair to sign the next transaction and have a scriptPubKey where the money is.
+Then define the amount to spend (here 10000 Satoshis) collect this information in a transaction output and add it to the previous transaction.
 \begin{lstlisting}[language=scala]
   val privKey = ECPrivateKey.freshPrivateKey
   val creditingSPK = P2PKHScriptPubKey(pubKey = privKey.publicKey)
@@ -39,7 +39,7 @@ Then define the amount to spend (here 10000 Satishis) collect this information i
   )
 \end{lstlisting}
 Next, the new transaction should point to an output of the previous transaction.
-Thus, a outpoint is created with the id of the previous transaction and the index pointing to the specific output of it.
+Thus, an outpoint is created with the id of the previous transaction and the index pointing to the specific output of it.
 This is collected in an utxo spending info which is then put in the list of all utxos (only one here).
 \begin{lstlisting}  
   val outPoint = TransactionOutPoint(prevTx.txId, UInt32.zero)
@@ -56,7 +56,7 @@ This is collected in an utxo spending info which is then put in the list of all 
   val utxos = List(utxoSpendingInfo)
 \end{lstlisting}
 Then, the destination, where the money goes, is defined.
-This includes a destination script pub key, as well as a the amount to spend to it.
+This includes a destination script pub key, as well as the amount to spend to it.
 \begin{lstlisting}
   val destinationAmount = Satoshis(Int64(5000))
 
@@ -66,7 +66,7 @@ This includes a destination script pub key, as well as a the amount to spend to 
     TransactionOutput(currencyUnit = destinationAmount, scriptPubKey = destinationSPK)
   )
 \end{lstlisting}
-Finally. define a fee rate, the network params and create a transaction builder.
+Finally, define a fee rate, the network params and create a transaction builder.
 \begin{lstlisting}
   val feeRate = SatoshisPerByte(Satoshis.one)
 
@@ -80,7 +80,7 @@ Finally. define a fee rate, the network params and create a transaction builder.
     network = networkParams
   )
 \end{lstlisting}
-After calling sign on the transaction builder a valid transaction is returned.
+After calling sign on the transaction builder, a valid transaction is returned.
 \begin{lstlisting}
   val signedTxF: Future[Transaction] = txBuilder
     .flatMap(_.sign)
@@ -96,10 +96,10 @@ This is its type signature.
 \begin{lstlisting}
   checkTransaction(transaction: Transaction): Boolean
 \end{lstlisting}
-It takes a transaction as input and returns a boolean whether the transaction is valid or not.
+It takes a transaction as input and returns a Boolean whether the transaction is valid or not.
 So for example when passing the built tx from above to this function the returned value would be true.
 There are several checks in checkTransaction.
-For example it checks if there is either no input or no output.
+For example, it checks if there is either no input or no output.
 In this case it returns false.
 
 The relevant parts for the property to be verified are the following two lines.

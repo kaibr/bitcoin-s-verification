@@ -4,27 +4,30 @@ This chapter describes the process we've made on trying to integrate Stainless i
 It shows the differences between the error reporting by the sbt plugin and the JAR.
 Finally, during our work on Bitcoin-S we found a bug that we explain along its corresponding bug fix.
 
+
 \section{Integration}
 During this work, Stainless bumped the sbt plugin from version 0.13.17 to 1.2.8 and Scala from 2.11.12 to 2.12.8.
 So this section might be out of date now.
 
 Bitcoin-S-Core uses sbt 1.2.8 and Scala 2.12.8, while Stainless sbt plugin is on sbt 0.13.17 and Scala 2.11.12.
 
-Sbt introduced new features in the 1.x releade used by Bitcoin-S.
+Sbt introduced new features in the 1.x release used by Bitcoin-S.
 
 For example, they introduced the new slash syntax.
-\begin{lstlisting}
+\begin{lstlisting}[language=scala]
   lazy val root = (project in file("."))
     .settings(
       name := "hello",
       version in ThisBuild := "1.0.0"
     )
 \end{lstlisting}
+
 The version line written without slash becomes now one with slash.
-The right and left parameter of in-operator reverse and instad of the in-operator is now a slash.
-\begin{lstlisting}
+The right and left parameter of in-operator reverse and instead of the in-operator is now a slash.
+\begin{lstlisting}[language=scala]
   ThisBuild / version := "1.0.0",
 \end{lstlisting}
+
 This is just one example of many others.
 
 The bigger problem is, due to the different Scala and sbt versions, the error message, after trying to go in a sbt shell.
@@ -35,6 +38,7 @@ The bigger problem is, due to the different Scala and sbt versions, the error me
   ...
   Project loading failed: (r)etry, (q)uit, (l)ast, or (i)gnore?
 \end{lstlisting}
+
 Downgrading Bitcoin-S sbt version to 0.13.17 fixes the error but then it can not load some libraries only compiled for newer versions.
 So this would take too much time to fix and changes the Bitcoin-S code unwantingly.
 
@@ -51,6 +55,7 @@ The final command looks like this in \emph{core} folder of Bitcoin-S:
     $(find . -type f -name *.scala | tr '\n' ' ')
     $(find ../secp256k1jni -type f -name *.java | tr '\n' ' ')
 \end{lstlisting}
+
 The output was some Stainless error.
 \begin{lstlisting}
   [Internal] Error: object scala.reflect.macros.internal.macroImpl in compiler mirror
@@ -61,6 +66,7 @@ The output was some Stainless error.
   [Internal] object scala.reflect.macros.internal.macroImpl in compiler mirror not found.
   [Internal] Please inform the authors of Inox about this message
 \end{lstlisting}
+
 After some discussion, we decided to go another way, because the errors may take too much time and it might lead to a next error.
 Let's extract the code needed to verify a transaction mainly the class Transaction and ScriptInterpreter with many other classes their depending on.
 
@@ -68,7 +74,7 @@ After this extraction Stainless was successfully integrated with both, sbt and J
 This leads us to another finding as described in the next section.
 
 \section{Error Reporting with sbt and JAR}
-
+// TODO https://github.com/epfl-lara/stainless/issues/484?
 
 \section{Bugfix}
 After so much digging and trying to understand the checkTransaction code, we found a bug even without Stainless.
@@ -78,12 +84,13 @@ Here the relevant code of checkTransaction again:
   val prevOutputTxIds = transaction.inputs.map(_.previousOutput.txId)
   val noDuplicateInputs = prevOutputTxIds.distinct.size == prevOutputTxIds.size
 \end{lstlisting}
+
 What happens, if a TransactionOutPoint (previousOutput) references the same Transaction ID (txId) another does?
 
 According to the Bitcoin protocol this is possible.
 A transaction can have multiple outputs that should be referenceable by the next transaction.
 What should not be possible is a transaction referencing the same output twice.
-This was a bug in Bitcoin Core known as CVE-2018–17144 which was patched on September 18 2018.
+This was a bug in Bitcoin Core known as CVE-2018–17144 which was patched on September 18, 2018.
 
 Here, Bitcoin-S did a bit too much and marked all transaction as invalid, if they referenced a transaction twice in the next transaction.
 The fix is, to check on TransactionOutPoint instead of TransactionOutPoint.txId, because TransactionOutPoint contains the txId as well as the output index it references.
@@ -93,4 +100,4 @@ The fix is, to check on TransactionOutPoint instead of TransactionOutPoint.txId,
 \end{lstlisting}
 Since TransactionOutPoint is a case class and Scala has a built in == for case classes there is no need to implement TransactionOutPoint.==.
 
-This was fixed in pull request \mypound435 on GitHub at April 23 2019 by us along a unit test to prevent this bug from apperaing again in the future.
+This was fixed in pull request \mypound435 on GitHub at April 23, 2019 by us along a unit test to prevent this bug from appearing again in the future.
