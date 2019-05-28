@@ -158,6 +158,34 @@ The following functional elements are a part of Pure Scala:
   \end{lstlisting}
   \item \textbf{Local classes}. 
   The creation of local classes within a function are allowed. \cite{Stainless:pure_scala}
+  \item \textbf{Functional arrays} which use the operation that do not modify an array.
 \end{itemize}
+
 \subsection{Predefined types}
+
 \subsection{Imperative features}
+
+Stainless supports extensions to Pure Scala implemeting some imperative features.
+They will be translated by Stainless into Pure Scala during a preprocessing phase.
+
+The following imperative components are supported:
+
+\begin{itemize}
+  \item \textbf{Mutable variables} which can be declared with the keyword \textit{var}.
+  Declaration of mutable variables is allowed only as a local variable within a function or in a case classe constuctor.
+  \item  \textbf{While loops}. 
+  Because besides main calculations in a loop the state of a loop counter changes at every iteration as a side effect, this kind of programming component does not belong to the functional paradigm and cannot be handled by solvers.
+  Thus, Stainless generates automatically a postcondition with the negation of the loop condition as an argument. 
+  Moreover, to make it stronger, the automatically generated postcondition can be customised with the keyword \textit{invariant}.
+  An example of while loop implementation:
+  \begin{lstlisting}[language=Scala]
+    var res = 0
+    var i = 0
+    (while(i < 10) {
+      res = res + i
+      i = i + 1
+    }) invariant(i >= 0 && res >= i)
+  \end{lstlisting}
+  \item \textbf{Arrays.} Stainless extends functional arrays allowing the reassignment of arrays elements.
+  \item ...
+\end{itemize}
