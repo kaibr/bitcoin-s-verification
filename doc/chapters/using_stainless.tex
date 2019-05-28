@@ -79,7 +79,84 @@ All dependencies must be on the classpath and all source files appended.
 Those are added with \code{-classpath Dep1.jar:Dep2.jar:...:DepN.jar src1.scala src2.scala ... srcM.scala}.
 
 \section{Scala compatibility (Pure Scala, imperative features, dedicated BigInt, Generics...)}
-Stainless supports only a subset of Scala.
-They call it Pure Scala.
-We will see some of this restrictions we have detected during this work in the next chapter.
-There is a list of what's supported in the Stainless documentation.
+
+To be verified the Scala code extended with Stainless annotations is passed to the framework as input.
+The source code should be written in so called Pure Scala, a functional subset of Scala, so that Stainless can perform the verification.
+Additionally the framework supports some imperative features. We will see some of this restrictions we have detected during this work in the next chapter.
+
+\subsection{Functional Pure Scala}
+The following functional elements are a part of Pure Scala:
+\begin{itemize}
+  \item \textbf{Algebraic Data Types:} abstract class, case class, case object. 
+  The root of ADT is an abstarct class, unless only one case class or case object is defined.
+  An abstract class cannot define fields and constructor arguments. 
+  Case class and case object can extend an abstract class.
+  An example of the ADT definition:
+  \begin{lstlisting}[language=Scala]
+    abstract class MyList
+    case object MyEmpty extends MyList
+    case class MyCons(elem: BigInt, rest: MyList) extends MyList
+  \end{lstlisting}
+  \item \textbf{Objects} for grouping classes and functions.
+  An example of object definition:
+  \begin{lstlisting}[language=Scala]
+    object Specs {
+      def increment(a: BigInt): BigInt = {
+        a + 1
+      }
+    case class Identifier(id: BigInt)
+    }
+  \end{lstlisting}
+  \item \textbf{Booleans:} logical operators  \textit{\&\&}, \textit{||}, \textit{!}, relational operator \textit{==}, Stainless syntax for boolean implication \textit{==>}. 
+  The short-circuit interpretation is used, when the second argument of a boolean expression is evaluated only when needed.  
+  \item \textbf{Generics.} Only invariant type parameters are supported, what means if S is subtype of T then List[S] and List[T] do not have sub-typing relationship.
+  Covariant and contravariant type parameters, such as List[+T] and List[-T], are not supported. 
+  Furthermore, only simple hierarchie is aloowed, when subclass must define the same type parameters in the same order as a parent class.
+  An example using Generics:
+  \begin{lstlisting}[language=Scala]
+    object Test {
+      abstract class List[T]
+      case class Cons[T](hd: T, tl: List[T]) extends List[T]
+      case class Nil[T]() extends List[T]
+      def contains[T](l: List[T], el: T) = { ... }
+    }
+  \end{lstlisting}
+  \item \textbf{Methods} can be defined in an abstract class and implemented or overridden in case classes. 
+  The call of superclass methods with the keyword \textit{super} is allowed. 
+  The method parameters can have default values. 
+  An example of method definition in case of inheritance:
+  \begin{lstlisting}[language=Scala]
+    object Test {
+      sealed abstract class Base {
+        def double(x: BigInt): BigInt = x * 2
+      }
+
+      case class Override() extends Base {
+        override def double(x: BigInt): BigInt = {
+          super.double(x + 1) + 42
+        }
+      }
+    }
+  \end{lstlisting}
+  \item \textbf{Pattern matching.} 
+  Simple nested pattern matching, matching on type only, pattern quards and custom pattern matching with \textit{unapply} method are supported.
+  \item \textbf{Values}. 
+  Only immutable variables are allowed. Thus, they must be defined with the keyword \textit{val} (and not with \textit{var}).
+  \item \textbf{Inner functions.}
+  \item \textbf{Anonymous functions.}
+  \item \textbf{Anonymous classes} with an explicit parent. 
+  An anonymous class should have the same number of public members as its parent.
+  An example of anonymous class implementation:
+  \begin{lstlisting}[language=Scala]
+    abstract class Foo {
+      def bar: Int
+    }
+    
+    def makeFoo(x: Int): Foo = new Foo {
+      def bar: Int = x
+    }
+  \end{lstlisting}
+  \item \textbf{Local classes}. The creation of local classes within a function are allowed.
+\end{itemize}
+\subsection{Predefined types}
+\subsection{Imperative features}
