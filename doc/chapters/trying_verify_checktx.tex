@@ -5,9 +5,64 @@
 During this work, Stainless bumped the sbt plugin from version 0.13.17 to 1.2.8 and Scala from 2.11.12 to 2.12.8.
 So this section might be out of date now.
 
-Bitcoin-S-Core uses sbt 1.2.8 and Scala 2.12.8.
+Bitcoin-S-Core uses sbt 1.2.8 and Scala 2.12.8, while Stainless sbt plugin is on sbt 0.13.17 and Scala 2.11.12.
 
-//TODO
+Sbt introduced new features in the 1.x releade used by Bitcoin-S.
+
+For example, they introduced the new slash syntax.
+\begin{lstlisting}
+  lazy val root = (project in file("."))
+    .settings(
+      name := "hello",
+      version in ThisBuild := "1.0.0"
+    )
+\end{lstlisting}
+The version line written without slash becomes now one with slash.
+The right and left parameter of in-operator reverse and instad of the in-operator is now a slash.
+\begin{lstlisting}
+  ThisBuild / version := "1.0.0",
+\end{lstlisting}
+This is just one example of many others.
+
+The bigger problem is, due to the different Scala and sbt versions, the error message, after trying to go in a sbt shell.
+\begin{lstlisting}
+  [warn] There may be incompatibilities among your library dependencies; run 'evicted'
+         to see detailed eviction warnings.
+  [error] java.lang.NoClassDefFoundError: sbt/SourcePosition
+  ...
+  Project loading failed: (r)etry, (q)uit, (l)ast, or (i)gnore?
+\end{lstlisting}
+Downgrading Bitcoin-S sbt version to 0.13.17 fixes the error but then it can not load some libraries only compiled for newer versions.
+So this would take too much time to fix and changes the Bitcoin-S code unwantingly.
+
+The next approach is to use stainless cli instead of sbt.
+Running stainless on all source files does not work, because the dependencies are missing.
+The parameter \emph{-classpath} can resolve it but the value of this parameter must be the paths to all the dependencies separated by a ':'.
+Finally, \emph{core} depends on \emph{secp256k1jni}, another package of Bitcoin-S written in Java.
+So this needs to be in the source files to.
+
+The final command looks like this in \emph{core} folder of Bitcoin-S:
+\begin{lstlisting}[language=bash]
+  $ stainless
+    -classpath ".:$(find ~/.ivy2/ -type f -name *.jar | tr '\n' ':')"
+    $(find . -type f -name *.scala | tr '\n' ' ')
+    $(find ../secp256k1jni -type f -name *.java | tr '\n' ' ')
+\end{lstlisting}
+The output was some Stainless error.
+\begin{lstlisting}
+  [Internal] Error: object scala.reflect.macros.internal.macroImpl in compiler mirror
+             not found.. Trace:
+  [Internal] - scala.reflect.internal.MissingRequirementError$.signal
+             (MissingRequirementError.scala:17)
+  ...
+  [Internal] object scala.reflect.macros.internal.macroImpl in compiler mirror not found.
+  [Internal] Please inform the authors of Inox about this message
+\end{lstlisting}
+After some discussion, we decided to go another way, because the errors may take too much time and it might lead to a next error.
+Let's extract the code needed to verify a transaction mainly the class Transaction and ScriptInterpreter with many other classes their depending on.
+
+After this extraction Stainless was successfully integrated with both, sbt and JAR.
+This leads us to another finding as described in the next section.
 
 \section{Error Reporting with sbt and JAR}
 
