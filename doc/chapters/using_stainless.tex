@@ -82,13 +82,14 @@ Those are added with \code{-classpath Dep1.jar:Dep2.jar:...:DepN.jar src1.scala 
 
 To be verified the Scala code extended with Stainless annotations is passed to the framework as input.
 The source code should be written in so called Pure Scala, a functional subset of Scala, so that Stainless can perform the verification.
-Additionally the framework supports some imperative features. We will see some of this restrictions we have detected during this work in the next chapter.
+Additionally, the framework supports some imperative features.
+We will see some of these restrictions we have detected during this work in the next chapter.
 
 \subsection{Functional Pure Scala}
 The following functional elements are a part of Pure Scala:
 \begin{itemize}
   \item \textbf{Algebraic Data Types:} abstract class, case class, case object. 
-  The root of ADT is an abstarct class, unless only one case class or case object is defined.
+  The root of ADT is an abstract class, unless only one case class or case object is defined.
   An abstract class cannot define fields and constructor arguments. 
   Case class and case object can extend an abstract class.
   An example of the ADT definition:
@@ -108,10 +109,10 @@ The following functional elements are a part of Pure Scala:
     }
   \end{lstlisting}
   \item \textbf{Booleans:} logical operators  \textit{\&\&}, \textit{||}, \textit{!}, relational operator \textit{==}, Stainless syntax for boolean implication \textit{==>}. 
-  The short-circuit interpretation is used, when the second argument of a boolean expression is evaluated only when needed.  
+  The short-circuit interpretation is used, when the second argument of a Boolean expression is evaluated only when needed.
   \item \textbf{Generics.} Only invariant type parameters are supported, what means if S is subtype of T then List[S] and List[T] do not have sub-typing relationship.
   Covariant and contravariant type parameters, such as List[+T] and List[-T], are not supported. 
-  Furthermore, only simple hierarchie is aloowed, when subclass must define the same type parameters in the same order as a parent class.
+  Furthermore, only simple hierarchies are allowed, when subclass must define the same type parameters in the same order as a parent class.
   An example using Generics:
   \begin{lstlisting}[language=Scala]
     object Test {
@@ -139,7 +140,7 @@ The following functional elements are a part of Pure Scala:
     }
   \end{lstlisting}
   \item \textbf{Pattern matching.} 
-  Simple nested pattern matching, matching on type only, pattern quards and custom pattern matching with \textit{unapply} method are supported.
+  Simple nested pattern matching, matching on type only, pattern guards and custom pattern matching with \textit{unapply} method are supported.
   \item \textbf{Values}. 
   Only immutable variables are allowed. Thus, they must be defined with the keyword \textit{val} (and not with \textit{var}).
   \item \textbf{Inner functions.}
