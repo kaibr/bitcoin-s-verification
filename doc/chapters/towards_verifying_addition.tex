@@ -68,16 +68,16 @@ Stainless output:
 \begin{lstlisting}
   [ Error  ] NumberType.scala:3:30: Unknown type parameter type T
              sealed abstract class Number[T <: Number[T]]
-
 \end{lstlisting}
 
+This is a missing feature in Stainless.
 \begin{lstlisting}[language=scala]
   sealed abstract class Number[T <: Number[T]] extends BasicArithmetic[T]  
 \end{lstlisting}
 
-\section{Rewriting Objects}
-// TODO reason?
 
+
+\section{Rewriting Objects}
 Stainless output:
 \begin{lstlisting}
 [ Error  ] CurrencyUnits.scala:54:1: Objects cannot extend classes or implement
@@ -86,6 +86,10 @@ Stainless output:
 \end{lstlisting}
 
 Changing the objects that extends classes to case objects solves this problem.
+This is, due to the internal design of Scala and Java.
+It's possible to reason about a case object but not about an object.
+This needs a fundamental knowledge of Scala and some functional paradigms that should not be part of this thesis.
+The issue \mypound520 on Stainless GitHub gives some thoughts about this.
 
 
 \section{Rewriting BigInt Constructor (only literal argument, no long argument, etc.)}
