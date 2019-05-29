@@ -63,7 +63,6 @@ So by removing the abstract type and fix it to Int64 as defined by Satoshis, the
 
 
 \section{Rewriting Generics}
-// I dont understand this.. maybe just a missing feature in Stainless?
 Stainless output:
 \begin{lstlisting}
   [ Error  ] NumberType.scala:3:30: Unknown type parameter type T
@@ -71,10 +70,11 @@ Stainless output:
 \end{lstlisting}
 
 This is a missing feature in Stainless.
+To track this, there is the issue \mypound519 on GitHub.
 \begin{lstlisting}[language=scala]
   sealed abstract class Number[T <: Number[T]] extends BasicArithmetic[T]  
 \end{lstlisting}
-
+For the sake of convenience this is also made static by parameterize T with Int64.
 
 
 \section{Rewriting Objects}
