@@ -145,15 +145,14 @@ After running Stainless on it, it throws a really huge bunch of errors about wha
 This would require to change nearly all the extracted code.
 
 We arrive at the decision that we need a smaller part to verify.
-We have chosen to verify the addition with zero of Bitcoin-Ss' CurrencyUnit class as described in the next chapter.
+We have chosen to verify the addition with zero of Bitcoin-Ss CurrencyUnit class as described in the next chapter.
 
-During the examination of the checkTransaction function, we found a bug in Bitcoin-S.
-You can read more about it in the next section.
+But before that you can read about the bug we found and fixed in the next section.
 
 
 \section{Fixing a Bug in Bitcoin-S}
 
-After so much digging and trying to understand the checkTransaction code, we found a bug even without Stainless.
+During the examination of the checkTransaction function, we found a bug in Bitcoin-S.
 
 Here the relevant code of checkTransaction again:
 \begin{lstlisting}[language=scala]
