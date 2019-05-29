@@ -181,10 +181,12 @@ Let's extract the code needed to verify a transaction mainly the class Transacti
 After this extraction Stainless was successfully integrated with both, sbt and JAR.
 This leads us to another finding as described in the next section.
 
+
 \section{Error Reporting with sbt and JAR}
 // TODO https://github.com/epfl-lara/stainless/issues/484?
 
-\section{Bugfix}
+
+\section{Fixing a Bug in Bitcoin-S}
 After so much digging and trying to understand the checkTransaction code, we found a bug even without Stainless.
 
 Here the relevant code of checkTransaction again:
