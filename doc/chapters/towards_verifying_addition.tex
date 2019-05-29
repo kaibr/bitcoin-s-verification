@@ -32,7 +32,7 @@ It prints a lot of errors because of code incompatibility.
 So let's describe the code rewriting in the following sections.
 
 
-\section{Rewriting Abstract Type Member}
+\section{Get Rid of Abstract Type Member}
 Stainless output:
 {\footnotesize\begin{verbatim}
 [ Error  ] CurrencyUnits.scala:5:3: Stainless doesn't support abstract type members
@@ -62,7 +62,7 @@ The verification is a bit more limited, to only Satoshis, but that's no problem,
 So by removing the abstract type and fix it to Int64 as defined by Satoshis, there was one error less in Stainless.
 
 
-\section{Rewriting Generics}
+\section{Get Rid of Special Generics}
 Stainless output:
 {\footnotesize\begin{verbatim}
   [ Error  ] NumberType.scala:3:30: Unknown type parameter type T
@@ -77,7 +77,7 @@ To track this, there is the issue \mypound519 on GitHub.
 For the sake of convenience this is also made static by parameterize T with Int64.
 
 
-\section{Rewriting Objects}
+\section{Turning object Into case object}
 Stainless output:
 {\footnotesize\begin{verbatim}
 [ Error  ] CurrencyUnits.scala:54:1: Objects cannot extend classes or implement
@@ -92,7 +92,7 @@ This needs a fundamental knowledge of Scala and some functional paradigms that s
 The issue \mypound520 on Stainless GitHub gives some thoughts about this.
 
 
-\section{Rewriting BigInt Constructor (only literal argument, no long argument, etc.)}
+\section{Replace BigInt Constructor Argument With String Literal}
 Stainless output:
 {\footnotesize\begin{verbatim}
 [ Error  ] CurrencyUnits.scala:47:33: Only literal arguments are allowed for BigInt.
@@ -123,7 +123,7 @@ Restricting the code one more time helps.
 So it does not be converted from BigInt to Long and back to BigInt.
 
 
-\section{Rewriting Private Inner Classes}
+\section{Extracting Private Inner Classes}
 Stainless output (simplified):
 {\footnotesize\begin{verbatim}
   [Warning ] CurrencyUnits.scala:36:3: Could not extract tree in class:
@@ -143,7 +143,7 @@ Just extract the inner class out of the object.
 This is not exactly the same code but since the class is still private it can not be extended outside of the file.
 
 
-\section{Rewriting Type Member}
+\section{Get Rid of Concrete Type Member}
 Stainless output:
 {\footnotesize\begin{verbatim}
   [Warning ] NumberType.scala:5:3: Could not extract tree in class: type A
@@ -165,7 +165,7 @@ This might be a missing feature in Stainless that should not be too hard to fix.
 There is an open pull request \mypound470 on GitHub for this issue.
 
 
-\section{Rewriting Usage of BigInt \&-Function}
+\section{Replace BigInt \&-Function With Bound Check}
 Stainless output:
 {\footnotesize\begin{verbatim}
   [ Error  ] NumberType.scala:19:14: Unknown call to & on result (BigInt) with
@@ -193,7 +193,7 @@ So here the \& mask can be replaced with a bound check whether the result is in 
 Again the code gets a bit more static but for this use case it is OK.
 
 
-\section{Rewriting require}
+\section{Remove Second Parameter of require}
 Stainless output:
 {\footnotesize\begin{verbatim}
   [Warning ] NumberType.scala:54:3: Could not extract tree in class:
