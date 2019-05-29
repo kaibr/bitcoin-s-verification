@@ -34,10 +34,10 @@ So let's describe the code rewriting in the following sections.
 
 \section{Rewriting Abstract Type Member}
 Stainless output:
-\begin{lstlisting}
+\begin{verbatim}
 [ Error  ] CurrencyUnits.scala:5:3: Stainless doesn't support abstract type members
            type A
-\end{lstlisting}
+\end{verbatim}
 This should be easy to rewrite by using generics instead of an abstract type, right?
 Unfortunately not.
 The problem is, CurrencyUnit uses its implementing class Satoshis.
@@ -64,10 +64,10 @@ So by removing the abstract type and fix it to Int64 as defined by Satoshis, the
 
 \section{Rewriting Generics}
 Stainless output:
-\begin{lstlisting}
+\begin{verbatim}
   [ Error  ] NumberType.scala:3:30: Unknown type parameter type T
              sealed abstract class Number[T <: Number[T]]
-\end{lstlisting}
+\end{verbatim}
 
 This is a missing feature in Stainless.
 To track this, there is the issue \mypound519 on GitHub.
@@ -79,11 +79,11 @@ For the sake of convenience this is also made static by parameterize T with Int6
 
 \section{Rewriting Objects}
 Stainless output:
-\begin{lstlisting}
+\begin{verbatim}
 [ Error  ] CurrencyUnits.scala:54:1: Objects cannot extend classes or implement
            traits, use a case object instead
            object Satoshis extends BaseNumbers[Satoshis] {
-\end{lstlisting}
+\end{verbatim}
 
 Changing the objects that extends classes to case objects solves this problem.
 This is, due to the internal design of Scala and Java.
@@ -94,10 +94,10 @@ The issue \mypound520 on Stainless GitHub gives some thoughts about this.
 
 \section{Rewriting BigInt Constructor (only literal argument, no long argument, etc.)}
 Stainless output:
-\begin{lstlisting}
+\begin{verbatim}
 [ Error  ] CurrencyUnits.scala:47:33: Only literal arguments are allowed for BigInt.
            def toBigInt: BigInt = BigInt(toLong)
-\end{lstlisting}
+\end{verbatim}
 
 As described before, Stainless supports only a subset of Scala.
 They provide their own dedicated BigInt library.
@@ -125,10 +125,10 @@ So it does not be converted from BigInt to Long and back to BigInt.
 
 \section{Rewriting Private Inner Classes}
 Stainless output (simplified):
-\begin{lstlisting}
+\begin{verbatim}
   [Warning ] CurrencyUnits.scala:36:3: Could not extract tree in class:
              case private class SatoshisImpl extends Satoshis
-\end{lstlisting}
+\end{verbatim}
 
 Stainless is not able to extract private classes inside other objects.
 Bitcoin-S-core uses it a lot, because they separate the class from its implementation.
@@ -145,11 +145,11 @@ This is not exactly the same code but since the class is still private it can no
 
 \section{Rewriting Type Member}
 Stainless output:
-\begin{lstlisting}
+\begin{verbatim}
   [Warning ] NumberType.scala:5:3: Could not extract tree in class: type A
              = BigInt (class scala.reflect.internal.Trees$TypeDef)
              type A = BigInt
-\end{lstlisting}
+\end{verbatim}
 
 Since the type A is not overridden in any of its subclasses, this can simply be hard coded.
 \begin{lstlisting}[language=scala]
@@ -167,11 +167,11 @@ There is an open pull request \mypound470 on GitHub for this issue.
 
 \section{Rewriting Usage of BigInt \&-Function}
 Stainless output:
-\begin{lstlisting}
+\begin{verbatim}
   [ Error  ] NumberType.scala:19:14: Unknown call to & on result (BigInt) with
              arguments List(Number.this.andMask) of type List(BigInt)
              require((result & andMask) == result,
-\end{lstlisting}
+\end{verbatim}
 
 Due to the restrictions on BigInt, the \& function on it is not supported too.
 \begin{lstlisting}[language=scala]
@@ -195,14 +195,14 @@ Again the code gets a bit more static but for this use case it is OK.
 
 \section{Rewriting require}
 Stainless output:
-\begin{lstlisting}
+\begin{verbatim}
   [Warning ] NumberType.scala:54:3: Could not extract tree in class:
              scala.this.Predef.require(Int64Impl.this.underlying.<=(
              math.this.BigInt.long2bigInt(9223372036854775807L)),
              "Number was too big for a int64, got: ".+(Int64Impl.this.underlying))
              (class scala.reflect.internal.Trees$Apply)
              require(underlying <= 9223372036854775807L,
-\end{lstlisting}
+\end{verbatim}
 
 This is, because Stainless does not support require with a second String parameter.
 Removing this String fixes the error.
@@ -213,12 +213,12 @@ But there is another problem.
 Bitcoin-S-Core uses require like a fail-fast method whereas Stainless needs it to verify the code.
 
 Stainless output:
-\begin{lstlisting}
+\begin{verbatim}
   [Warning ] Found counter-example:
   [Warning ]   thiss: { x: Object | @unchecked isNumber(x) } -> Int64Impl(0)
   [Warning ]   num: { x: Object | @unchecked isInt64(x) }    -> 
                  Int64Impl(9223372036854775808)
-\end{lstlisting}
+\end{verbatim}
 
 Corresponding code:
 \begin{lstlisting}[language=scala]
@@ -253,12 +253,12 @@ Thus, the addition need to have the restrictions of checkResult too.
 \end{lstlisting}
 
 Stainless finds another counter example:
-\begin{lstlisting}
+\begin{verbatim}
   [Warning ] Found counter-example:
   [Warning ]   num: { x: Object | @unchecked isInt64(x) }    -> Int64Impl(1)
   [Warning ]   thiss: { x: Object | @unchecked isNumber(x) } ->
                  Int64Impl(9223372036854775807)
-\end{lstlisting}
+\end{verbatim}
 
 Sure, it can just add one to the maximum Int64 and the require does not hold anymore.
 The goal is to check the addition of zero so let's add a restriction for num to be zero.
