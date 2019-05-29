@@ -2,8 +2,10 @@
 \label{chap:connecting}
 // TODO
 
+
 \section{Creation of a Transaction}
-Some parts of the code in this section are from Bitcoin-S-Core transaction builder example.\cite{BitcoinSCore:txbuilderexample}
+
+Some of the code in this section are copied or modified parts of Bitcoin-S-Core transaction builder example.\cite{BitcoinSCore:txbuilderexample}
 Bitcoin-S-Core has a bitcoin transaction builder class with the following signature:
 \begin{lstlisting}[language=scala]
   BitcoinTxBuilder(
@@ -14,14 +16,12 @@ Bitcoin-S-Core has a bitcoin transaction builder class with the following signat
     network: BitcoinNetwork               // bitcoin network information
   ): Future[BitcoinTxBuilder]             // sign TxBuilder to get tx
 \end{lstlisting}
+
 Here is how those parameters are generated.
 
-First, a previous transaction with outputs is needed to spend some money from.
-This is created here, to show the process.
-It could also be parsed from a transaction in the bitcoin network.
-A single output is sufficient for this example.
-So, first create a new key pair to sign the next transaction and have a scriptPubKey where the money is.
-Then define the amount to spend (here 10000 Satoshis) collect this information in a transaction output and add it to the previous transaction.
+First, we need a some bitcoins/satoshis.
+Thus, we create a transaction with one single output.
+This transaction can also be parsed from the real bitcoin network but to show the progression we create one.
 \begin{lstlisting}[language=scala]
   val privKey = ECPrivateKey.freshPrivateKey
   val creditingSPK = P2PKHScriptPubKey(pubKey = privKey.publicKey)
@@ -37,10 +37,17 @@ Then define the amount to spend (here 10000 Satoshis) collect this information i
     lockTime = UInt32.zero
   )
 \end{lstlisting}
-Next, the new transaction should point to an output of the previous transaction.
-Thus, an outpoint is created with the id of the previous transaction and the index pointing to the specific output of it.
-This is collected in an utxo spending info which is then put in the list of all utxos (only one here).
-\begin{lstlisting}  
+
+On line one and two we are creating a new keypair to sign the next transaction and have a scriptPubKey where the bitcoins are.
+Line four specifies the amount of satoshis we are having in the transaction.
+Then we create the actual transaction from line 6 to 13.
+
+Now that we have some bitcoins, we create the new transaction to spend them.
+
+First, we need some out points.
+This are pointers to previous transactions' outputs.
+We use the index zero, because the previous transaction has only one output that becomes the first index zero.
+\begin{lstlisting}[language=scala]
   val outPoint = TransactionOutPoint(prevTx.txId, UInt32.zero)
 
   val utxoSpendingInfo = BitcoinUTXOSpendingInfo(
@@ -54,9 +61,10 @@ This is collected in an utxo spending info which is then put in the list of all 
 
   val utxos = List(utxoSpendingInfo)
 \end{lstlisting}
-Then, the destination, where the money goes, is defined.
-This includes a destination script pub key, as well as the amount to spend to it.
-\begin{lstlisting}
+
+Second, we need destinations to spend the bitcoins to.
+For the sake of convenience we create only one.
+\begin{lstlisting}[language=scala]
   val destinationAmount = Satoshis(Int64(5000))
 
   val destinationSPK = P2PKHScriptPubKey(pubKey = ECPrivateKey.freshPrivateKey.publicKey)
@@ -65,12 +73,19 @@ This includes a destination script pub key, as well as the amount to spend to it
     TransactionOutput(currencyUnit = destinationAmount, scriptPubKey = destinationSPK)
   )
 \end{lstlisting}
-Finally, define a fee rate, the network params and create a transaction builder.
-\begin{lstlisting}
+
+We spend 5000 satoshis to the newly created script public key.
+
+Finally, we define the fee rate in satoshis per one byte transaction size as well as some bitcoin network parameters.
+\begin{lstlisting}[language=scala]
   val feeRate = SatoshisPerByte(Satoshis.one)
 
   val networkParams = RegTest // soem static values for testing
+\end{lstlisting}
 
+
+Now lets build the transaction with those data.
+\begin{lstlisting}[language=scala]
   val txBuilder: Future[BitcoinTxBuilder] = BitcoinTxBuilder(
     destinations = destinations,
     utxos = utxos,
@@ -78,115 +93,66 @@ Finally, define a fee rate, the network params and create a transaction builder.
     changeSPK = creditingSPK,
     network = networkParams
   )
-\end{lstlisting}
-After calling sign on the transaction builder, a valid transaction is returned.
-\begin{lstlisting}
+
   val signedTxF: Future[Transaction] = txBuilder
     .flatMap(_.sign)
     .map {
       (tx: Transaction) => println(tx.hex) // transaction in hex for the bitcoin network
     }
 \end{lstlisting}
-There is no need for a transaction input, since a transaction out point is kind of the pointer to a transaction input.
+
+Line one to seven creates a transaction builder which is then signed on line nine to thirteen.
+On line twelve we can now use our transaction object.
+For example, after calling the \emph{hex} function on it, we can send the returned string to the real bitcoin network.
+
 
 \section{Validation of a Transaction}
+
 Bitcoin-S-Core offers a function called \emph{checkTransaction}.
 This is its type signature.
-\begin{lstlisting}
+\begin{lstlisting}[language=scala]
   checkTransaction(transaction: Transaction): Boolean
 \end{lstlisting}
-It takes a transaction as input and returns a Boolean whether the transaction is valid or not.
-So for example when passing the built tx from above to this function the returned value would be true.
+We can pass a transaction and it returns a Boolean whether the transaction is valid or not.
+So for example when we pass the built transaction from above to it the returned value would be true, because it's a valid transaction.
+
 There are several checks in checkTransaction.
 For example, it checks if there is either no input or no output.
 In this case it returns false.
 
-The relevant parts for the property to be verified are the following two lines.
+The relevant part for the property we are trying to verify is the following.
 \begin{lstlisting}[language=scala]
   val prevOutputTxIds = transaction.inputs.map(_.previousOutput.txId)
   val noDuplicateInputs = prevOutputTxIds.distinct.size == prevOutputTxIds.size
 \end{lstlisting}
-It gathers all inputs output transaction ids.
-On this previous outputs ids it calls distinct and checks if the size stays the same.
-Distinct removes duplicates, so if there was two times the same input transaction id the size of those ids would be greater before calling distinct.
 
-There is a bug in those two lines, as described in the next chapter.
+It gathers all transaction ids referenced by the out points.
+When calling \emph{distinct} on the returned list, it returns a list where duplicated are removed.
+Is the size of the new list is the same as the size of the old, we know that there was no duplicate transaction id.
 
-
-\section{Integration}
-During this work, Stainless bumped the sbt plugin from version 0.13.17 to 1.2.8 and Scala from 2.11.12 to 2.12.8.
-So this section might be out of date now.
-
-Bitcoin-S-Core uses sbt 1.2.8 and Scala 2.12.8, while Stainless sbt plugin is on sbt 0.13.17 and Scala 2.11.12.
-
-Sbt introduced new features in the 1.x release used by Bitcoin-S.
-
-For example, they introduced the new slash syntax.
-\begin{lstlisting}[language=scala]
-  lazy val root = (project in file("."))
-    .settings(
-      name := "hello",
-      version in ThisBuild := "1.0.0"
-    )
-\end{lstlisting}
-
-The version line written without slash becomes now one with slash.
-The right and left parameter of in-operator reverse and instead of the in-operator is now a slash.
-\begin{lstlisting}[language=scala]
-  ThisBuild / version := "1.0.0",
-\end{lstlisting}
-
-This is just one example of many others.
-
-The bigger problem is, due to the different Scala and sbt versions, the error message, after trying to go in a sbt shell.
-\begin{lstlisting}
-  [warn] There may be incompatibilities among your library dependencies; run 'evicted'
-         to see detailed eviction warnings.
-  [error] java.lang.NoClassDefFoundError: sbt/SourcePosition
-  ...
-  Project loading failed: (r)etry, (q)uit, (l)ast, or (i)gnore?
-\end{lstlisting}
-
-Downgrading Bitcoin-S sbt version to 0.13.17 fixes the error but then it can not load some libraries only compiled for newer versions.
-So this would take too much time to fix and changes the Bitcoin-S code unwantingly.
-
-The next approach is to use stainless cli instead of sbt.
-Running stainless on all source files does not work, because the dependencies are missing.
-The parameter \emph{-classpath} can resolve it but the value of this parameter must be the paths to all the dependencies separated by a ':'.
-Finally, \emph{core} depends on \emph{secp256k1jni}, another package of Bitcoin-S written in Java.
-So this needs to be in the source files to.
-
-The final command looks like this in \emph{core} folder of Bitcoin-S:
-\begin{lstlisting}[language=bash]
-  $ stainless
-    -classpath ".:$(find ~/.ivy2/ -type f -name *.jar | tr '\n' ':')"
-    $(find . -type f -name *.scala | tr '\n' ' ')
-    $(find ../secp256k1jni -type f -name *.java | tr '\n' ' ')
-\end{lstlisting}
-
-The output was some Stainless error.
-\begin{lstlisting}
-  [Internal] Error: object scala.reflect.macros.internal.macroImpl in compiler mirror
-             not found.. Trace:
-  [Internal] - scala.reflect.internal.MissingRequirementError$.signal
-             (MissingRequirementError.scala:17)
-  ...
-  [Internal] object scala.reflect.macros.internal.macroImpl in compiler mirror not found.
-  [Internal] Please inform the authors of Inox about this message
-\end{lstlisting}
-
-After some discussion, we decided to go another way, because the errors may take too much time and it might lead to a next error.
-Let's extract the code needed to verify a transaction mainly the class Transaction and ScriptInterpreter with many other classes their depending on.
-
-After this extraction Stainless was successfully integrated with both, sbt and JAR.
-This leads us to another finding as described in the next section.
+There is a bug, because checkTransaction checks on the transaction id that we are going to explain a next section.
 
 
-\section{Error Reporting with sbt and JAR}
-// TODO https://github.com/epfl-lara/stainless/issues/484?
+\section{Process of the Verification // TODO change?}
+
+Trying to integrate Stainless in Bitcoin-S caused a lot of troubles, because of version conflicts.
+If you are interested in it you can read \hl{TODO} in the appendix.
+
+It takes too much time to do it and after some discussion, we decided to extract only the parts of the code that are needed for checkTransaction.
+
+The extracted code has more than 1500 lines.
+After running Stainless on it, it throws a really huge bunch of errors about what Stainless can not reason about.
+This would require to change nearly all the extracted code.
+
+We arrive at the decision that we need a smaller part to verify.
+We have chosen to verify the addition with zero of Bitcoin-Ss' CurrencyUnit class as described in the next chapter.
+
+During the examination of the checkTransaction function, we found a bug in Bitcoin-S.
+You can read more about it in the next section.
 
 
 \section{Fixing a Bug in Bitcoin-S}
+
 After so much digging and trying to understand the checkTransaction code, we found a bug even without Stainless.
 
 Here the relevant code of checkTransaction again:
