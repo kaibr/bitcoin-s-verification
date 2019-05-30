@@ -36,8 +36,8 @@
   trait BaseNumbers[T] {
     def zero: T
     def one: T
-    def min: T
-    def max: T
+    def min: T //maybe remove
+    def max: T //maybe remove
   }
 
   object Int64 extends BaseNumbers[Int64] {
@@ -51,8 +51,8 @@
     lazy val zero = Int64(0)
     lazy val one = Int64(1)
 
-    lazy val min = Int64(-9223372036854775808L)
-    lazy val max = Int64(9223372036854775807L)
+    lazy val min = Int64(-9223372036854775808L) //maybe remove
+    lazy val max = Int64(9223372036854775807L) //maybe remove
 
     def apply(long: Long): Int64 = Int64(BigInt(long))
 
@@ -91,8 +91,8 @@
   }
 
   object Satoshis extends BaseNumbers[Satoshis] {
-    val min = Satoshis(Int64.min)
-    val max = Satoshis(Int64.max)
+    val min = Satoshis(Int64.min) //maybe remove
+    val max = Satoshis(Int64.max) //maybe remove
     val zero = Satoshis(Int64.zero)
     val one = Satoshis(Int64.one)
 

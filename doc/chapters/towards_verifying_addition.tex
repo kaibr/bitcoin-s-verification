@@ -1,7 +1,31 @@
 \chapter{Towards Verifying Addition with Zero}
+After realizing, that it would consume to much time to rewrite the whole Bitcoin-S code
 After so many failures, we have decided to search for the smallest unit in Bitcoin-S-Core that is worthwhile to verify.
 We found the addition of two Satoshis would be a good candidate.
 To make it even easier, we decided to verify only the addition, where we add zero to an amount of Satoshis.
+
+The initial code is:
+\lstinputlisting[language=scala]{../code/currsniporig/src/main/scala/code/initial/Code.scala}
+
+When we run Stainless on it it throws the following errors:
+{\footnotesize\begin{verbatim}
+  [ Error  ] Code.scala:43:1: Objects cannot extend classes or implement traits,
+             use a case object instead
+           object Int64 extends BaseNumbers[Int64] {
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^...
+  [ Error  ] Code.scala:65:3: Stainless doesn't support abstract type members
+              type A
+              ^^^^^^
+  [ Error  ] Code.scala:86:33: Only literal arguments are allowed for BigInt.
+              def toBigInt: BigInt = BigInt(toLong)
+                                            ^^^^^^
+  [ Error  ] Code.scala:93:1: Objects cannot extend classes or implement traits,
+             use a case object instead
+            object Satoshis extends BaseNumbers[Satoshis] {
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^...
+  [  Info  ] Shutting down executor service.
+\end{verbatim}}
+
 The signature looks like the following.
 \begin{lstlisting}[language=scala]
   +(c: CurrencyUnit): CurrencyUnit
@@ -45,8 +69,12 @@ The problem is, CurrencyUnit uses its implementing class Satoshis.
 Simplified code.
 \begin{lstlisting}[language=scala]
   sealed abstract class CurrencyUnit {
+    type A
+
     def +(c: CurrencyUnit): CurrencyUnit =
       Satoshis(satoshis.underlying + c.satoshis.underlying)
+
+    protected def underlying: A
   }
 
   sealed abstract class Satoshis extends CurrencyUnit
