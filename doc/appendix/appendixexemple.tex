@@ -8,6 +8,15 @@
 During this work, Stainless bumped the sbt plugin from version 0.13.17 to 1.2.8 and Scala from 2.11.12 to 2.12.8.
 So this section might be out of date now.
 
+There are two ways to integrate Stainless in a Scala project, the Scala build tool (sbt) plugin or a command line tool.
+Both, when run, analyses the code passed and report warnings to the console about the given code.
+Stainless requires and Scala recommends Java SE Development Kit 8.
+Newer Java versions won't work.
+
+To use the latest version of the sbt tool you have to build it locally.
+You can run \code{sbt universal:stage} in the cloned Stainless git repository.
+This generates \emph{frontends/scalac/target/universal/stage/bin/stainless-scalac}.
+
 Bitcoin-S-Core uses sbt 1.2.8 and Scala 2.12.8, while Stainless sbt plugin is on sbt 0.13.17 and Scala 2.11.12.
 
 Sbt introduced new features in the 1.x release used by Bitcoin-S.
