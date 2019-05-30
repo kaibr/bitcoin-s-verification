@@ -10,7 +10,7 @@
 
     protected def underlying: A
 
-    def toLong: Long = toBigInt.bigInteger.longValueExact()
+    def toLong: Long = toBigInt.longValue()
     def toBigInt: BigInt = underlying
 
     def andMask: BigInt
