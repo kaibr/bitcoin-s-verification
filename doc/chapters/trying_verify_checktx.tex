@@ -87,7 +87,6 @@ Finally, we define the fee rate in satoshis per one byte transaction size as wel
   val networkParams = RegTest // soem static values for testing
 \end{lstlisting}
 
-
 Now lets build the transaction with those data.
 \begin{lstlisting}[language=scala]
   val txBuilder: Future[BitcoinTxBuilder] = BitcoinTxBuilder(
@@ -137,7 +136,7 @@ Is the size of the new list is the same as the size of the old, we know that the
 There is a bug, because checkTransaction checks on the transaction id that we are going to explain a next section.
 
 
-\section{Process of the Verification // TODO change?}
+\section{Process of Verification // TODO change}
 
 Trying to integrate Stainless in Bitcoin-S caused a lot of troubles, because of version conflicts.
 If you are interested in it you can read \hl{TODO} in the appendix.
