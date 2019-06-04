@@ -95,6 +95,7 @@ This limits the verification a bit, but as we only want to verify the addition i
 
 
 \section{Replace BigInt Constructor Argument With String Literal}
+
 Stainless output:
 {\footnotesize\begin{verbatim}
   [ Error  ] Code.scala:77:33: Only literal arguments are allowed for BigInt.
@@ -105,7 +106,7 @@ Stainless output:
 As described before, Stainless supports only a subset of Scala.
 The BigInt from the Stainless library is a bit restricted.
 It does not support dynamic BigInt construction.
-Only from string literals.
+Only from literal arguments.
 
 Again, a simplified code version.
 \begin{lstlisting}[language=scala]
@@ -133,6 +134,7 @@ Stainless output:
 \end{verbatim}}
 
 This is a missing feature in Stainless.
+It does not support upper type bound on the class itself.
 To track this, there is the issue \mypound519 on GitHub.
 \begin{lstlisting}[language=scala]
   sealed abstract class Number[T <: Number[T]] extends BasicArithmetic[T]  
