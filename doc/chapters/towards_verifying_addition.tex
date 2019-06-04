@@ -55,7 +55,7 @@ Stainless recommendation is to use objects for modules and case objects as algeb
 This is, due to the internal design of Scala and Java.
 It's possible to reason about case object but not about object.
 This needs a fundamental knowledge of Scala and some functional paradigms that should not be part of this thesis.
-The issue \mypound520 on Stainless GitHub\footnote{https://github.com/epfl-lara/stainless/issues/520} gives some thoughts if you want to know more.
+The issue \mypound520 on Stainless GitHub\footnote{\url{https://github.com/epfl-lara/stainless/issues/520}} gives some thoughts if you want to know more.
 
 
 \section{Get Rid of Abstract Type Member}
@@ -135,7 +135,7 @@ Stainless output:
 
 This is a missing feature in Stainless.
 It does not support upper type bound on the class itself.
-To track this, there is the issue \mypound519 on GitHub\footnote{https://github.com/epfl-lara/stainless/issues/519}.
+To track this, there is the issue \mypound519 on GitHub\footnote{\url{https://github.com/epfl-lara/stainless/issues/519}}.
 \begin{lstlisting}[language=scala]
   sealed abstract class Number[T <: Number[T]] extends BasicArithmetic[T]  
 \end{lstlisting}
@@ -159,7 +159,7 @@ This is easy.
 We just replace all occurence of A with BigInt, since A is not overrided in an implementing class.
 This is not exact the same code, because an implementing class could not override A anymore but thats fine for our verification.
 
-This was a missing feature of Stainless that was fixed on Mai 28, 2019 with pull request \mypound470 on GitHub\footnote{https://github.com/epfl-lara/stainless/pull/470}.
+This was a missing feature of Stainless that was fixed on Mai 28, 2019 with pull request \mypound470 on GitHub\footnote{\url{https://github.com/epfl-lara/stainless/pull/470}}.
 
 
 \section{Replace BigInt \&-Function With Bound Check}

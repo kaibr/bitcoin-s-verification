@@ -17,7 +17,7 @@ This is a systematic process based on mathematical modeling.
 With formal verification all possible inputs are explored algorithmically and exhaustively.
 This is in contrast to testing, where only predefined inputs are tested.
 The correctness of a program is analyzed relative to its formal specification.
-Formal specification is a mathematical description of a software behavior that can be used by the verification tool to verify the code.\cite{sanghavi:formal_verification}
+Formal specification is a mathematical description of a software behavior that can be used by the verification tool to verify the code. \cite{sanghavi:formal_verification}
 
 One of such tools is Stainless which we use in our work.
 
@@ -28,7 +28,7 @@ One of such tools is Stainless which we use in our work.
 Stainless is developed by "Lab for Automated Reasoning and Analysis" (LARA) at EPFL's School of Computer and Communication Sciences.
 Using this framework we can verify the correctness of Scala programs.
 Stainless statically verifies that a program satisfies a given specification and that a program will not crash at runtime.
-The framework explores all possible inputs and finds a counter examples for possible failures in a program which violate the given specification.\cite{Stainless:introduction}
+The framework explores all possible inputs and finds a counter examples for possible failures in a program which violate the given specification. \cite{Stainless:introduction}
 
 The main functions used to write a specification are \textit{require} and \textit{ensuring}. 
 With \textit{require} we define a precondition of a function, which we want to verify.
@@ -38,7 +38,7 @@ We pass a constraint for the inputs of a function as an argument to \textit{requ
 With \textit{ensuring} we provide a postcondition which is a condition on an output of the function.
 \textit{ensuring} is called after the function body.
 
-On invoking, Stainless tries to prove that the postcondition always holds, assuming the given precondition does hold.\cite{Stainless:introduction}
+On invoking, Stainless tries to prove that the postcondition always holds, assuming the given precondition does hold. \cite{Stainless:introduction}
 
 The following example demonstrates a simple formal specification for the function calculating factorial.
 This is a modified example from the Stainless documentation, so Stainless reports an error verifying it.
@@ -64,7 +64,7 @@ Reporting the postcondition as \textit{invalid} the framework could find at leas
 If Stainless is unable to prove the postcondition or find a counterexample it reports the outcome \textit{unknown}.
 In this case a timeout or an internal error occurred.
 Furthermore, Stainless checks for calls in the code to the function with invalid arguments violating the precondition.
-For example if we invoke factorial with a negative number it reports \textit{invalid}.\cite{Stainless:introduction}
+For example if we invoke factorial with a negative number it reports \textit{invalid}. \cite{Stainless:introduction}
 
 Let's return back to our incorrect example with factorial.
 Stainless reports the following result for the factorial verification from our example:
@@ -81,11 +81,11 @@ The program would work correct by changing the type from Int to BigInt.
 
 Stainless supports only a subset of Scala.
 They call is Pure Scala.
-You can find the specification of Pure Scala on the Stainless website.\cite{Stainless:pure_scala}
+You can find the specification of Pure Scala on the Stainless website\footnote{\url{https://epfl-lara.github.io/stainless/purescala.html}}.
 
 In addition, Stainless has its own library with annotations, reimplementaion of some core data types, collections and input-output functions and more.
-Some of them are described on the website.\cite{Stainless:library}
-There are more details about library in the source code of Stainless on GitHub in the folder \textit{frontends/library/stainless}.\cite{Stainless:github} 
+Some of them are described on the website\footnote{\url{https://epfl-lara.github.io/stainless/library.html}}.
+There are more details about library in the source code of Stainless on GitHub in the folder \textit{frontends/library/stainless}\footnote{\url{https://github.com/epfl-lara/stainless}}.
 
 Stainless verifies Scala programs using SMT (satisfiability modulo theories) solvers. 
 The framework transforms a program code to the Pure Scala fragment supported by Inox solver.
@@ -103,7 +103,7 @@ Protocol data structures are defined in the package \textbf{bitcoin-s-core}.
 This package is the main target to be verified because it specifies the base of Bitcoin protocol, and it is crucial for correct protocol functionality.
 There is also the package \textbf{bitcoind-rpc} which is an RPC client implementation to communicate with \textit{bitcoind}, daemon of Bitcoin Core running on a machine.
 Developers of Bitcoin-S are working on the implementation of a lightweight bitcoin client in the package \textbf{bitcoin-s-spv-node}.
-The whole list of packages can be found on GitHub \cite{BitcoinSProject}.
+The whole list of packages can be found on GitHub\footnote{\url{https://github.com/bitcoin-s}}.
 
 Bitcoin-S is a large project implementing many functionalities.
 In this work one of them is going to be examined and worked on, namely the property of the Bitcoin that a non-coinbase transaction can not generate new coins.
