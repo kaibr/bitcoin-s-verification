@@ -158,7 +158,7 @@ What happens, if a TransactionOutPoint (previousOutput) references the same Tran
 According to the Bitcoin protocol this is possible.
 A transaction can have multiple outputs that should be referenceable by the next transaction.
 What should not be possible is a transaction referencing the same output twice.
-This was a bug in Bitcoin Core known as CVE-2018–17144 which was patched on September 18, 2018.
+This was a bug in Bitcoin Core known as CVE-2018–17144 which was patched on September 18, 2018. \cite{cve201817144}
 
 Here, Bitcoin-S did a bit too much and marked all transaction as invalid, if they referenced a transaction twice in the next transaction.
 The fix is, to check on TransactionOutPoint instead of TransactionOutPoint.txId, because TransactionOutPoint contains the txId as well as the output index it references.
@@ -166,6 +166,7 @@ The fix is, to check on TransactionOutPoint instead of TransactionOutPoint.txId,
   val prevOutputs = transaction.inputs.map(_.previousOutput)
   val noDuplicateInputs = prevOutputs.distinct.size == prevOutputs.size
 \end{lstlisting}
+
 Since TransactionOutPoint is a case class and Scala has a built in == for case classes there is no need to implement TransactionOutPoint.==.
 \begin{figure}[H]
 	\centering
@@ -174,7 +175,7 @@ Since TransactionOutPoint is a case class and Scala has a built in == for case c
 	\label{fig:output1}
 \end{figure}
 
-This was fixed in pull request \mypound435 on GitHub at April 23, 2019 by us along a unit test to prevent this bug from appearing again in the future.
+This was fixed in pull request \mypound435 on GitHub\footnote{https://github.com/bitcoin-s/bitcoin-s/pull/435} at April 23, 2019 by us along a unit test to prevent this bug from appearing again in the future.
 
 
 \section{Process of Verification // TODO change}
