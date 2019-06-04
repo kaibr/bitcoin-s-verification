@@ -1,7 +1,8 @@
 \chapter{Introduction}
 \label{chap:introduction}
+
 In this work we experiment in formal verification of Scala code. 
-We use the verification framework Stainless to verify the code of Bitcoin-S-Core, the Scala implementation of the Bitcoin protocol.
+We use the verification framework Stainless to verify parts of the code of Bitcoin-S-Core, a Scala implementation of the Bitcoin protocol.
 In the following we describe the main aspects of formal verification, Stainless and the project Bitcoin-S.
 
 
@@ -9,21 +10,21 @@ In the following we describe the main aspects of formal verification, Stainless 
 \label{sec:formal_verification}
 
 The longer and more complex a source code is, the more difficult it is to verify its correctness.
-There are different approaches for verification of the program correctness. 
+There are different approaches to show the correctness of a program.
 
 The commonly used one is testing.
 A developer creates a set of some practical scenarios and assertions to test a software design and implementation. 
 So, the actual results are checked to match the expected results.
 Tests help to identify bugs and missing requirements.
 However, not all possible inputs can be tested. 
-Therefore, a long-term test coverage model is usually created to test a software design enough.
-Nevertheless, this is still not easy to test a software being able to observe the side effects of a code.
+Therefore, a long-term test coverage model is usually created to test a software design.
+Nevertheless, it is still not easy to test a software and its side effects.
 \textbf{Practically, a developer runs tests, debugs appeared failures, adjusts a code and extends a test bench to verify the previously uncovered aspects. (TODO// do we need this sentence?)}\cite{sanghavi:formal_verification}
 
-Another powerful method to check whether a program works correct is formal verification. 
-This is a systematic process based on mathematical modeling. 
-It is unnecessary to create a simulation tests with some possible inputs. 
-With formal verification all possible input values are explored algorithmically and exhaustively.
+Another powerful method to check whether a program works correct is formal verification.
+This is a systematic process based on mathematical modeling.
+It is unnecessary to create a simulation tests with some possible inputs.
+With formal verification all possible inputs are explored algorithmically and exhaustively.
 Correctness of a program is analyzed relative to its formal specification.
 Formal specification is a mathematical description of a software behavior that can be provided to the formal verification tool for proving it.\cite{sanghavi:formal_verification}
 
@@ -32,7 +33,6 @@ One of such tools is Stainless which we use in our work.
 
 \section{Overview of Stainless}
 \label{sec:stainless}
-
 
 Stainless is developed by "Lab for Automated Reasoning and Analysis" (LARA) at EPFL's School of Computer and Communication Sciences.
 Using this framework we can verify the correctness of Scala programs.
