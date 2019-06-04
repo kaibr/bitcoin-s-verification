@@ -133,25 +133,7 @@ It gathers all transaction ids referenced by the out points.
 When calling \emph{distinct} on the returned list, it returns a list where duplicated are removed.
 Is the size of the new list is the same as the size of the old, we know that there was no duplicate transaction id.
 
-There is a bug, because checkTransaction checks on the transaction id that we are going to explain a next section.
-
-
-\section{Process of Verification // TODO change}
-
-Trying to integrate Stainless in Bitcoin-S caused a lot of troubles, because of version conflicts.
-If you are interested in it you can read \hl{TODO} in the appendix.
-
-It takes too much time to do it and after some discussion, we decided to extract only the parts of the code that are needed for checkTransaction.
-
-The extracted code has more than 1500 lines.
-After running Stainless on it, it throws a really huge bunch of errors about what Stainless can not reason about.
-And after fixing some of those errors there appear new ones as we can see in the next chapter.
-This would require to change nearly everything of the extracted code.
-
-We arrived at the decision that we need a smaller part to verify.
-We have chosen to verify the addition with zero of Bitcoin-Ss CurrencyUnit class as described in the next chapter.
-
-But before that you can read about the bug we found and fixed in the next section.
+There is a bug, because checkTransaction checks on the transaction id that we are going to explain the next section.
 
 
 \section{Fixing a Bug in Bitcoin-S}
@@ -193,3 +175,19 @@ Since TransactionOutPoint is a case class and Scala has a built in == for case c
 \end{figure}
 
 This was fixed in pull request \mypound435 on GitHub at April 23, 2019 by us along a unit test to prevent this bug from appearing again in the future.
+
+
+\section{Process of Verification // TODO change}
+
+Trying to integrate Stainless in Bitcoin-S caused a lot of troubles, because of version conflicts.
+If you are interested in it you can read \hl{TODO} in the appendix.
+
+It takes too much time to do it and after some discussion, we decided to extract only the parts of the code that are needed for checkTransaction.
+
+The extracted code has more than 1500 lines.
+After running Stainless on it, it throws a really huge bunch of errors about what Stainless can not reason about.
+And after fixing some of those errors there appear new ones as we can see in the next chapter.
+This would require to change nearly everything of the extracted code.
+
+We arrived at the decision that we need a smaller part to verify.
+We have chosen to verify the addition with zero of Bitcoin-Ss CurrencyUnit class as described in the next chapter.
