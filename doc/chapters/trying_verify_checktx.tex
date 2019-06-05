@@ -1,22 +1,22 @@
 \chapter{Trying to Verify the no Inflation Property}
 \label{chap:verify_check}
 
-This chapter describes some parts of Bitcoin-S needed to verify our property.
-We are going to create a transaction and show you the relevant parts of checkTransaction, where transactions are checked against some properties.
+This chapter describes the part of Bitcoin-S needed to verify our property.
+We are going to create a transaction and show you the relevant parts of the method checkTransaction, where transactions are checked against some properties.
 Then we see some troubles occurred during this work.
 In the end you will see how we fixed a bug in Bitcoin-S.
 
 
 \section{Creation of a Transaction}
 
-Some of the code in this section are copied or modified parts of Bitcoin-S-Core transaction builder example.\cite{BitcoinSCore:txbuilderexample}
-Bitcoin-S-Core has a bitcoin transaction builder class with the following signature:
+Some of the code in this section is copied or adapted parts of Bitcoin-S-Core transaction builder example.\cite{BitcoinSCore:txbuilderexample}
+Bitcoin-S-Core has a bitcoin transaction builder class with the following constructor:
 \begin{lstlisting}[language=scala]
   BitcoinTxBuilder(
     destinations: Seq[TransactionOutput], // where we send money
     utxos: BitcoinTxBuilder.UTXOMap,      // unspent transaction outputs
     feeRate: FeeUnit,                     // fee rate per byte
-    changeSPK: ScriptPubKey,              // public key
+    changeSPK: ScriptPubKey,              // where to send the change
     network: BitcoinNetwork               // bitcoin network information
   ): Future[BitcoinTxBuilder]             // sign TxBuilder to get tx
 \end{lstlisting}
@@ -25,7 +25,10 @@ Here is how those parameters are generated.
 
 First, we need a some bitcoins/satoshis.
 Thus, we create a transaction with one single output.
-This transaction can also be parsed from the real bitcoin network but to show the progression we create one.
+This transaction can be parsed from the bitcoin network but we create a transaction manually in order to see this process.
+
+// TODO explain more. We create a fake transaction blabla
+
 \begin{lstlisting}[language=scala]
   val privKey = ECPrivateKey.freshPrivateKey
   val creditingSPK = P2PKHScriptPubKey(pubKey = privKey.publicKey)
@@ -43,7 +46,7 @@ This transaction can also be parsed from the real bitcoin network but to show th
 \end{lstlisting}
 
 On line one and two we are creating a new keypair to sign the next transaction and have a scriptPubKey where the bitcoins are.
-Line four specifies the amount of satoshis we are having in the transaction.
+Line four specifies the amount of satoshis we have in the transaction.
 Then we create the actual transaction from line 6 to 13.
 
 Now that we have some bitcoins, we create the new transaction to spend them.
