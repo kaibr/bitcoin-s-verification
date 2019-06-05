@@ -35,7 +35,7 @@ When we run Stainless on it, it throws the following errors:
 So let's see how we can fix those errors.
 
 
-\section{Turn object Into case object}
+\section{Turning Object into Case Object}
 
 Stainless output:
 {\footnotesize\begin{verbatim}
@@ -58,7 +58,7 @@ This needs a fundamental knowledge of Scala and some functional paradigms that s
 The issue \mypound520 on Stainless GitHub\footnote{\url{https://github.com/epfl-lara/stainless/issues/520}} gives some thoughts if you want to know more.
 
 
-\section{Get Rid of Abstract Type Member}
+\section{Getting Rid of Abstract Type Member}
 
 Stainless output:
 {\footnotesize\begin{verbatim}
@@ -94,7 +94,7 @@ Since there is no easy way to fix it and the code should stay as much as possibl
 This limits the verification a bit, but as we only want to verify the addition in satoshis, thats OK.
 
 
-\section{Replace BigInt Constructor Argument With String Literal}
+\section{Replacing the BigInt Constructor Argument With A String Literal}
 
 Stainless output:
 {\footnotesize\begin{verbatim}
@@ -124,7 +124,7 @@ Luckily, we can use toBigInt on underlying directly instead of going over toLong
 After fixing all Stainless errors, a new error appears.
 
 
-\section{Get Rid of Special Generics}
+\section{Getting Rid of Special Generics}
 
 Stainless output:
 {\footnotesize\begin{verbatim}
@@ -145,7 +145,7 @@ For the sake of convenience we make this a concrete type by replacing T with Int
 Now, there are two new errors.
 
 
-\section{Get Rid of Concret Type}
+\section{Getting Rid of Concrete Type}
 
 Stainless output:
 {\footnotesize\begin{verbatim}
@@ -160,9 +160,10 @@ We just replace all occurence of A with BigInt, since A is not overrided in an i
 This is not exact the same code, because an implementing class could not override A anymore but thats fine for our verification.
 
 This was a missing feature of Stainless that was fixed on Mai 28, 2019 with pull request \mypound470 on GitHub\footnote{\url{https://github.com/epfl-lara/stainless/pull/470}}.
+Now it should work without this change.
 
 
-\section{Replace BigInt \&-Function With Bound Check}
+\section{Replacing the BigInt \&-Function With Bound Check}
 \label{sec:bound_check}
 
 Stainless output:
@@ -197,7 +198,7 @@ Again the code gets a bit more static and it's not the exact same code anymore.
 Running Stainless produces again new errors.
 
 
-\section{Extract Private Inner Classes}
+\section{Extracting Private Inner Classes}
 
 Stainless output:
 {\footnotesize\begin{verbatim}
@@ -221,7 +222,7 @@ This is not exactly the same code but since the class is still private it can no
 Now we get som weird warnings about require.
 
 
-\section{Remove Second Parameter of require}
+\section{Removeing Second Parameter of require}
 
 Stainless output:
 {\footnotesize\begin{verbatim}
@@ -246,7 +247,7 @@ We can saftly remove it.
 A new error apperas.
 
 
-\section{Rewrite BigInt Comparison with Long}
+\section{Rewriting BigInt Comparison with Long}
 
 Stainless output:
 {\footnotesize\begin{verbatim}
@@ -283,7 +284,7 @@ This show, that there is an invalid specification in checkResult and Stainless p
 Let's ignore this for a moment and write the verification for our addition with zero.
 
 
-\section{Write Specification for Verification}
+\section{Writing Specification for Verification}
 
 As specified, our verification must only support addition with zero.
 So we restrict the parameter to be zero in the precondition.
@@ -310,7 +311,7 @@ That's all we need to verify our addition.
 Now we will look into the previous error.
 
 
-\section{Propagate require}
+\section{Propagating require}
 
 There is another problem with Bitcoin-S.
 Bitcoin-S-Core uses require as a fail-fast method whereas Stainless needs it to verify the code.
