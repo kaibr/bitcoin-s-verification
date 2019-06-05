@@ -1,49 +1,17 @@
 \chapter*{Abstract}
 \label{chap:abstract}
 
-In this thesis we experiment in formal verification of Bitcoin-S.
+In this thesis we try to verify some properties of Bitcoin-S.
 
-First, we show you some theory about formal verification, Stainless -- a verification tool and Bitcoin-S.
+First, we look at some theory about formal verification, Stainless -- a verification tool and Bitcoin-S.
 
 Then, we try to verify that a non-coinbase transaction should not generate new coins.
-We explain how to create a transaction and how to check it in Bitcoin-S.
-After some time we realize that it is not possible with the current tools and the time we have.
-But because we familiarized us with the Bitcoin-S code we find a bug and send a bug fix to Bitcoin-S.
+We create a transaction and check it in Bitcoin-S.
+After some time we realize that it is not possible with the current tools and the given time.
+But because we familiarized us with the Bitcoin-S code we find a bug and send a bug fix to the Bitcoin-S project.
 
-So we verify a smaller part of Bitcoin-S.
-The addition of Satoshis with zero.
-This needs a loot of changes in the code that we go through step-by-step.
+So we verify a less interesting property property of Bitcoin-S.
+There is a datatype Satoshis that represents bitcoins. We verify that the addition of Satoshis with zero results in the same amount of Satoshis.
+Even this needs many changes in the code that we go through step-by-step.
 
-Finally, we see that you should write software with verification tools in mind, because otherwise you possibly must rewrite the whole code when it comes to verification.
-
-
-% In this thesis we experiment in formal verification.
-% To this end, we verify for correctnes a part of the implementation of the Bitcoin protocol in Bitcoin-S using the verification framework Stainless.
-% During the work we have faced some challenges.
-
-% First of all, we indentify a property of the Bitcoin protocol which we want to verify.
-% Because of the found bug in the C++ implementation of Bitcoin Core, which allowed a non-coinbase transaction to generate new coins, this property has been chosen.
-
-% The first challenging step is to integrate Stainless into Bitcoin-S.
-% The difference in the versions of the sbt framework and Scala used in Bitcoin-S and Stainless makes the integration process quite diffucult.
-% Thus, we have extracted the classes implementing the property mentioned above from the subpackage Bitcoin-S-Core.
-
-% To understand the building process of a transaction, we experiment with the transaction creation and validation implemented in Bitcoin-S-Core.
-% Furthermore, we analyse function \textit{checkTransaction} which is important for the protection against the introduced missuse of the Bitcoin protocol.
-
-% The next challenging stage is to use Stainless for verification of this function.
-% Because Stainless takes as an input the functional subset of Scala with some imperative features we have to reimplement the extracted code according to the rules of Stainless.
-% All extracted classes consist of more than 1500 lines of code what takes too much time to rewrite it. 
-% Not to mention, this is only a preparation phase towards verification and not verification itself.
-% So, we have decided to verify another functionality implemented in the Bitcoin-S-Core package which requires the extraction of the smaller batch of classes.
-% The coin addition seems to be a good candidate.
-% The operation of the coin addition with zero should result to the same value of the coin.
-% We rewrite the code of 2 classes implementing this functionality accoring to the functional style.
-% Then we define a formal specification for the function of the addition and some other dependent functions.
-
-% During this work, we have detected a bug in the function \textit{checkTransaction} in Bitcoin-S-Core which forbids one type of a valid transaction.
-% We have fixed it, and our pull request has been merged to the Bitcoin-S project.
-% Furthermore, we have verified the coin addition with zero using Stainless.
-% The framework has reported the operation as valid.
-% But we had to transform the original code too much. So that we cannot state that the code of Bitcoin-S has been successfully verified.
-
+Finally, we see that software should be written with verification tools in mind, because otherwise the code possibly must be rewritten when it comes to verification.
