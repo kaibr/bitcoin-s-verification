@@ -197,13 +197,15 @@ This was fixed in \href{https://github.com/bitcoin-s/bitcoin-s/pull/435}{pull re
 Trying to integrate Stainless in Bitcoin-S caused a lot of troubles, mainly because of version conflicts.
 You can find more about it in chapter \ref{chap:appendix_arb}.
 
-
-It takes too much time to do it and after some discussion, we decided to extract only the parts of the code that are needed for checkTransaction.
+After integrating Stainless in Bitcoin-S there are many errors.
+It takes too much time to fix them all so it should be easier to extract the classes needed for checkTransaction.
 
 The extracted code has more than 1500 lines.
-After running Stainless on it, it throws a really huge bunch of errors about what Stainless can not reason about.
-And after fixing some of those errors there appear new ones as we can see in the next chapter.
-This would require to change nearly everything of the extracted code.
+After running Stainless on it, it still throws a huge bunch of errors about what Stainless can not reason about.
+After fixing some of those errors there appear new ones.
+So this would require to change nearly everything of the extracted code.
 
-We arrived at the decision that we need a smaller part to verify.
-We have chosen to verify the addition with zero of Bitcoin-Ss CurrencyUnit class as described in the next chapter.
+Lets adjust the property from the \nameref{property_1} to the \nameref{property_2}, because there is not enough time to fix all this errors and write the verification.
+This is way less interesting to verify but gives still many insights in what needs to be done to verify some parts of Bitcoin-S and other source code.
+
+So lets look at the \nameref{property_2}.
