@@ -1,11 +1,12 @@
 \chapter{Towards Verifying the Addition with Zero Property}
 \label{chap:verify_add}
 
-After realizing, that it would consume to much time to rewrite the Bitcoin-S code and even the extracted part with checkTransaction, we decided to extract the smallest unit in Bitcoin-S-Core that is worthwhile to verify.
-We found the addition of two Satoshis would be a good candidate.
-To make it even easier, we decided to verify only the addition of some satoshis with zero.
+After realizing, that it would consume to much time to rewrite the Bitcoin-S code and even the extracted part with checkTransaction, the smallest unit in Bitcoin-S-Core that is worthwhile to verify was extracted.
+This could be the addition of two CurrencyUnits.
+To make it even easier, the addition of CurrencyUnits with zero.
+CurrencyUnits is an abstract class in Bitcoin-S, representing currencies like Satoshis.
 
-The initial code is this:
+Here we can see the extracted code needed for the addition of CurrencyUnits:
 \lstinputlisting[language=scala]{../code/currsniporig/src/main/scala/code/initial/Code.scala}
 
 The additions signature looks like this:
