@@ -83,11 +83,11 @@ The program would work correct by changing the type from Int to BigInt.
 
 Stainless supports only a subset of Scala.
 They call is Pure Scala.
-You can find the specification of Pure Scala on the Stainless website\footnote{\url{https://epfl-lara.github.io/stainless/purescala.html}}.
+You can find the specification of Pure Scala on the Stainless website in the section \href{https://epfl-lara.github.io/stainless/purescala.html}{Pure Scala}.
 
 In addition, Stainless has its own library with annotations, reimplementaion of some core data types, collections and input-output functions and more.
-Some of them are described on the website\footnote{\url{https://epfl-lara.github.io/stainless/library.html}}.
-There are more details about library in the source code of Stainless on GitHub in the folder \textit{frontends/library/stainless}\footnote{\url{https://github.com/epfl-lara/stainless}}.
+Some of them are described on the website in the section \href{https://epfl-lara.github.io/stainless/library.html}{Stainless Library}.
+There are more details about library in the source code of Stainless on GitHub in the folder \href{https://github.com/epfl-lara/stainless}{\textit{frontends/library/stainless}}.
 
 Stainless verifies Scala programs using SMT (satisfiability modulo theories) solvers. 
 The framework transforms a program code to the Pure Scala fragment supported by Inox solver.
@@ -105,7 +105,7 @@ Protocol data structures are defined in the package \textbf{bitcoin-s-core}.
 This package is the main target to be verified because it specifies the base of Bitcoin protocol, and it is crucial for correct protocol functionality.
 There is also the package \textbf{bitcoind-rpc} which is an RPC client implementation to communicate with \textit{bitcoind}, daemon of Bitcoin Core running on a machine.
 Developers of Bitcoin-S are working on the implementation of a lightweight bitcoin client in the package \textbf{bitcoin-s-spv-node}.
-The whole list of packages can be found on GitHub\footnote{\url{https://github.com/bitcoin-s}}.
+The whole list of packages can be found on GitHub in the \href{https://github.com/bitcoin-s}{organization Bitcoin-S}.
 
 Bitcoin-S is a large project implementing many functionalities.
 In this work one of them is going to be examined and worked on, namely the property of the Bitcoin that a non-coinbase transaction can not generate new coins.
