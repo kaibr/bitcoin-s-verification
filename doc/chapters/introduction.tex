@@ -30,17 +30,19 @@ One of such tools is Stainless which we use in our work.
 Stainless is developed by "Lab for Automated Reasoning and Analysis" (LARA) at EPFL's School of Computer and Communication Sciences.
 Using this framework we can verify the correctness of Scala programs.
 Stainless statically verifies that a program satisfies a given specification and that a program will not crash at runtime.
-The framework explores all possible inputs and finds a counter examples for possible failures in a program which violate the given specification. \cite{Stainless:introduction}
+The framework covers all possible inputs and finds a counter examples for possible failures in a program which violate the given specification. \cite{Stainless:introduction}
 
-The main functions used to write a specification are \textit{require} and \textit{ensuring}. 
+The main functions used to write a specification are \textit{require} and \textit{ensuring}.
+
 With \textit{require} we define a precondition of a function, which we want to verify.
 \textit{require} is placed at the beginning of the function body.
-We pass a constraint for the inputs of a function as an argument to \textit{require} in the form of a Boolean expression.
+\textit{require} specifies, if the parameter of the function hold a certain condition.
 
-With \textit{ensuring} we provide a postcondition which is a condition on an output of the function.
-\textit{ensuring} is called after the function body.
+With \textit{ensuring}, we define the postcondition of a function.
+\textit{ensuring} is placed at the end of the function after the body.
+\textit{ensuting} specifies, if the return value or the result of the function hold a certain condition.
 
-On invoking, Stainless tries to prove that the postcondition always holds, assuming the given precondition does hold. \cite{Stainless:introduction}
+On invoking Stainless, it tries to prove that the postcondition always holds, assuming the given precondition does hold. \cite{Stainless:introduction}
 
 The following example demonstrates a simple formal specification for the function calculating factorial.
 This is a modified example from the Stainless documentation, so Stainless reports an error verifying it.
