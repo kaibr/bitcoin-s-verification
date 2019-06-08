@@ -1,6 +1,9 @@
 \chapter{Practical Challenges with Stainless}
 \label{chap:appendix_arb}
 
+In this chapter we explore the practical challenges that could occur by using Stainless.
+
+
 \section{sbt vs JAR}
 
 We can either use the sbt plugin or a JAR file to check the code with Stainless.
@@ -18,7 +21,7 @@ We do not have to download it manually and find the right version and if we bump
 
 However, there are some drawbacks currently.
 For example the sbt plugin does not always report errors.
-We will read mor about that shortly.
+We will read more about that shortly.
 
 
 \section{Integration}
@@ -26,8 +29,6 @@ We will read mor about that shortly.
 During this work, Stainless updated the sbt plugin to support sbt 1.2.8 from 0.13.17 and Scala 2.12.8 from 2.11.12.
 So this section might be out of date now.
 
-There are two ways to integrate Stainless in a Scala project, the Scala build tool (sbt) plugin or a command line tool.
-Both, when run, analyses the code passed and report warnings to the console about the given code.
 Stainless requires and Scala recommends Java SE Development Kit 8.
 Newer Java versions won't work.
 
@@ -66,7 +67,10 @@ The final command looks like this in \emph{core} folder of Bitcoin-S:
     $(find ../secp256k1jni -type f -name *.java | tr '\n' ' ')
 \end{lstlisting}
 
-The output was some Stainless error.
+\emph{.ivy2} is the dependency cache of sbt.
+The \emph{tr} replaces the first char with the second so '\\n' with either ':' or ' '.
+
+With this command, Stainless throws the next error:
 \begin{verbatim}
   [Internal] Error: object scala.reflect.macros.internal.macroImpl in compiler mirror
              not found.. Trace:
@@ -77,20 +81,18 @@ The output was some Stainless error.
   [Internal] Please inform the authors of Inox about this message
 \end{verbatim}
 
-After some discussion, we decided to go another way, because the errors may take too much time and it might lead to a next error.
-Let's extract the code needed to verify a transaction mainly the class Transaction and ScriptInterpreter with many other classes their depending on.
+So we can not know how many errors will face us.
+Lets go another way, because the errors may take too much time and it might lead to a next error.
+We extract the code needed to verify a transaction mainly the class Transaction and ScriptInterpreter with many other classes their depending on.
 
 After this extraction Stainless was successfully integrated with both, sbt and JAR.
-This leads us to another finding as described in the next section.
-
-
-\section{Error Reporting with sbt and JAR}
 
 Running \code{sbt compile} in the project with Stainless ended without error.
 But it also ended with no output.
-So we were not able to change the code so Stainless would accept it.
+So we can not able to change the code so Stainless would accept it since we do not know what to change.
 
-After running the JAR file on the code there were many errors as described in chapter \ref{chap:verify_add}.
+So the sbt plugin does not complain always where the JAR file did.
+The open \href{https://github.com/epfl-lara/stainless/issues/484}{issue \mypound484 on GitHub} might describe exactly this error.
 
-So the sbt plugin does not complain always but the JAR file did.
-The open issue \mypound484 on GitHub\footnote{url{https://github.com/epfl-lara/stainless/issues/484}} might describe this error.
+Now we can finally run Stainless on our code.
+But this leads us to the next findings described in the previous chapters.
