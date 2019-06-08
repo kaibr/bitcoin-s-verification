@@ -82,7 +82,7 @@ With this command, Stainless throws the next error:
 \end{verbatim}
 
 So we can not know how many errors will face us.
-Lets go another way, because the errors may take too much time and it might lead to a next error.
+Let's go another way, because the errors may take too much time and it might lead to a next error.
 We extract the code needed to verify a transaction mainly the class Transaction and ScriptInterpreter with many other classes their depending on.
 
 After this extraction Stainless was successfully integrated with both, sbt and JAR.
@@ -91,7 +91,7 @@ Running \code{sbt compile} in the project with Stainless ended without error.
 But it also ended with no output.
 So we can not able to change the code so Stainless would accept it since we do not know what to change.
 
-So the sbt plugin does not complain always where the JAR file did.
+So the sbt plugin does not always complain where the JAR file did.
 The open \href{https://github.com/epfl-lara/stainless/issues/484}{issue \mypound484 on GitHub} might describe exactly this error.
 
 Now we can finally run Stainless on our code.
