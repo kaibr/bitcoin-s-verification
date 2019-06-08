@@ -2,12 +2,28 @@
 \label{chap:appendix_arb}
 
 \section{sbt vs JAR}
-We can either use the sbt plugin or a JAR file to check code with Stainless.
+
+We can either use the sbt plugin or a JAR file to check the code with Stainless.
+
+Invoking the JAR on our source code Stainless will verify it.
+If we have a bigger project, this becomes really tricky because we must pass all files needed including the dependencies.
+This is in contrast to the sbt plugin, where we can integrate Stainless in our compilation process.
+When we call compile, Stainless verifies the code and stops the compilation if the verification fails.
+
+Having a fixed version configured in the sbt build file, every developer has the same Stainless features available.
+This should prevent incompatibility with new or deprecated features when we use different plugins.
+
+So the sbt plugin has clear advantages over the JAR file since its integrated directly.
+We do not have to download it manually and find the right version and if we bump the version we can just edit it in the build file and every developer is on the same version again.
+
+However, there are some drawbacks currently.
+For example the sbt plugin does not always report errors.
+We will read mor about that shortly.
 
 
 \section{Integration}
 
-During this work, Stainless bumped the sbt plugin from version 0.13.17 to 1.2.8 and now supports also Scala 2.12.8 and prevoiusly 2.11.12.
+During this work, Stainless updated the sbt plugin to support sbt 1.2.8 from 0.13.17 and Scala 2.12.8 from 2.11.12.
 So this section might be out of date now.
 
 There are two ways to integrate Stainless in a Scala project, the Scala build tool (sbt) plugin or a command line tool.
