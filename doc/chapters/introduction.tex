@@ -1,36 +1,27 @@
 \chapter{Introduction}
 \label{chap:introduction}
 
-In this work we use the verification framework Stainless to verify parts of the code of Bitcoin-S, a Scala implementation of the Bitcoin protocol.
-In the following we describe the main aspects of formal verification, Stainless and Bitcoin-S.
-
-
-\section{What is formal verification}
-\label{sec:formal_verification}
-
-// TODO move to chapter description and change Overview of stainless to formal verification with stainless
-
 The longer and more complex a source code is, the more difficult it is to verify its correctness.
 There are different approaches to show the correctness of a program.
-
-A powerful method to check whether a program works correctly is formal verification.
-This is a systematic process based on mathematical modeling.
-With formal verification all possible inputs are covered algorithmically.
-This is in contrast to testing, where only predefined inputs are tested.
+One of them is formal verification.
+In contrast to testing, where only predefined inputs are tested, with formal verification all possible inputs are covered.
 The correctness of a program is analyzed relative to its formal specification.
 Formal specification is a mathematical description of a software behavior that can be used by the verification tool to verify the code.
-We will see an example shortly.
+We will see an example of a formal specification shortly.
 
-One of such tools is Stainless which we use in our work.
+In this work we use the verification framework Stainless to verify parts of the code of Bitcoin-S, a Scala implementation of the Bitcoin protocol.
+In the following we look at the main aspects of formal verification with Stainless and properties of Bitcoin-S we want to verify.
 
 
-\section{Overview of Stainless}
+\section{Formal verification with Stainless}
 \label{sec:stainless}
 
 Stainless is developed by "Lab for Automated Reasoning and Analysis" (LARA) at EPFL's School of Computer and Communication Sciences.
 Using this framework we can verify the correctness of Scala programs.
+The following overview of the framework is taken from the section \href{https://epfl-lara.github.io/stainless/intro.html}{Introduction} of the Stainless documentation \cite{Stainless:documentation}.
+
 Stainless statically verifies that a program satisfies a given specification and that a program will not crash at runtime.
-The framework covers all possible inputs and finds a counter examples for possible failures in a program which violate the given specification. \cite{Stainless:introduction}
+The framework covers all possible inputs and finds a counter examples for possible failures in a program which violate the given specification.
 
 The main functions used to write a specification are \textit{require} and \textit{ensuring}.
 
@@ -42,10 +33,10 @@ With \textit{ensuring}, we define the postcondition of a function.
 \textit{ensuring} is placed at the end of the function after the body.
 \textit{ensuting} specifies, if the return value or the result of the function hold a certain condition.
 
-On invoking Stainless, it tries to prove that the postcondition always holds, assuming the given precondition does hold. \cite{Stainless:introduction}
+On invoking Stainless, it tries to prove that the postcondition always holds, assuming the given precondition does hold.
 
 The following example demonstrates a simple formal specification for the function calculating factorial.
-This is a modified example from the Stainless documentation, so Stainless reports an error verifying it.
+This is a modified example from the section \href{https://epfl-lara.github.io/stainless/intro.html}{Introduction} of the Stainless documentation \cite{Stainless:documentation}, so Stainless reports an error verifying it.
 \begin{lstlisting}[language=Scala]
   def factorial(n: Int): Int = {
       require(n >= 0)
@@ -68,7 +59,7 @@ Reporting the postcondition as \textit{invalid} the framework could find at leas
 If Stainless is unable to prove the postcondition or find a counterexample it reports the outcome \textit{unknown}.
 In this case a timeout or an internal error occurred.
 Furthermore, Stainless checks for calls in the code to the function with invalid arguments violating the precondition.
-For example if we invoke factorial with a negative number it reports \textit{invalid}. \cite{Stainless:introduction}
+For example if we invoke factorial with a negative number it reports \textit{invalid}.
 
 Let's return back to our incorrect example with factorial.
 Stainless reports the following result for the factorial verification from our example:
@@ -85,16 +76,13 @@ The program would work correct by changing the type from Int to BigInt.
 
 Stainless supports only a subset of Scala.
 They call is Pure Scala.
-You can find the specification of Pure Scala on the Stainless website in the section \href{https://epfl-lara.github.io/stainless/purescala.html}{Pure Scala}.
+You can find the specification of Pure Scala on the Stainless documentation website \cite{Stainless:documentation} in the section \href{https://epfl-lara.github.io/stainless/purescala.html}{Pure Scala}.
 
 In addition, Stainless has its own library with annotations, reimplementaion of some core data types, collections and input-output functions and more.
 Some of them are described on the website in the section \href{https://epfl-lara.github.io/stainless/library.html}{Stainless Library}.
-There are more details about library in the source code of Stainless on GitHub in the folder \href{https://github.com/epfl-lara/stainless}{\textit{frontends/library/stainless}}.
+There are more details about library in the source code of Stainless on GitHub \cite{Stainless:github} in the folder \href{https://github.com/epfl-lara/stainless/tree/master/frontends/library/stainless}{\textit{frontends/library/stainless}}.
 
 Stainless verifies Scala programs using SMT (satisfiability modulo theories) solvers. 
-The framework transforms a program code to the Pure Scala fragment supported by Inox solver.
-This solver was also developed by LARA-Group and allows usage of different SMT solvers such as Z3, CVC4 and Princess, adding support of other higher-level features.
-Thus, preconditions, postconditions and assertions are translated into SMT formulas, so an SMT solver can determine if all properties hold.\cite{Stainless:introduction}\cite{Stainless}
 
 
 \section{Overview of Bitcoin-S}
