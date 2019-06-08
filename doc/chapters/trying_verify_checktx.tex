@@ -3,8 +3,8 @@
 
 This chapter describes the part of Bitcoin-S needed to verify the No Inflation Property described before.
 We are going to create a transaction and show you the relevant parts of the method checkTransaction, where transactions are checked against some properties.
-Then we see some troubles occurred during this work.
-In the end you will see how we fixed a bug in Bitcoin-S.
+Then, we will see the bug in Bitcoin-S found during this work and its fix.
+In the end we find reasons why it was needed for this work to change the verification from the No Inflation Property to the Addition with Zero Property.
 
 
 \section{Creation of a Transaction}
@@ -192,10 +192,11 @@ Since TransactionOutPoint is a case class and Scala has a built in == for case c
 This was fixed in \href{https://github.com/bitcoin-s/bitcoin-s/pull/435}{pull request \mypound435} on GitHub at April 23, 2019 through this work along a unit test to prevent this bug from appearing again in the future.
 
 
-\section{Adjusting Property}
+\section{Adjusting No Inflation Property}
 
-Trying to integrate Stainless in Bitcoin-S caused a lot of troubles, because of version conflicts.
-If you are interested in it you can read more in the appendix \ref{chap:appendix_arb}.
+Trying to integrate Stainless in Bitcoin-S caused a lot of troubles, mainly because of version conflicts.
+You can find more about it in chapter \ref{chap:appendix_arb}.
+
 
 It takes too much time to do it and after some discussion, we decided to extract only the parts of the code that are needed for checkTransaction.
 
