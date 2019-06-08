@@ -1,7 +1,7 @@
 \chapter{Trying to Verify the no Inflation Property}
 \label{chap:verify_check}
 
-This chapter describes the part of Bitcoin-S needed to verify our property.
+This chapter describes the part of Bitcoin-S needed to verify the No Inflation Property described before.
 We are going to create a transaction and show you the relevant parts of the method checkTransaction, where transactions are checked against some properties.
 Then we see some troubles occurred during this work.
 In the end you will see how we fixed a bug in Bitcoin-S.
@@ -9,26 +9,26 @@ In the end you will see how we fixed a bug in Bitcoin-S.
 
 \section{Creation of a Transaction}
 
-Some of the code in this section is copied or adapted parts of Bitcoin-S-Core transaction builder example.\cite{BitcoinSCore:txbuilderexample}
+Some of the code in this section is copied or adapted from Bitcoin-S-Core transaction builder example.\cite{BitcoinSCore:txbuilderexample}
 Bitcoin-S-Core has a bitcoin transaction builder class with the following constructor:
 \begin{lstlisting}[language=scala]
   BitcoinTxBuilder(
-    destinations: Seq[TransactionOutput], // where we send money
+    destinations: Seq[TransactionOutput], // where to send the money
     utxos: BitcoinTxBuilder.UTXOMap,      // unspent transaction outputs
     feeRate: FeeUnit,                     // fee rate per byte
     changeSPK: ScriptPubKey,              // where to send the change
     network: BitcoinNetwork               // bitcoin network information
-  ): Future[BitcoinTxBuilder]             // sign TxBuilder to get tx
+  ): Future[BitcoinTxBuilder]
 \end{lstlisting}
 
-Here is how those parameters are generated.
+To return a Future does not make sense, since the implementing constructor calls either Future.successfull or Future.fromTry which returns an already resolved Future.
+This might be for future purposes.
 
-First, we need a some bitcoins/satoshis.
-Thus, we create a transaction with one single output.
-This transaction can be parsed from the bitcoin network but we create a transaction manually in order to see this process.
+Now we create a transaction.
 
-// TODO explain more. We create a fake transaction blabla
-
+First, we need a some money.
+Thus, we create a fake transaction with one single output.
+This transaction can be parsed from the bitcoin network but we create one manually in order to see this process.
 \begin{lstlisting}[language=scala]
   val privKey = ECPrivateKey.freshPrivateKey
   val creditingSPK = P2PKHScriptPubKey(pubKey = privKey.publicKey)
@@ -45,15 +45,18 @@ This transaction can be parsed from the bitcoin network but we create a transact
   )
 \end{lstlisting}
 
-On line one and two we are creating a new keypair to sign the next transaction and have a scriptPubKey where the bitcoins are.
+On line one and two we create a new keypair to sign the next transaction and have a scriptPubKey where the bitcoins are.
+This is our keypair.
+So the money is transferred to our public key.
 Line four specifies the amount of satoshis we have in the transaction.
 Then we create the actual transaction from line 6 to 13.
 
-Now that we have some bitcoins, we create the new transaction to spend them.
+Now that we have some bitcoins, we create the new transaction where we want to spend them.
 
 First, we need some out points.
-This are pointers to previous transactions' outputs.
+They point to outputs of previous transactions.
 We use the index zero, because the previous transaction has only one output that becomes the first index zero.
+If there were two previous outputs, the second output would become the index 1 and so on.
 \begin{lstlisting}[language=scala]
   val outPoint = TransactionOutPoint(prevTx.txId, UInt32.zero)
 
@@ -69,6 +72,8 @@ We use the index zero, because the previous transaction has only one output that
   val utxos = List(utxoSpendingInfo)
 \end{lstlisting}
 
+This utxs are the inputs of our transaction.
+
 Second, we need destinations to spend the bitcoins to.
 For the sake of convenience we create only one.
 \begin{lstlisting}[language=scala]
@@ -81,67 +86,69 @@ For the sake of convenience we create only one.
   )
 \end{lstlisting}
 
-We spend 5000 satoshis to the newly created script public key.
+We spend 5000 satoshis to the newly created random public key.
 
 Finally, we define the fee rate in satoshis per one byte transaction size as well as some bitcoin network parameters.
+The bitcoin network parameters are not important so we use some static values for testing purpose.
 \begin{lstlisting}[language=scala]
   val feeRate = SatoshisPerByte(Satoshis.one)
 
-  val networkParams = RegTest // soem static values for testing
+  val networkParams = RegTest // some static values for testing
 \end{lstlisting}
 
 Now lets build the transaction with those data.
 \begin{lstlisting}[language=scala]
-  val txBuilder: Future[BitcoinTxBuilder] = BitcoinTxBuilder(
-    destinations = destinations,
-    utxos = utxos,
-    feeRate = feeRate,
-    changeSPK = creditingSPK,
-    network = networkParams
+  val txBuilderF: Future[BitcoinTxBuilder] = BitcoinTxBuilder(
+    destinations = destinations, // where to send the money
+    utxos = utxos,               // unspent transaction outputs
+    feeRate = feeRate,           // fee rate per byte
+    changeSPK = creditingSPK,    // where to send the change
+    network = networkParams      // bitcoin network information
   )
 
-  val signedTxF: Future[Transaction] = txBuilder
-    .flatMap(_.sign)
+  val signedTxF: Future[Transaction] = txBuilderF
+    .flatMap(_.sign)                       // call sign on the transaction builder
     .map {
       (tx: Transaction) => println(tx.hex) // transaction in hex for the bitcoin network
     }
 \end{lstlisting}
 
-Line one to seven creates a transaction builder which is then signed on line nine to thirteen.
-On line twelve we can now use our transaction object.
-For example, after calling the \emph{hex} function on it, we can send the returned string to the real bitcoin network.
+Line one to seven creates a transaction builder which is then signed on line ten.
+We can now use our transaction object on line twelve.
+For example, after calling \emph{hex} on it, we can send the returned string to the bitcoin network.
 
 
 \section{Validation of a Transaction}
 
-Bitcoin-S-Core offers a function called \emph{checkTransaction}.
-This is its type signature.
+Bitcoin-S offers a function called \emph{checkTransaction} located in the ScriptInterpreter object.
+This is its type signature:
 \begin{lstlisting}[language=scala]
   checkTransaction(transaction: Transaction): Boolean
 \end{lstlisting}
+
 We can pass a transaction and it returns a Boolean whether the transaction is valid or not.
-So for example when we pass the built transaction from above to it the returned value would be true, because it's a valid transaction.
+So for example when we pass the transaction built before the returned value would be true, because it's a valid transaction.
+It might not be accepted by the bitcoin network but for a transaction on its own its valid.
+We can not check context with it, because we can only pass one transaction.
 
 There are several checks in checkTransaction.
 For example, it checks if there is either no input or no output.
-In this case it returns false.
+In this case we get false.
 
-The relevant part for the bug we found.
+The relevant part for the bug we found:
 \begin{lstlisting}[language=scala]
   val prevOutputTxIds = transaction.inputs.map(_.previousOutput.txId)
   val noDuplicateInputs = prevOutputTxIds.distinct.size == prevOutputTxIds.size
 \end{lstlisting}
 
 It gathers all transaction ids referenced by the out points.
-When calling \emph{distinct} on the returned list, it returns a list where duplicated are removed.
-Is the size of the new list is the same as the size of the old, we know that there was no duplicate transaction id.
-
-There is a bug, because checkTransaction checks on the transaction id that we are going to explain the next section.
+When we call \emph{distinct} on the returned list, we get a list with duplicate removed.
+If the size of the new list is the same as the size of the old, we know that there was no duplicate transaction id, because, as said, distinct removes the duplicates.
 
 
 \section{Fixing a Bug in Bitcoin-S}
 
-During the examination of the checkTransaction function, we found a bug in Bitcoin-S.
+We can see that there is a bug in the checkTransaction function from before, recognized and fixed through this work.
 
 \begin{figure}[H]
 	\centering
@@ -156,15 +163,19 @@ Here the relevant code of checkTransaction again:
   val noDuplicateInputs = prevOutputTxIds.distinct.size == prevOutputTxIds.size
 \end{lstlisting}
 
-What happens, if a TransactionOutPoint (previousOutput) references the same Transaction ID (txId) another does?
+What happens, if we have two TransactionOutPoints (previousOutputs) with a different index but referencing the same Transaction ID (txId)?
 
 According to the Bitcoin protocol this is possible.
 A transaction can have multiple outputs that should be referenceable by the next transaction.
-What should not be possible is a transaction referencing the same output twice.
-This was a bug in Bitcoin Core known as CVE-2018–17144 which was patched on September 18, 2018. \cite{cve201817144}
+So this is clearly a bug.
 
-Here, Bitcoin-S did a bit too much and marked all transaction as invalid, if they referenced a transaction twice in the next transaction.
+What should not be possible is a transaction referencing the same output twice.
+This bug occured in Bitcoin Core known as CVE-2018–17144 which was patched on September 18, 2018. \cite{cve201817144}
+
+Here, Bitcoin-S did a bit too much and marked all transaction as invalid, if they referenced the same transaction twice.
 The fix is, to check on TransactionOutPoint instead of TransactionOutPoint.txId, because TransactionOutPoint contains the txId as well as the output index it references.
+So in pseudo code, we check on the tuple (tx, index) instead of (tx).
+The fixed code:
 \begin{lstlisting}[language=scala]
   val prevOutputs = transaction.inputs.map(_.previousOutput)
   val noDuplicateInputs = prevOutputs.distinct.size == prevOutputs.size
@@ -178,7 +189,7 @@ Since TransactionOutPoint is a case class and Scala has a built in == for case c
 	\label{fig:output1}
 \end{figure}
 
-This was fixed in \href{https://github.com/bitcoin-s/bitcoin-s/pull/435}{pull request \mypound435} on GitHub at April 23, 2019 by us along a unit test to prevent this bug from appearing again in the future.
+This was fixed in \href{https://github.com/bitcoin-s/bitcoin-s/pull/435}{pull request \mypound435} on GitHub at April 23, 2019 through this work along a unit test to prevent this bug from appearing again in the future.
 
 
 \section{Adjusting Property}
