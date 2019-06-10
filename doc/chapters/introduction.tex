@@ -95,7 +95,14 @@ We will rewrite the code to Pure Scala, because Bitcoin-S is not written in it.
 
 \subsection{No Inflation Property}
 \label{property_1}
+The decision to verify this property was inspired by the bug found in Bitcoin Core in September 2018  \cite{cve201817144} which could allow to spend the same unspent transaction output (UTXO) in a transaction multiple times.
+Hence, new coins could be created out of thin air.
+Thus, the property, that a non-coinbase transaction cannot generate new coins, is chosen to be verified in this work.
 
+As we can see later in chapter \ref{chap:verify_check}, we must rewrite the huge fragment of the code implementing this property.
+This reimplementation into Pure Scala needs a lot of time.
+So, we adjust the plan and verify another functionality of Bitcoin-S.
+Nevertheless, during the analysis of the No Inflation Property we have detected and fixed a bug in Bitcoin-S, what is described in section \ref{sec:bugfix}. 
 
 
 \subsection{Addition with Zero Property}
