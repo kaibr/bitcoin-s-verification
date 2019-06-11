@@ -61,13 +61,13 @@
     def ==(c: CurrencyUnit): Boolean = satoshis == c.satoshis
 
     override def +(c: CurrencyUnit): CurrencyUnit = {
-      require(
+      require(                                       // <--- specification
            c.satoshis == Satoshis.zero
         && this.underlying.toBigInt <= BigInt("9223372036854775807")
         && this.underlying.toBigInt >= BigInt("-9223372036854775808")
       )
       Satoshis(satoshis.underlying + c.satoshis.underlying)
-    } ensuring(res => res.satoshis == this.satoshis)
+    } ensuring(res => res.satoshis == this.satoshis) // <--- specification
 
     protected def underlying: Int64
   }
