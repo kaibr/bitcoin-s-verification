@@ -35,7 +35,7 @@
 \end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Formal verification components //TODO: or concept}
+\section{Formal Verification Components //TODO: or concept}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{frame}
@@ -44,10 +44,10 @@
 %  \begin{column}{0.5\textwidth}
   %Basics
   \begin{itemize}
-    \item Pure Scala code
-    \item Imperative features
-    \item Formal specification with pre- and postcondition
-    \item Outcomes of verification: valid, invalid, unknown
+    \item Pure Scala
+    \item Imperative features // remove?
+    \item Pre- and Postcondition
+    \item Outcome: valid, invalid, unknown
   \end{itemize}
 %  \end{column}
   %\pause
@@ -64,9 +64,9 @@
 
 
 \begin{frame}
-\frametitle{Properties to verify}
+\frametitle{Properties to Verify}
 \begin{itemize}
-  \item Bitcoin-S project
+  \item Bitcoin-S
   \item No Inflation Property
   \item Addition with Zero Property
 \end{itemize}
@@ -87,16 +87,16 @@
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Process of verification //TODO: change the title}
+\section{Process of Verification //TODO: change the title}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 \begin{frame}[fragile]
 \frametitle{Verifying No Inflation Property}
 \begin{itemize}
-  \item Validation of a transaction with \textit{checkTransaction}
+  \item Validation of a Transaction with \textit{checkTransaction}
   \item Integration of Stainless
-  \item Adjusting the property
+  \item Adjusting the Property
   \item Bug in \textit{checkTransaction}
 \end{itemize}
 \pause
@@ -118,11 +118,11 @@
 \frametitle{Verifying Addition with Zero}
 \begin{itemize}%[<1-2>]
   \item Datatype Satoshis
-  \item Method for verification
+  \item Method for Verification
   \begin{lstlisting}[language=Scala, numbers=none]
     +(c: CurrencyUnit): CurrencyUnit
   \end{lstlisting}
-  \item Rewriting 2 classes into Pure Scala
+  \item Rewriting 2 Classes in Pure Scala
 \end{itemize}
 \end{frame}
 
@@ -133,7 +133,7 @@
 
 
 \begin{frame}[fragile]
-\frametitle{Formal specification}
+\frametitle{Formal Specification}
 \begin{lstlisting}[language=Scala]
   override def +(c: CurrencyUnit): CurrencyUnit = {
     require(c.satoshis == Satoshis.zero)
