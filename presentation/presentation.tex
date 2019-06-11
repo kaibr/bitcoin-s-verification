@@ -35,131 +35,122 @@
 \end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{What is The DAO}
+\section{Formal verification components //TODO: or concept}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{frame}
-\frametitle{What is The DAO}
-\begin{columns}
-  \begin{column}{0.5\textwidth}
-  Basics
+\frametitle{Stainless}
+%\begin{columns}
+%  \begin{column}{0.5\textwidth}
+  %Basics
   \begin{itemize}
-    \item Investment fund
-    \item Autonomous
-    \item Voting right based on invested amount
+    \item Pure Scala code
+    \item Imperative features
+    \item Formal specification with pre- and postcondition
+    \item Outcomes of verification: valid, invalid, unknown
   \end{itemize}
-  \end{column}
-  \pause
-  \begin{column}{0.5\textwidth}
-    Technology
-    \begin{itemize}
-      \item An open-source software
-      \item Written in Solidity
-      \item Build on Ethereum blockchain
-    \end{itemize}
-  \end{column}
-\end{columns}
+%  \end{column}
+  %\pause
+  %\begin{column}{0.5\textwidth}
+  %  Technology
+  %  \begin{itemize}
+  %    \item An open-source software
+  %    \item Written in Solidity
+  %    \item Build on Ethereum blockchain
+  %  \end{itemize}
+  %\end{column}
+%\end{columns}
 \end{frame}
 
 
-\begin{frame}[fragile]
-\frametitle{Initial Phase}
+\begin{frame}
+\frametitle{Properties to verify}
 \begin{itemize}
-  \item Defines the contract
-  \item Minimum ETH needed
-  \item Fixed end time
+  \item Bitcoin-S project
+  \item No Inflation Property
+  \item Addition with Zero Property
+\end{itemize}
+%\pause
+%\begin{lstlisting}[language=Solidity]
+%contract DAO is DAOInterface {
+%  uint constant minProposalDebatePeriod = 2 weeks;
+%  uint public proposalDeposit;
+%  mapping (address => bool) public allowedRecipients;
+
+%  function DAO(uint _proposalDeposit) {
+%    proposalDeposit = _proposalDeposit;
+%    allowedRecipients[address(this)] = true;
+%  }
+%}
+%\end{lstlisting}
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Process of verification //TODO: change the title}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\begin{frame}[fragile]
+\frametitle{Verifying No Inflation Property}
+\begin{itemize}
+  \item Validation of a transaction with \textit{checkTransaction}
+  \item Integration of Stainless
+  \item Adjusting the property
+  \item Bug in \textit{checkTransaction}
 \end{itemize}
 \pause
-\begin{lstlisting}[language=Solidity]
-contract DAO is DAOInterface {
-  uint constant minProposalDebatePeriod = 2 weeks;
-  uint public proposalDeposit;
-  mapping (address => bool) public allowedRecipients;
-
-  function DAO(uint _proposalDeposit) {
-    proposalDeposit = _proposalDeposit;
-    allowedRecipients[address(this)] = true;
-  }
-}
+\begin{lstlisting}[language=Scala]
+  val prevOutputTxIds = transaction.inputs.map(_.previousOutput.txId)
+  val noDuplicateInputs = prevOutputTxIds.distinct.size == prevOutputTxIds.size
 \end{lstlisting}
 \end{frame}
 
 
 \begin{frame}
-\frametitle{Investors}
-\begin{itemize}
-  \item Invest in The DAO
-  \item A Ethereum wallet address
-  \item Gets DAO tokens
-  \item Receive reward
-\end{itemize}
-\end{frame}
-
-
-\begin{frame}
-\frametitle{Example Investors}
+\frametitle{Bugfix}
 \centering
-\includegraphics[width=\textwidth,height=0.8\textheight,keepaspectratio]{assets/token_holders.png}
+\includegraphics[width=\textwidth,height=0.8\textheight,keepaspectratio]{assets/bitcoin-s-pr.png}
 \end{frame}
 
 
 \begin{frame}[fragile]
-\frametitle{Proposal}
-\begin{itemize}[<1-2>]
-  \item Recipient
-  \item Amount
-  \item Deadline
-  \item Creator
+\frametitle{Verifying Addition with Zero}
+\begin{itemize}%[<1-2>]
+  \item Datatype Satoshis
+  \item Method for verification
+  \begin{lstlisting}[language=Scala, numbers=none]
+    +(c: CurrencyUnit): CurrencyUnit
+  \end{lstlisting}
+  \item Rewriting 2 classes into Pure Scala
 \end{itemize}
-\pause
-\begin{lstlisting}[language=Solidity]
-struct Proposal {
-  address recipient;
-  uint amount;
-  string description;
-  uint votingDeadline;
-  uint proposalDeposit;
-  address creator;
-}
+\end{frame}
+
+
+\begin{frame}
+\frametitle{Rewriting the code}
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Formal specification}
+\begin{lstlisting}[language=Scala]
+  override def +(c: CurrencyUnit): CurrencyUnit = {
+    require(c.satoshis == Satoshis.zero)
+    Satoshis(satoshis.underlying + c.satoshis.underlying)
+  } ensuring(res => res.satoshis == this.satoshis)
 \end{lstlisting}
 \end{frame}
 
 
-\begin{frame}
-\frametitle{Example Proposal}
-Mobotiq's vision of modular Electric Vehicles that can be rented P2P is a perfect fit for the blockchain. Integration with Ethereum could enable the development of fully autonomous, self-renting vehicles.
-\end{frame}
-
-
-\begin{frame}
-\frametitle{Proposal List}
-\includegraphics[width=\textwidth,height=0.8\textheight,keepaspectratio]{assets/proposals.png}
-\end{frame}
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Majority voting attack}
+\section{Results}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{frame}
-\frametitle{Curator}
-\begin{itemize}
-  \item Controls the whitelist
-  \item Checks proposals
-\end{itemize}
-\end{frame}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Why there is no new The DAO}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\begin{frame}
-\frametitle{Why there is no new The DAO}
-\begin{itemize}
-	\item Profitableness
-	\item Law
-	\item Voting problem
-	\item The stalker
-\end{itemize}
+\frametitle{Output of Stainless}
+\centering
+\includegraphics[width=\textwidth,height=0.8\textheight,keepaspectratio]{assets/final_verify_output.png}
 \end{frame}
 
 
