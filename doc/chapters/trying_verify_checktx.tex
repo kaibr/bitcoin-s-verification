@@ -21,7 +21,7 @@ Bitcoin-S-Core has a bitcoin transaction builder class with the following constr
   ): Future[BitcoinTxBuilder]
 \end{lstlisting}
 
-To return a Future does not make sense, since the implementing constructor calls either Future.successfull or Future.fromTry which returns an already resolved Future.
+The return type Future does not make sense here, since the implementing constructor calls either Future.successfull or Future.fromTry which returns an already resolved Future.
 This might be for future purposes.
 
 Now we create a transaction.
