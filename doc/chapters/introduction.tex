@@ -31,7 +31,7 @@ With \textit{require} we define a precondition of a function, which we want to v
 
 With \textit{ensuring}, we define the postcondition of a function.
 \textit{ensuring} is placed at the end of the function after the body.
-\textit{ensuting} specifies, if the return value or the result of the function hold a certain condition.
+\textit{ensuring} specifies, if the return value or the result of the function hold a certain condition.
 
 On invoking Stainless, it tries to prove that the postcondition always holds, assuming the given precondition does hold.
 
@@ -48,7 +48,7 @@ This is a modified example from the section \href{https://epfl-lara.github.io/st
   } ensuring(res => res >= 0)
 \end{lstlisting}
 
-The function recursively calculates factorial of an integer number.
+It recursively calculates factorial of an integer number.
 The input of the function is constrained with \textit{require} to a non-negative value.
 The result should also be non-negative.
 Thus, Stainless will verify whether the result of the factorial calculation is non-negative for all non-negative inputs.
@@ -61,7 +61,7 @@ In this case a timeout or an internal error occurred.
 Furthermore, Stainless checks for calls in the code to the function with invalid arguments violating the precondition.
 For example if we invoke factorial with a negative number it reports \textit{invalid}.
 
-Let's return back to our incorrect example with factorial.
+Let's return to our incorrect example with factorial.
 Stainless reports the following result for the factorial verification from our example:
 \begin{figure}[H]
 	\centering
@@ -99,7 +99,7 @@ We will rewrite the code to Pure Scala, because Bitcoin-S is not written in it.
 The decision to verify this property was inspired by the bug found in Bitcoin Core in September 2018  \cite{cve201817144} which allowed to spend the same unspent transaction output (UTXO) in a transaction multiple times.
 Hence, new coins could be created out of the air.
 Thus, we try to verify the property, that a non-coinbase transaction cannot generate new coins.
-Lets name it the \nameref{property_1}.
+Let's name it the \nameref{property_1}.
 
 As we can see later in chapter \ref{chap:verify_check}, we must rewrite a huge part of the code implementing this property.
 This reimplementation into Pure Scala needs a lot of time.
@@ -113,8 +113,8 @@ Nevertheless, during the analysis of the \nameref{property_1} we look at a bug i
 In Bitcoin-S there is a class Satoshis representing an amount of bitcoins.
 We look at the verification of the addition of Satoshis with zero Satoshis.
 This operation should result in the same amount of Satoshis.
-Lets call it the \nameref{property_2}.
+Let's call it the \nameref{property_2}.
 
-Using Stainless, we see the successfull verification of this property.
+Using Stainless, we see the successful verification of this property.
 But the process of the verification with the tool requires many changes in the code, so that Stainless can accept it.
 We look at all needed modifications in chapter \ref{chap:verify_add}.
