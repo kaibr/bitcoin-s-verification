@@ -4,6 +4,15 @@
 \input{solidity-highlighting.tex}
 
 \usecolortheme{beaver}
+\addtobeamertemplate{footnote}{}{\vspace{4ex}}
+\setbeamerfont{footnote}{size=\scriptsize}
+
+\newcommand\blfootnote[1]{%
+  \begingroup
+  \renewcommand\thefootnote{}\footnote{#1}%
+  \addtocounter{footnote}{-1}%
+  \endgroup
+}
 
 \AtBeginSection
 {
@@ -62,6 +71,7 @@ def max(x: Int, y: Int): Int = {
 } ensuring (res =>
   x <= res && y <= res && (res == x || res == y))
 \end{lstlisting}
+\blfootnote{\url{https://epfl-lara.github.io/stainless/tutorial.html\#warm-up-max}}
 \end{frame}
 
 
@@ -76,7 +86,7 @@ def max(x: Int, y: Int): Int = {
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Problems}
+\section{Problems Rewriting Code}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
