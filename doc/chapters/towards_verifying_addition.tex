@@ -1,7 +1,7 @@
 \chapter{Towards Verifying the Addition with Zero Property}
 \label{chap:verify_add}
 
-After realizing, that it would consume to much time to rewrite the Bitcoin-S code and even the extracted part with checkTransaction, the smallest unit in Bitcoin-S-Core that is worthwhile to verify was extracted.
+After realizing, that it would consume too much time to rewrite the Bitcoin-S code and even the extracted part with checkTransaction, the smallest unit in Bitcoin-S-Core that is worthwhile to verify was extracted.
 This could be the addition of two CurrencyUnits.
 To make it even easier, the addition of CurrencyUnits with zero.
 CurrencyUnits is an abstract class in Bitcoin-S, representing currencies like Satoshis.
@@ -9,7 +9,7 @@ CurrencyUnits is an abstract class in Bitcoin-S, representing currencies like Sa
 Here we can see the extracted code needed for the addition of CurrencyUnits:
 \lstinputlisting[language=scala]{../code/currsniporig/src/main/scala/code/initial/Code.scala}
 
-The additions signature looks like this:
+The additions' signature looks like this:
 \begin{lstlisting}[language=scala]
   +(c: CurrencyUnit): CurrencyUnit
 \end{lstlisting}
@@ -92,7 +92,7 @@ Satoshis extends CurrencyUnit with type Int64, so it is of type CurrencyUnit[Int
 That's too specific, because the addition would require CurrencyUnits of type CurrencyUnit[A] not CurrencyUnit[Int64].
 
 Since there is no easy way to fix it and the code should stay as much as possible the original, we just remove the abstract type and fixed it to Int64.
-This limits the verification a bit, but as we only want to verify the addition in satoshis, thats OK.
+This limits the verification a bit, but as we only want to verify the addition in satoshis, that's OK.
 
 
 \section{Replacing the BigInt Constructor Argument With A String Literal}
@@ -157,8 +157,8 @@ Stainless output:
 \end{verbatim}}
 
 This is easy.
-We just replace all occurence of A with BigInt, since A is not overrided in an implementing class.
-This is not exact the same code, because an implementing class could not override A anymore but thats fine for our verification.
+We just replace all occurrence of A with BigInt, since A is not overrode in an implementing class.
+This is not exact the same code, because an implementing class could not override A anymore but that's fine for our verification.
 
 This was a missing feature of Stainless that was fixed on Mai 28, 2019 with \href{https://github.com/epfl-lara/stainless/pull/470}{pull request \mypound470} on GitHub.
 Now it should work without this change.
@@ -220,7 +220,7 @@ This is an easy to fix.
 We just extract the private class out of the object.
 This is not exactly the same code but since the class is still private it can not be extended outside of the file.
 
-Now we get som weird warnings about require.
+Now we get some weird warnings about require.
 
 
 \section{Removing Second Parameter of Require}
@@ -243,9 +243,9 @@ Stainless output:
 \end{verbatim}}
 
 Seems like Stainless does not support the second string parameter of require or at least it throws a warning about it.
-We can saftly remove it.
+We can safely remove it.
 
-A new error apperas.
+A new error appears.
 
 
 \section{Rewriting BigInt Comparison with Long}
@@ -255,7 +255,7 @@ Stainless output:
   [ Error  ] inv$4 depends on missing dependencies: long2bigInt$0.
 \end{verbatim}}
 
-This error is hard to understand but we can see that there is a missing Long to BigInt conversion.
+This error is hard to understand, but we can see that there is a missing Long to BigInt conversion.
 So we search for all longs in the code.
 \begin{lstlisting}[language=scala]
   private case class Int64Impl(underlying: BigInt) extends Int64 {
@@ -366,7 +366,7 @@ Stainless finds another counter example:
 \end{verbatim}}
 
 Sure, when adding one to the maximum Int64 the require does not hold anymore.
-Since we do only allow zero as a parameter the easiest way is to restrict it to zero here too.
+Since we do only allow zero as a parameter, the easiest way is to restrict it to zero here too.
 
 
 \section{Result}
