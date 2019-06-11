@@ -37,112 +37,124 @@
 \end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Formal Verification Components //TODO: or concept}
+\section{Formal Verification}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 
 \begin{frame}
 \frametitle{Stainless}
-%\begin{columns}
-%  \begin{column}{0.5\textwidth}
-  %Basics
-  \begin{itemize}
-    \item Pure Scala
-    \item Imperative features // remove?
-    \item Pre- and Postcondition
-    \item Outcome: valid, invalid, unknown
-  \end{itemize}
-%  \end{column}
-  %\pause
-  %\begin{column}{0.5\textwidth}
-  %  Technology
-  %  \begin{itemize}
-  %    \item An open-source software
-  %    \item Written in Solidity
-  %    \item Build on Ethereum blockchain
-  %  \end{itemize}
-  %\end{column}
-%\end{columns}
+\begin{itemize}
+  \item Pure Scala
+  \item Pre- and Postcondition
+  \item Outcome: valid, invalid, unknown
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}[fragile]
+\frametitle{Example: max}
+\begin{lstlisting}[language=Scala]
+def max(x: Int, y: Int): Int = {
+  require(0 <= x && 0 <= y)
+  val d = x - y
+  if (d > 0) x
+  else y
+} ensuring (res =>
+  x <= res && y <= res && (res == x || res == y))
+\end{lstlisting}
 \end{frame}
 
 
 \begin{frame}
-\frametitle{Properties to Verify}
+\frametitle{Properties}
 \begin{itemize}
   \item Bitcoin-S
   \item No Inflation Property
   \item Addition with Zero Property
 \end{itemize}
-%\pause
-%\begin{lstlisting}[language=Solidity]
-%contract DAO is DAOInterface {
-%  uint constant minProposalDebatePeriod = 2 weeks;
-%  uint public proposalDeposit;
-%  mapping (address => bool) public allowedRecipients;
-
-%  function DAO(uint _proposalDeposit) {
-%    proposalDeposit = _proposalDeposit;
-%    allowedRecipients[address(this)] = true;
-%  }
-%}
-%\end{lstlisting}
 \end{frame}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Process of Verification //TODO: change the title}
+\section{Problems}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
 \begin{frame}[fragile]
-\frametitle{Verifying No Inflation Property}
-\begin{itemize}
-  \item Validation of a Transaction with \textit{checkTransaction}
-  \item Integration of Stainless
-  \item Adjusting the Property
-  \item Bug in \textit{checkTransaction}
-\end{itemize}
-\pause
+\frametitle{Rewrite Code: Turning Object into Case Object}
+This:
 \begin{lstlisting}[language=Scala]
-  val prevOutputTxIds = transaction.inputs.map(_.previousOutput.txId)
-  val noDuplicateInputs = prevOutputTxIds.distinct.size == prevOutputTxIds.size
+object Satoshis extends BaseNumbers[Satoshis] {
+  val zero = Satoshis(Int64.zero)
+  val one = Satoshis(Int64.one)
+}
+\end{lstlisting}
+
+Becomes this:
+\begin{lstlisting}[language=Scala]
+case object Satoshis extends BaseNumbers[Satoshis] {
+  val zero = Satoshis(Int64.zero)
+  val one = Satoshis(Int64.one)
+}
 \end{lstlisting}
 \end{frame}
 
 
-\begin{frame}
-\frametitle{Bugfix}
-\centering
-\includegraphics[width=\textwidth,height=0.8\textheight,keepaspectratio]{assets/bitcoin-s-pr.png}
-\end{frame}
-
-
 \begin{frame}[fragile]
-\frametitle{Verifying Addition with Zero}
-\begin{itemize}%[<1-2>]
-  \item Datatype Satoshis
-  \item Method for Verification
-  \begin{lstlisting}[language=Scala, numbers=none]
-    +(c: CurrencyUnit): CurrencyUnit
-  \end{lstlisting}
-  \item Rewriting 2 Classes in Pure Scala
-\end{itemize}
-\end{frame}
-
-
-\begin{frame}
-\frametitle{Rewriting the code}
-\end{frame}
-
-
-\begin{frame}[fragile]
-\frametitle{Formal Specification}
+\frametitle{Rewrite Code: BigInt \&-Function to Bound Check}
+This:
 \begin{lstlisting}[language=Scala]
-  override def +(c: CurrencyUnit): CurrencyUnit = {
-    require(c.satoshis == Satoshis.zero)
-    Satoshis(satoshis.underlying + c.satoshis.underlying)
-  } ensuring(res => res.satoshis == this.satoshis)
+sealed abstract class Number {
+  def andMask: BigInt
+  def checkResult(result: BigInt): BigInt = {
+    require((result & andMask) == result)
+    result
+  }
+}  
+\end{lstlisting}
+Becomes this:
+\begin{lstlisting}[language=Scala]
+sealed abstract class Number {
+  def checkResult(result: BigInt): BigInt = {
+    require(
+      result <= BigInt("9223372036854775807") &&
+      result >= BigInt("-9223372036854775808")
+    )
+    result
+  }
+}
 \end{lstlisting}
 \end{frame}
+
+\begin{frame}[fragile]
+\frametitle{Rewrite Code: Getting Rid of Abstract Type Member}
+This:
+\begin{lstlisting}[language=Scala]
+sealed abstract class CurrencyUnit {
+  type A
+
+  protected def underlying: A
+}
+
+sealed abstract class Satoshis extends CurrencyUnit  
+\end{lstlisting}
+
+Becomes this:
+\begin{lstlisting}[language=Scala]
+  ???
+\end{lstlisting}
+\end{frame}
+
+
+% \begin{frame}[fragile]
+% \frametitle{Formal Specification}
+% \begin{lstlisting}[language=Scala]
+%   override def +(c: CurrencyUnit): CurrencyUnit = {
+%     require(c.satoshis == Satoshis.zero)
+%     Satoshis(satoshis.underlying + c.satoshis.underlying)
+%   } ensuring(res => res.satoshis == this.satoshis)
+% \end{lstlisting}
+% \end{frame}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -153,6 +165,14 @@
 \frametitle{Output of Stainless}
 \centering
 \includegraphics[width=\textwidth,height=0.8\textheight,keepaspectratio]{assets/final_verify_output.png}
+\end{frame}
+
+\begin{frame}
+\frametitle{Lessons Learned}
+\begin{itemize}
+  \item Write Verifiable Code
+  \item We Verified Not Original Bitcoin-S Code
+\end{itemize}
 \end{frame}
 
 
