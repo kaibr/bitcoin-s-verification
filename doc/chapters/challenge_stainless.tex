@@ -2,7 +2,7 @@
 \label{chap:appendix_arb}
 
 In this chapter we look at the practical challenges that could occur by using Stainless.
-Since Stainless is still in development and there is no 1.x release there might still be breaking changes and improvements fixing problems discribed now.
+Since Stainless is still in development and there is no 1.x release there might still be breaking changes and improvements fixing problems described now.
 
 
 \section{sbt vs JAR}
@@ -52,7 +52,7 @@ The bigger problem is, due to the different Scala and sbt versions, the error me
 \end{verbatim}
 
 Downgrading Bitcoin-S sbt version to 0.13.17 fixes the error but then it can not load some libraries only compiled for newer versions.
-So this would take too much time to fix and changes the Bitcoin-S code unwantingly.
+So this would take too much time to fix and changes the Bitcoin-S code inadvertent.
 
 The next approach is to use stainless cli instead of sbt.
 Running stainless on all source files does not work, because the dependencies are missing.
