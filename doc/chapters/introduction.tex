@@ -95,24 +95,26 @@ We will rewrite the code to Pure Scala, because Bitcoin-S is not written in it.
 
 \subsection{No Inflation Property}
 \label{property_1}
-The decision to verify this property was inspired by the bug found in Bitcoin Core in September 2018  \cite{cve201817144} which could allow to spend the same unspent transaction output (UTXO) in a transaction multiple times.
-Hence, new coins could be created out of thin air.
-Thus, the property, that a non-coinbase transaction cannot generate new coins, is chosen to be verified in this work.
-We call it here as the No Inflation Property.
 
-As we can see later in chapter \ref{chap:verify_check}, we must rewrite the huge fragment of the code implementing this property.
+The decision to verify this property was inspired by the bug found in Bitcoin Core in September 2018  \cite{cve201817144} which allowed to spend the same unspent transaction output (UTXO) in a transaction multiple times.
+Hence, new coins could be created out of the air.
+Thus, we try to verify the property, that a non-coinbase transaction cannot generate new coins.
+Lets name it the \nameref{property_1}.
+
+As we can see later in chapter \ref{chap:verify_check}, we must rewrite a huge part of the code implementing this property.
 This reimplementation into Pure Scala needs a lot of time.
 So, we adjust the plan and verify another functionality of Bitcoin-S.
-Nevertheless, during the analysis of the No Inflation Property we have detected and fixed a bug in Bitcoin-S, what is described in section \ref{sec:bugfix}. 
+Nevertheless, during the analysis of the \nameref{property_1} we look at a bug in Bitcoin-S found during this work and see the code changes for the bugfix in section \ref{sec:bugfix}. 
 
 
 \subsection{Addition with Zero Property}
 \label{property_2}
-In Bitcoin-S there is a datatype Satoshis representing an amount of bitcoins.
-We verify the addition of Satoshis with zero Satoshis.
-This operation should result in the same amount of Satoshis.
-We call it in the work as the Addition with Zero Property.
 
-Using Stainless, we successfully verify this property.
+In Bitcoin-S there is a class Satoshis representing an amount of bitcoins.
+We look at the verification of the addition of Satoshis with zero Satoshis.
+This operation should result in the same amount of Satoshis.
+Lets call it the \nameref{property_2}.
+
+Using Stainless, we see the successfull verification of this property.
 But the process of the verification with the tool requires many changes in the code, so that Stainless can accept it.
 We look at all needed modifications in chapter \ref{chap:verify_add}.
