@@ -53,7 +53,7 @@ Stainless output:
 Here, we can just change the objects from object to case object.
 Stainless recommendation is to use objects for modules and case objects as algebraic data type.
 
-This is, due to the internal design of Scala and Java.
+This is, due to the internal design of Scala.
 It's possible to reason about case object but not about object.
 This needs a fundamental knowledge of Scala and some functional paradigms that should not be part of this thesis.
 The \href{https://github.com/epfl-lara/stainless/issues/520}{issue \mypound520} on Stainless GitHub gives some thoughts if you want to know more.
@@ -83,15 +83,18 @@ Simplified code.
     protected def underlying: A
   }
 
-  sealed abstract class Satoshis extends CurrencyUnit
+  sealed abstract class Satoshis extends CurrencyUnit {
+    override type A = Int64
+  }
 \end{lstlisting}
 
 What happens, if we typify CurrencyUnit with A, meaning to make it generic with type A?
 
-Satoshis extends CurrencyUnit with type Int64, so it is of type CurrencyUnit[Int64].
-That's too specific, because the addition would require CurrencyUnits of type CurrencyUnit[A] not CurrencyUnit[Int64].
+Satoshis extends CurrencyUnit with type Int64, so it would be of type CurrencyUnit[Int64].
+That's too specific, because the return type of the addition is then CurrencyUnit[Int64] not CurrencyUnit[A].
+Maybe the Bitcoin-S developers should reimplement this part and not use Satoshis directly.
 
-Since there is no easy way to fix it and the code should stay as much as possible the original, we just remove the abstract type and fixed it to Int64.
+Since there is no easy way to fix it and the code should stay as much as possible the original, we just remove the abstract type and set it to Int64.
 This limits the verification a bit, but as we only want to verify the addition in satoshis, that's OK.
 
 
