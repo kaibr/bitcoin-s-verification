@@ -111,6 +111,32 @@ case object Satoshis extends BaseNumbers[Satoshis] {
 
 
 \begin{frame}[fragile]
+\frametitle{Rewrite Code: Getting Rid of Abstract Type Member}
+This:
+\begin{lstlisting}[language=Scala]
+sealed abstract class CurrencyUnit {
+  type A
+
+  protected def underlying: A
+}
+
+sealed abstract class Satoshis extends CurrencyUnit {
+  override type A = Int64
+}
+\end{lstlisting}
+
+Becomes this:
+\begin{lstlisting}[language=Scala]
+sealed abstract class CurrencyUnit {
+  protected def underlying: Int64
+}
+
+sealed abstract class Satoshis extends CurrencyUnit
+\end{lstlisting}
+\end{frame}
+
+
+\begin{frame}[fragile]
 \frametitle{Rewrite Code: BigInt \&-Function to Bound Check}
 This:
 \begin{lstlisting}[language=Scala]
@@ -133,25 +159,6 @@ sealed abstract class Number {
     result
   }
 }
-\end{lstlisting}
-\end{frame}
-
-\begin{frame}[fragile]
-\frametitle{Rewrite Code: Getting Rid of Abstract Type Member}
-This:
-\begin{lstlisting}[language=Scala]
-sealed abstract class CurrencyUnit {
-  type A
-
-  protected def underlying: A
-}
-
-sealed abstract class Satoshis extends CurrencyUnit  
-\end{lstlisting}
-
-Becomes this:
-\begin{lstlisting}[language=Scala]
-  ???
 \end{lstlisting}
 \end{frame}
 
