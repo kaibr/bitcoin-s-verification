@@ -2,14 +2,14 @@
 \label{chap:verify_check}
 
 This chapter describes the part of Bitcoin-S needed to verify the \nameref{property_1} described before.
-We are going to create a transaction and show you the relevant parts of the method checkTransaction, where transactions are checked against some properties.
+We are going to create a transaction and show the relevant parts of the method \texttt{checkTransaction}, where transactions are checked against some properties.
 Then, we will see the bug in Bitcoin-S found during this work and its fix.
 In the end we see why the \nameref{property_1} needed to be changed to the \nameref{property_2}.
 
 
 \section{Creation of a Transaction}
 
-Some code in this section is copied or adapted from Bitcoin-S-Core transaction builder example.\cite{BitcoinSCore:txbuilderexample}
+Some code in this section is copied or adapted from the Bitcoin-S-Core transaction builder example \cite{BitcoinSCore:txbuilderexample}.
 Bitcoin-S-Core has a bitcoin transaction builder class with the following constructor:
 \begin{lstlisting}[language=scala]
   BitcoinTxBuilder(
@@ -21,12 +21,12 @@ Bitcoin-S-Core has a bitcoin transaction builder class with the following constr
   ): Future[BitcoinTxBuilder]
 \end{lstlisting}
 
-The return type Future does not make sense here, since the implementing constructor calls either Future.successful or Future.fromTry which returns an already resolved Future.
+The return type Future does not make sense here, since the implementation calls either Future.successful or Future.fromTry which returns an already resolved Future.
 This might be for future purposes.
 
 Now we create a transaction.
 
-First, we need a some money.
+First, we need some money.
 Thus, we create a fake transaction with one single output.
 This transaction can be parsed from the bitcoin network, but we create one manually in order to see this process.
 \begin{lstlisting}[language=scala]
@@ -89,7 +89,7 @@ For the sake of convenience we create only one.
 We spend 5000 satoshis to the newly created random public key.
 
 Finally, we define the fee rate in satoshis per one byte transaction size as well as some bitcoin network parameters.
-The bitcoin network parameters are not important, so we use some static values for testing purpose.
+The bitcoin network parameters are not important, so we use some static values normally used when testing.
 \begin{lstlisting}[language=scala]
   val feeRate = SatoshisPerByte(Satoshis.one)
 
@@ -126,9 +126,9 @@ This is its type signature:
   checkTransaction(transaction: Transaction): Boolean
 \end{lstlisting}
 
-We can pass a transaction and it returns a Boolean whether the transaction is valid or not.
-So for example when we pass the transaction built before the returned value would be true, because it's a valid transaction.
-It might not be accepted by the bitcoin network but for a transaction on its own its valid.
+We can pass a transaction and it returns a Boolean indicating whether the transaction is valid or not.
+So for example when we pass the transaction we built before the returned value would be true, because it's a valid transaction.
+It might not be accepted by the bitcoin network but for a transaction on its own it's valid.
 We can not check context with it, because we can only pass one transaction.
 
 There are several checks in checkTransaction.
@@ -158,13 +158,13 @@ We can see that there is a bug in the checkTransaction function from before, rec
 	\label{fig:output1}
 \end{figure}
 
-Here the relevant code of checkTransaction again:
+Here is the relevant code of checkTransaction again:
 \begin{lstlisting}[language=scala]
   val prevOutputTxIds = transaction.inputs.map(_.previousOutput.txId)
   val noDuplicateInputs = prevOutputTxIds.distinct.size == prevOutputTxIds.size
 \end{lstlisting}
 
-What happens, if we have two TransactionOutPoints (previousOutputs) with a different index but referencing the same Transaction ID (txId)?
+What happens if we have two TransactionOutPoints (previousOutputs) with a different index but referencing the same Transaction ID (txId)?
 
 According to the Bitcoin protocol this is possible.
 A transaction can have multiple outputs that should be referenceable by the next transaction.
@@ -190,16 +190,16 @@ Since TransactionOutPoint is a case class and Scala has a built in == for case c
 	\label{fig:output1}
 \end{figure}
 
-This was fixed in \href{https://github.com/bitcoin-s/bitcoin-s/pull/435}{pull request \mypound435} on GitHub at April 23, 2019, through this work along a unit test to prevent this bug from appearing again in the future.
+This was fixed in \href{https://github.com/bitcoin-s/bitcoin-s/pull/435}{pull request \mypound435} on GitHub at April 23, 2019, through this work along with a unit test to prevent this bug from appearing again in the future.
 
 
 \section{Adjusting No Inflation Property}
 
 Trying to integrate Stainless in Bitcoin-S caused a lot of troubles, mainly because of version conflicts.
-You can find more about it in chapter \ref{chap:appendix_arb}.
+For more details see chapter \ref{chap:appendix_arb}.
 
 After integrating Stainless in Bitcoin-S, there were many errors.
-It takes too much time to fix them all so it should be easier to extract the classes needed for checkTransaction.
+It takes too much time to fix them all so it should be easier to extract the classes needed for the \texttt{checkTransaction} function.
 
 The extracted code has more than 1500 lines.
 After running Stainless on it, it still throws a huge bunch of errors about what Stainless can not reason about.

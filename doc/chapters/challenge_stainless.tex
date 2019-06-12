@@ -7,22 +7,22 @@ Since Stainless is still in development and there is no 1.x release there might 
 
 \section{sbt vs JAR}
 
-We can either use the sbt plugin or a JAR file to check the code with Stainless.
+We can either use the sbt plugin or a JAR file to check code with Stainless.
 
 Invoking the JAR on our source code Stainless will verify it.
 If we have a bigger project, this becomes really tricky, because we must pass all files needed including the dependencies.
 This is in contrast to the sbt plugin, where we can integrate Stainless in our compilation process.
 When we call compile, Stainless verifies the code and stops the compilation if the verification fails.
 
-Having a fixed version configured in the sbt build file, every developer has the same Stainless features available.
+Having a static version configured in the sbt build file, every developer has the same Stainless features available.
 This should prevent incompatibility with new or deprecated features when we use different plugins.
 
 So the sbt plugin has clear advantages over the JAR file since its integrated directly.
 We do not have to download it manually and find the right version and if we bump the version we can just edit it in the build file and every developer is on the same version again.
 
-However, there are some drawbacks currently.
+However, currently there are some drawbacks.
 For example the sbt plugin does not always report errors.
-We will read more about that shortly.
+We will see more about that shortly.
 
 
 \section{Integration}
@@ -42,7 +42,7 @@ Bitcoin-S-Core uses sbt 1.2.8 and Scala 2.12.8, while Stainless sbt plugin is on
 Sbt introduced new features in the 1.x release used by Bitcoin-S.
 Most of them can be written the sbt 0.13.17 way.
 
-The bigger problem is, due to the different Scala and sbt versions, the error message, after trying to go in a sbt shell.
+The bigger problem is, due to the different Scala and sbt versions, the following error after trying to go in a sbt shell:
 \begin{verbatim}
   [warn] There may be incompatibilities among your library dependencies; run 'evicted'
          to see detailed eviction warnings.
@@ -52,10 +52,10 @@ The bigger problem is, due to the different Scala and sbt versions, the error me
 \end{verbatim}
 
 Downgrading Bitcoin-S sbt version to 0.13.17 fixes the error but then it can not load some libraries only compiled for newer versions.
-So this would take too much time to fix and changes the Bitcoin-S code inadvertent.
+So this would take too much time to fix and changes the Bitcoin-S code inadvertently.
 
-The next approach is to use stainless cli instead of sbt.
-Running stainless on all source files does not work, because the dependencies are missing.
+The next approach is to use the stainless cli instead of sbt.
+Running stainless on all source files does not work, because dependencies are missing.
 The parameter \emph{-classpath} can resolve it but the value of this parameter must be the paths to all the dependencies separated by a ':'.
 Finally, \emph{core} depends on \emph{secp256k1jni}, another package of Bitcoin-S written in Java.
 So this needs to be in the source files to.
@@ -69,7 +69,7 @@ The final command looks like this in \emph{core} folder of Bitcoin-S:
 \end{lstlisting}
 
 \emph{.ivy2} is the dependency cache of sbt.
-The \emph{tr} replaces the first char with the second so '\\n' with either ':' or ' '.
+The \emph{tr} replaces the first char with the second so a newline with either ':' or ' '.
 
 With this command, Stainless throws the next error:
 \begin{verbatim}
@@ -84,13 +84,13 @@ With this command, Stainless throws the next error:
 
 So we can not know how many errors will face us.
 Let's go another way, because the errors may take too much time and it might lead to a next error.
-We extract the code needed to verify a transaction mainly the class Transaction and ScriptInterpreter with many other classes their depending on.
+We extract the code needed to verify a transaction mainly the class Transaction and ScriptInterpreter with many other classes they're depending on.
 
-After this extraction Stainless was successfully integrated with both, sbt and JAR.
+After this extraction Stainless was successfully integrated with both sbt and JAR.
 
 Running \code{sbt compile} in the project with Stainless ended without error.
 But it also ended with no output.
-So we can not able to change the code so Stainless would accept it since we do not know what to change.
+So we are not able to change the code so Stainless would accept it since we do not know what to change.
 
 So the sbt plugin does not always complain where the JAR file did.
 The open \href{https://github.com/epfl-lara/stainless/issues/484}{issue \mypound484 on GitHub} might describe exactly this error.

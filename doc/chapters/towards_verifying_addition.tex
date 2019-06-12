@@ -1,7 +1,7 @@
 \chapter{Towards Verifying the Addition with Zero Property}
 \label{chap:verify_add}
 
-After realizing, that it would consume too much time to rewrite the Bitcoin-S code and even the extracted part with checkTransaction, the smallest unit in Bitcoin-S-Core that is worthwhile to verify was extracted.
+After realizing that it would consume too much time to rewrite the Bitcoin-S code and even the extracted part with checkTransaction, the smallest unit in Bitcoin-S-Core that is worthwhile to verify was extracted.
 This could be the addition of two CurrencyUnits.
 To make it even easier, the addition of CurrencyUnits with zero.
 CurrencyUnits is an abstract class in Bitcoin-S, representing currencies like Satoshis.
@@ -51,9 +51,9 @@ Stainless output:
 \end{verbatim}}
 
 Here, we can just change the objects from object to case object.
-Stainless recommendation is to use objects for modules and case objects as algebraic data type.
+Stainless recommendation is to use objects for modules and case objects as algebraic data types.
 
-This is, due to the internal design of Scala.
+This is due to the internal design of Scala.
 It's possible to reason about case object but not about object.
 This needs a fundamental knowledge of Scala and some functional paradigms that should not be part of this thesis.
 The \href{https://github.com/epfl-lara/stainless/issues/520}{issue \mypound520} on Stainless GitHub gives some thoughts if you want to know more.
@@ -70,7 +70,7 @@ Stainless output:
 
 This should be easy to rewrite by using generics instead of an abstract type, right?
 Unfortunately not.
-The problem is, CurrencyUnit uses one of its implementing class Satoshis.
+The problem is, CurrencyUnit uses one of its implementing classes: Satoshis.
 
 Simplified code.
 \begin{lstlisting}[language=scala]
@@ -110,7 +110,7 @@ Stainless output:
 As described before, Stainless supports only a subset of Scala.
 The BigInt from the Stainless library is a bit restricted.
 One such restriction is, that BigInt does not support dynamic BigInt construction.
-Thus, the constructor parameter of BitInt must be a literal arguments.
+Thus, the constructor parameter of BitInt must be a literal argument.
 
 Again, a simplified code version.
 \begin{lstlisting}[language=scala]
@@ -120,11 +120,11 @@ Again, a simplified code version.
   }
 \end{lstlisting}
 
-This would be really hard to refactor, because Bitcoin-S tries to be as much dynamic as possible so it can be used with other cryptocurrencies than bitcoins.
-Maybe it would even be impossible, because they need to parse dynamic values from the bitcoin network.
+This would be really hard to refactor, because Bitcoin-S tries to be as dynamic as possible so it can be used with cryptocurrencies other than bitcoins.
+Maybe it could be impossible, because they need to parse dynamic values from the bitcoin network.
 
-Luckily, we can use toBigInt on underlying directly instead of going over toLong.
-So, instead of converting the underlying to Long and and back to BigInt we convert underlying directly to BigInt.
+Luckily, we can use toBigInt on the field \texttt{underlying} directly instead of toLong.
+So, instead of converting the underlying to Long and back to BigInt we convert underlying directly to BigInt.
 
 After fixing all Stainless errors, a new error appears.
 
@@ -139,15 +139,15 @@ Stainless output:
 \end{verbatim}}
 
 This is a missing feature in Stainless.
-It does not support upper type bound on the class itself.
+It does not support upper type boundaries on the class itself.
 To track this, \href{https://github.com/epfl-lara/stainless/issues/519}{issue \mypound519} was created on GitHub during this work.
 \begin{lstlisting}[language=scala]
   sealed abstract class Number[T <: Number[T]] extends BasicArithmetic[T]  
 \end{lstlisting}
 
-For the sake of convenience we make this a concrete type by replacing T with Int64.
+Despite this, in order to be able to continue, we make this a concrete type by replacing T with Int64.
 Int64,  because Satoshis uses only Int64.
-There are other number typs like UInt16 but for our property we don't need them.
+There are other number types like UInt16 but for our property we don't need them.
 
 Now, there are two new errors.
 
@@ -163,8 +163,8 @@ Stainless output:
 \end{verbatim}}
 
 This is easy.
-We just replace all occurrence of A with BigInt, since A is not overrode in an implementing class.
-This is not exact the same code, because an implementing class can not override A anymore but that's fine for our verification.
+We just replace all occurrence of A with BigInt, since A is not overwritten in an implementing class.
+This is not the exact same code, because an implementing class can not override A anymore but that's fine for our verification.
 
 This was a missing feature in Stainless that was fixed on Mai 28, 2019 with \href{https://github.com/epfl-lara/stainless/pull/470}{pull request \mypound470} on GitHub.
 Now it should work without this change.
@@ -196,8 +196,8 @@ Simplified code:
   }
 \end{lstlisting}
 
-This is a bound check.
-It checks, if the result of the addition is in range of the specified type, which is now the hard coded Int64.
+This is a bounds check.
+It checks if the result of the addition is in range of the specified type, which is now the hard coded Int64.
 
 So, we can replace the \& mask with a bound check whether the result is in range of Long.MinValue and Long.MaxValue, because Int64 has the same 64-bit range as Long.
 Again the code gets a bit more static and it's not the exact same code anymore.
@@ -250,7 +250,7 @@ Stainless output:
 \end{verbatim}}
 
 Seems like Stainless does not support the second string parameter of require or at least it throws a warning about it.
-We can safely remove the string parameters from the requires, since they only serve as error message.
+We can safely remove the string parameters from the requires, since they only serve as error messages.
 
 A new error appears.
 
@@ -272,7 +272,7 @@ So we search for all Long values in the code.
 \end{lstlisting}
 
 Looks like it can not compare a BigInt with a Long value.
-We can easily convert this Long value to a BigInt with string literal parameter by passing this numbers as strings to the BigInt constructor.
+We can easily convert this Long value to a BigInt with a string literal parameter by passing these numbers as strings to the BigInt constructor.
 
 Finally, we get some output from Stainless about the verification in the code.
 {\footnotesize\begin{verbatim}
@@ -287,7 +287,7 @@ Finally, we get some output from Stainless about the verification in the code.
 [  Info  ] total: 5  valid: 4  (4 from cache) invalid: 1  unknown: 0  time:  1.317
 \end{verbatim}}
 
-This show, that there is an invalid specification in checkResult and Stainless prints a counterexample for it.
+This shows that there is an invalid specification in checkResult and Stainless prints a counterexample for it.
 
 Let's ignore this for a moment and write the specification for the \nameref{property_2}.
 

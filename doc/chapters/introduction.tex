@@ -27,15 +27,15 @@ The main functions used to write a specification are \textit{require} and \texti
 
 With \textit{require} we define a precondition of a function, which we want to verify.
 \textit{require} is placed at the beginning of the function body.
-\textit{require} specifies, if the parameter of the function hold a certain condition.
+\textit{require} specifies, if the parameter of the function holds against a certain condition.
 
 With \textit{ensuring}, we define the postcondition of a function.
 \textit{ensuring} is placed at the end of the function after the body.
-\textit{ensuring} specifies, if the return value or the result of the function hold a certain condition.
+\textit{ensuring} specifies, if the return value or the result of the function satisfies a certain condition.
 
 On invoking Stainless, it tries to prove that the postcondition always holds, assuming the given precondition does hold.
 
-The following example demonstrates a simple formal specification for the function calculating factorial.
+The following example demonstrates a simple formal specification for the function calculating a factorial.
 This is a modified example from the section \href{https://epfl-lara.github.io/stainless/intro.html}{Introduction} of the Stainless documentation \cite{Stainless:documentation}, so Stainless reports an error verifying it.
 \begin{lstlisting}[language=Scala]
   def factorial(n: Int): Int = {
@@ -48,7 +48,7 @@ This is a modified example from the section \href{https://epfl-lara.github.io/st
   } ensuring(res => res >= 0)
 \end{lstlisting}
 
-It recursively calculates factorial of an integer number.
+It recursively calculates the factorial of an integer number.
 The input of the function is constrained with \textit{require} to a non-negative value.
 The result should also be non-negative.
 Thus, Stainless will verify whether the result of the factorial calculation is non-negative for all non-negative inputs.
@@ -75,12 +75,12 @@ Due to an overflow in the 32 bit Int the result becomes a negative value.
 The program would work correct by changing the type from Int to BigInt.
 
 Stainless supports only a subset of Scala.
-They call is Pure Scala.
+They call this Pure Scala.
 You can find the specification of Pure Scala on the Stainless documentation website \cite{Stainless:documentation} in the section \href{https://epfl-lara.github.io/stainless/purescala.html}{Pure Scala}.
 
-In addition, Stainless has its own library with annotations, reimplementaion of some core data types, collections and input-output functions and more.
+In addition, Stainless has its own library with annotations, reimplementation of some core data types, collections and input-output functions and more.
 Some of them are described on the website in the section \href{https://epfl-lara.github.io/stainless/library.html}{Stainless Library}.
-There are more details about library in the source code of Stainless on GitHub \cite{Stainless:github} in the folder \href{https://github.com/epfl-lara/stainless/tree/master/frontends/library/stainless}{\textit{frontends/library/stainless}}.
+There are more details about the library in the source code of Stainless on GitHub \cite{Stainless:github} in the folder \href{https://github.com/epfl-lara/stainless/tree/master/frontends/library/stainless}{\textit{frontends/library/stainless}}.
 
 Stainless verifies Scala programs using SMT (satisfiability modulo theories) solvers. 
 
@@ -90,7 +90,7 @@ Stainless verifies Scala programs using SMT (satisfiability modulo theories) sol
 Bitcoin-S is a large project found on GitHub implementing many functionalities.
 In this work we look at two of them, namely the \nameref{property_1} and the \nameref{property_2} described shortly.
 Thus, we go through the relevant code parts to verify those properties, look at some challenges with Stainless and see why we should write software with verification in mind.
-We will rewrite the code to Pure Scala, because Bitcoin-S is not written in it.
+In order to be able to verify Bitcoin-S, we have to rewrite parts of it in the subset of Scala supported by Stainless.
 
 
 \subsection{No Inflation Property}
@@ -110,7 +110,7 @@ Nevertheless, during the analysis of the \nameref{property_1} we look at a bug i
 \subsection{Addition with Zero Property}
 \label{property_2}
 
-In Bitcoin-S there is a class Satoshis representing an amount of bitcoins.
+In Bitcoin-S there is a class \texttt{Satoshis} representing an amount of bitcoins.
 We look at the verification of the addition of Satoshis with zero Satoshis.
 This operation should result in the same amount of Satoshis.
 Let's call it the \nameref{property_2}.
