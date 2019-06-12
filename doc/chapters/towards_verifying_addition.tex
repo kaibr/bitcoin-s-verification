@@ -109,8 +109,8 @@ Stainless output:
 
 As described before, Stainless supports only a subset of Scala.
 The BigInt from the Stainless library is a bit restricted.
-It does not support dynamic BigInt construction.
-Only from literal arguments.
+One such restriction is, that BigInt does not support dynamic BigInt construction.
+Thus, the constructor parameter of BitInt must be a literal arguments.
 
 Again, a simplified code version.
 \begin{lstlisting}[language=scala]
@@ -120,10 +120,11 @@ Again, a simplified code version.
   }
 \end{lstlisting}
 
-This would be really hard to refactor, because Bitcoin-S tries to be as much dynamic as possible so it can be used with other cryptocurrencies than bitcoins too.
-Maybe it would even be impossible, because they need to parse a lot from the bitcoin network.
+This would be really hard to refactor, because Bitcoin-S tries to be as much dynamic as possible so it can be used with other cryptocurrencies than bitcoins.
+Maybe it would even be impossible, because they need to parse dynamic values from the bitcoin network.
 
 Luckily, we can use toBigInt on underlying directly instead of going over toLong.
+So, instead of converting the underlying to Long and and back to BigInt we convert underlying directly to BigInt.
 
 After fixing all Stainless errors, a new error appears.
 
