@@ -19,7 +19,7 @@
 
 \raggedbottom
 \KOMAoptions{cleardoublepage=plain}			% Add header and footer on blank pages
-
+\providecommand{\versiondate}{2019-06-13}
 
 % Load Standard Packages:
 %---------------------------------------------------------------------------
@@ -65,7 +65,7 @@
 \setlength{\TPHorizModule}{1mm}
 \setlength{\TPVertModule}{1mm}
 %---------------------------------------------------------------------------					
-			
+
 % Definition of Colors
 %---------------------------------------------------------------------------
 \RequirePackage{color}                          % Color (not xcolor!)
@@ -128,9 +128,9 @@
 %
 % for futher informations go to http://ewus.de/tipp-1029.html
 %---------------------------------------------------------------------------
-\usepackage[nonumberlist]{glossaries}
-\makeglossaries
-\include{database/glossary}
+% \usepackage[nonumberlist]{glossaries}
+% \makeglossaries
+% \include{database/glossary}
 %---------------------------------------------------------------------------
 
 % Intro:
@@ -141,7 +141,7 @@
 %---------------------------------------------------------------------------
 
 \input{leader/title}					% Titel der Arbeit aus Datei titel.tex lesen
-\input{leader/version}				% Versionsnummer und -datum aus Datei version.tex lesen
+% \input{leader/version}				% Versionsnummer und -datum aus Datei version.tex lesen
 
 % Set up header and footer
 %---------------------------------------------------------------------------
@@ -153,7 +153,7 @@
 \fancyhf{}																		% clean all fields
 \fancypagestyle{plain}{												% new definition of plain style	
 	\fancyfoot[OR,EL]{\footnotesize \thepage} 	% footer right part --> page number
-	\fancyfoot[OL,ER]{\footnotesize \heading, Version \versionnumber, \versiondate}	% footer even page left part 
+	\fancyfoot[OL,ER]{\footnotesize \heading}	% footer even page left part 
 }
 
 \renewcommand{\chaptermark}[1]{\markboth{\thechapter.  #1}{}}
