@@ -222,9 +222,10 @@ Simplified:
   }
 \end{lstlisting}
 
-This is an easy to fix.
+This is easy to fix.
 We just extract the private class out of the object.
-This is not exactly the same code but since the class is still private it can not be extended outside of the file.
+This is not exactly the same code, because other classes in the same file could now access the private class.
+But for our property it does not change anything.
 
 Now we get some weird warnings about require.
 
@@ -249,7 +250,7 @@ Stainless output:
 \end{verbatim}}
 
 Seems like Stainless does not support the second string parameter of require or at least it throws a warning about it.
-We can safely remove it.
+We can safely remove the string parameters from the requires, since they only serve as error message.
 
 A new error appears.
 
@@ -262,7 +263,7 @@ Stainless output:
 \end{verbatim}}
 
 This error is hard to understand, but we can see that there is a missing Long to BigInt conversion.
-So we search for all longs in the code.
+So we search for all Long values in the code.
 \begin{lstlisting}[language=scala]
   private case class Int64Impl(underlying: BigInt) extends Int64 {
     require(underlying >= -9223372036854775808L)
@@ -271,7 +272,7 @@ So we search for all longs in the code.
 \end{lstlisting}
 
 Looks like it can not compare a BigInt with a Long value.
-We can easily convert this Long value to a BigInt with string literals parameter.
+We can easily convert this Long value to a BigInt with string literal parameter by passing this numbers as strings to the BigInt constructor.
 
 Finally, we get some output from Stainless about the verification in the code.
 {\footnotesize\begin{verbatim}
@@ -286,9 +287,9 @@ Finally, we get some output from Stainless about the verification in the code.
 [  Info  ] total: 5  valid: 4  (4 from cache) invalid: 1  unknown: 0  time:  1.317
 \end{verbatim}}
 
-This show, that there is an invalid specification in checkResult and Stainless prints a counter example for it.
+This show, that there is an invalid specification in checkResult and Stainless prints a counterexample for it.
 
-Let's ignore this for a moment and write the verification for our addition with zero.
+Let's ignore this for a moment and write the specification for the \nameref{property_2}.
 
 
 \section{Writing Specification for Verification}
