@@ -1,13 +1,15 @@
 \chapter{Conclusion}
 \label{chap:conclusion}
 
-As we saw, it is really hard to verify software not written with verification in mind.
-It needs a lot of changes in the software because verification is mathematical and the current software is written mostly in object-oriented style.
+Because of the limitations of the verication tool, we could only verify a rewritten version of the original Bitcoin-S code.
+So we can not guarantee the correctness of the addition of Satoshis with zero in Bitcoin-S.
+Not all changes we made were as trivial as the replacement of objects with case objects.
+For these non-trivial changes, as seen for example the bound check in section \ref{sec:bound_check}, we cannot say whether they are equivalent to the original implementation or not.
+
+So code should be written specically with formal verication in mind, in order to successfully verify it.
+Otherwise, it needs a lot of changes in the software because verification is mathematical and the current software is written mostly in object-oriented style.
 Software written in the functional paradigm would be much easier to reason about.
 
 Thus, either Stainless must find ways to translate more of built-in object-oriented patterns of Scala to their verification tool or developers must invest more in functional programming.
 
-The code we verified in the previous chapter is not the original code from Bitcoin-S.
-So we can not guarantee the correctness of the addition of Satoshis with zero in Bitcoin-S.
-Not all changes we made were as trivial as the replacement of objects with case objects.
-For these non-trivial changes, as seen in section \ref{sec:bound_check}, we cannot say whether they are equivalent to the original implementation or not.
+Also, we found that trying to verify code reveals bugs as shown in section \ref{sec:bugfix}. Finally, our work led to some feedback to the Stainless developers to improve the tool.
