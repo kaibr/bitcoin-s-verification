@@ -140,12 +140,14 @@ Stainless output:
 
 This is a missing feature in Stainless.
 It does not support upper type bound on the class itself.
-To track this, there is the \href{https://github.com/epfl-lara/stainless/issues/519}{issue \mypound519} on GitHub.
+To track this, \href{https://github.com/epfl-lara/stainless/issues/519}{issue \mypound519} was created on GitHub during this work.
 \begin{lstlisting}[language=scala]
   sealed abstract class Number[T <: Number[T]] extends BasicArithmetic[T]  
 \end{lstlisting}
 
 For the sake of convenience we make this a concrete type by replacing T with Int64.
+Int64,  because Satoshis uses only Int64.
+There are other number typs like UInt16 but for our property we don't need them.
 
 Now, there are two new errors.
 
