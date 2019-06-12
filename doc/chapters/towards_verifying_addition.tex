@@ -164,9 +164,9 @@ Stainless output:
 
 This is easy.
 We just replace all occurrence of A with BigInt, since A is not overrode in an implementing class.
-This is not exact the same code, because an implementing class could not override A anymore but that's fine for our verification.
+This is not exact the same code, because an implementing class can not override A anymore but that's fine for our verification.
 
-This was a missing feature of Stainless that was fixed on Mai 28, 2019 with \href{https://github.com/epfl-lara/stainless/pull/470}{pull request \mypound470} on GitHub.
+This was a missing feature in Stainless that was fixed on Mai 28, 2019 with \href{https://github.com/epfl-lara/stainless/pull/470}{pull request \mypound470} on GitHub.
 Now it should work without this change.
 
 
@@ -181,7 +181,7 @@ Stainless output:
                     ^^^^^^^^^^^^^^^^
 \end{verbatim}}
 
-Due to the restrictions on BigInt, we can not use the \& function on.
+Due to the restrictions on BigInt, we can not use the \& function either.
 Simplified code:
 \begin{lstlisting}[language=scala]
   sealed abstract class Number extends BasicArithmetic[Int64] {
@@ -199,7 +199,7 @@ Simplified code:
 This is a bound check.
 It checks, if the result of the addition is in range of the specified type, which is now the hard coded Int64.
 
-So, we can replace the \& mask with a bound check whether the result is in range of Long.MinValue and Long.MaxValue.
+So, we can replace the \& mask with a bound check whether the result is in range of Long.MinValue and Long.MaxValue, because Int64 has the same 64-bit range as Long.
 Again the code gets a bit more static and it's not the exact same code anymore.
 
 Running Stainless produces again new errors.
