@@ -82,7 +82,6 @@ def max(x: Int, y: Int): Int = {
 \frametitle{Example: max}
 \begin{lstlisting}[language=Scala]
 def max(x: Int, y: Int): Int = {
-  require(0 <= x && 0 <= y)
   val d = x - y
   if (d > 0) x
   else y
@@ -97,9 +96,6 @@ def max(x: Int, y: Int): Int = {
 \frametitle{Example: max}
 {\small\begin{verbatim}
   [...     ]
-  [Warning ]  => INVALID
-  [Warning ] Found counter-example:[Warning ]   x: Int -> 1
-  [Warning ]   y: Int -> -2147483648
   [  Info  ]  - Result for 'postcondition' VC for max @2:3:
   [Warning ]  => INVALID
   [Warning ] Found counter-example:
@@ -138,6 +134,20 @@ def max(x: Int, y: Int): Int = {
 % \end{verbatim}
 \end{frame}
 
+\begin{frame}[fragile]
+  \frametitle{Example: max}
+  \begin{lstlisting}[language=Scala]
+  def max(x: Int, y: Int): Int = {
+    require(0 <= x && 0 <= y)
+    val d = x - y
+    if (d > 0) x
+    else y
+  } ensuring (res =>
+    x <= res && y <= res && (res == x || res == y))
+  \end{lstlisting}
+  \blfootnote{\url{https://epfl-lara.github.io/stainless/tutorial.html\#warm-up-max}}
+  \end{frame}
+  
 
 \begin{frame}
 \frametitle{Properties}
