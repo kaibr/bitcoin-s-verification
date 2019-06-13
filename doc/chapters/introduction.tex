@@ -93,7 +93,7 @@ Thus, we go through the relevant code parts to verify those properties, look at 
 In order to be able to verify Bitcoin-S, we have to rewrite parts of it in the subset of Scala supported by Stainless.
 
 
-\subsection{No Inflation Property}
+\subsection{No-Inflation Property}
 \label{property_1}
 
 The decision to verify this property was inspired by the bug found in Bitcoin Core in September 2018  \cite{cve201817144} which allowed to spend the same unspent transaction output (UTXO) in a transaction multiple times.
@@ -107,7 +107,7 @@ So, we adjust the plan and verify another functionality of Bitcoin-S.
 Nevertheless, during the analysis of the \nameref{property_1} we look at a bug in Bitcoin-S found during this work and see the code changes for the bugfix in section \ref{sec:bugfix}. 
 
 
-\subsection{Addition with Zero Property}
+\subsection{Addition-with-Zero Property}
 \label{property_2}
 
 In Bitcoin-S there is a class \texttt{Satoshis} representing an amount of bitcoins.
