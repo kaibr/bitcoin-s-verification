@@ -43,10 +43,12 @@
 
 \frame{\titlepage}
 
+
 \begin{frame}
   \frametitle{Table of Contents}
   \tableofcontents
 \end{frame}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Formal Verification}
@@ -225,20 +227,18 @@ sealed abstract class Number {
 \end{frame}
 
 
-% \begin{frame}[fragile]
-% \frametitle{Formal Specification}
-% \begin{lstlisting}[language=Scala]
-%   override def +(c: CurrencyUnit): CurrencyUnit = {
-%     require(c.satoshis == Satoshis.zero)
-%     Satoshis(satoshis.underlying + c.satoshis.underlying)
-%   } ensuring(res => res.satoshis == this.satoshis)
-% \end{lstlisting}
-% \end{frame}
+\begin{frame}[fragile]
+\frametitle{Formal Specification}
+\begin{lstlisting}[language=Scala]
+def +(c: CurrencyUnit): CurrencyUnit = {
+  require(c.satoshis == Satoshis.zero)
+  Satoshis(
+    satoshis.underlying + c.satoshis.underlying
+  )
+} ensuring(res => res.satoshis == this.satoshis)
+\end{lstlisting}
+\end{frame}
 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Conclusion}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{frame}
 \frametitle{Output of Stainless}
@@ -246,14 +246,24 @@ sealed abstract class Number {
 \includegraphics[width=\textwidth,height=0.8\textheight,keepaspectratio]{assets/final_verify_output.png}
 \end{frame}
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Conclusion}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
 \begin{frame}
 \frametitle{Conclusion}
 \begin{itemize}
   \item Write verifiable code
   \item We verified not original Bitcoin-S code
-  \item Found a bug in Bitcoin-S
   \item Provided feedback to Stainless developers
+  \item Found a bug in Bitcoin-S
 \end{itemize}
+\end{frame}
+
+\begin{frame}
+\frametitle{Found Bug in Bitcoin-S}
+\includegraphics[width=\textwidth,height=0.8\textheight,keepaspectratio]{assets/bitcoin-s-pr.png}
 \end{frame}
 
 
