@@ -165,7 +165,7 @@ def max(x: Int, y: Int): Int = {
 
 
 \begin{frame}[fragile]
-\frametitle{Rewrite Code: Turning Object into Case Object}
+\frametitle{Turning Object into Case Object}
 This:
 \begin{lstlisting}[language=Scala]
 object Satoshis extends BaseNumbers[Satoshis] {
@@ -185,7 +185,7 @@ case object Satoshis extends BaseNumbers[Satoshis] {
 
 
 \begin{frame}[fragile]
-\frametitle{Rewrite Code: Getting Rid of Abstract Type Member}
+\frametitle{Getting Rid of Abstract Type Member}
 This:
 \begin{lstlisting}[language=Scala]
 sealed abstract class CurrencyUnit {
@@ -211,7 +211,7 @@ sealed abstract class Satoshis extends CurrencyUnit
 
 
 \begin{frame}[fragile]
-\frametitle{Rewrite Code: BigInt \&-Function to Bound Check}
+\frametitle{BigInt \&-Function to Bound Check}
 This:
 \begin{lstlisting}[language=Scala]
 sealed abstract class Number {
