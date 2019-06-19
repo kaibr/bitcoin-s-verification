@@ -39,8 +39,9 @@
 \usepackage{booktabs}													% package for nicer tables
 \usepackage{tocvsec2}													% provides means of controlling the sectional numbering
 \usepackage{dirtree}
-\usepackage{nameref}
 
+
+\usepackage{nameref}
 \usepackage{listings}
 \input{scala-highlighting.tex}
 
@@ -135,6 +136,11 @@
 
 % Intro:
 %---------------------------------------------------------------------------
+
+% KAI
+\newcommand{\todo}[1]{{\par \large \color{red}#1}}
+
+
 \begin{document}                              	% Start Document
 \settocdepth{subsection}														% Set depth of toc
 \pagenumbering{roman}														
