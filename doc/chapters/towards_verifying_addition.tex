@@ -1,10 +1,21 @@
 \chapter{Towards Verifying the Addition-with-Zero Property}
 \label{chap:verify_add}
 
+
+
 After realizing that it would consume too much time to rewrite the Bitcoin-S code and even the extracted part with checkTransaction, the smallest unit in Bitcoin-S-Core that is worthwhile to verify was extracted.
 This could be the addition of two CurrencyUnits.
 To make it even easier, the addition of CurrencyUnits with zero.
 CurrencyUnits is an abstract class in Bitcoin-S, representing currencies like Satoshis.
+
+\section{Extracting the relevant Code}
+
+\todo{ramon: write this section}
+\todo{ramon: keep close to original code}
+\todo{ramon: for every transformation: before and after}
+\todo{ramon,anna: for every transformation: why does it preserve the semantics}
+\todo{ramon,anna: add comments}
+\todo{ramon,anna: explain what the code does and why}
 
 Here we can see the extracted code needed for the addition of CurrencyUnits:
 \lstinputlisting[language=scala]{../code/currsniporig/src/main/scala/code/initial/Code.scala}
@@ -14,7 +25,7 @@ The additions' signature looks like this:
   +(c: CurrencyUnit): CurrencyUnit
 \end{lstlisting}
 
-When we run Stainless on it, it throws the following errors:
+When we run Stainless on this code (without any properties to prove), it throws the following errors:
 {\footnotesize\begin{verbatim}
   [ Error  ] Code.scala:41:1: Objects cannot extend classes or implement traits,
              use a case object instead

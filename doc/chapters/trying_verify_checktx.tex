@@ -113,6 +113,8 @@ Now lets build the transaction with those data.
     }
 \end{lstlisting}
 
+\todo{ramon: change code to get an actual transaction, completely understand and explain the code}
+
 Line one to seven creates a transaction builder which is then signed on line ten.
 We can now use our transaction object on line twelve.
 For example, after calling \emph{hex} on it, we can send the returned string to the bitcoin network.
@@ -125,6 +127,8 @@ This is its type signature:
 \begin{lstlisting}[language=scala]
   checkTransaction(transaction: Transaction): Boolean
 \end{lstlisting}
+
+\todo{kai: code zeigen}
 
 We can pass a transaction and it returns a Boolean indicating whether the transaction is valid or not.
 So for example when we pass the transaction we built before the returned value would be true, because it's a valid transaction.
@@ -195,11 +199,14 @@ This was fixed in \href{https://github.com/bitcoin-s/bitcoin-s/pull/435}{pull re
 
 \section{Adjusting No-Inflation Property}
 
+\todo{anna: what does it mean to integrate}
+
 Trying to integrate Stainless in Bitcoin-S caused a lot of troubles, mainly because of version conflicts.
 For more details see chapter \ref{chap:appendix_arb}.
 
 After integrating Stainless in Bitcoin-S, there were many errors.
 It takes too much time to fix them all so it should be easier to extract the classes needed for the \texttt{checkTransaction} function.
+\todo{anna: which errors?}
 
 The extracted code has more than 1500 lines.
 After running Stainless on it, it still throws a huge bunch of errors about what Stainless can not reason about.
