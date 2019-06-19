@@ -8,4 +8,4 @@ Poster for thesis in `poster`.
 
 Presentation for TechDay in `presentation`.
 
-Quastion for TechDay in `question.md`.
+Question for TechDay in `question.md`.
