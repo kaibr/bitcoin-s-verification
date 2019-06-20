@@ -1,9 +1,5 @@
 package addition.reduced.number
 
-import org.bitcoins.core.protocol.NetworkElement
-import org.bitcoins.core.util.{BitcoinSUtil, Factory, NumberUtil}
-import scodec.bits.ByteVector
-
 import scala.util.{Failure, Success, Try}
 
 /**
@@ -15,8 +11,7 @@ import scala.util.{Failure, Success, Try}
   * unsigned integer types
   */
 sealed abstract class Number[T <: Number[T]]
-  extends NetworkElement
-    with BasicArithmetic[T] {
+  extends BasicArithmetic[T] {
   type A = BigInt
 
   /** The underlying scala number used to to hold the number */
@@ -90,8 +85,6 @@ sealed abstract class Number[T <: Number[T]]
       Success(())
     }
   }
-
-  override def bytes: ByteVector = BitcoinSUtil.decodeHex(hex)
 }
 
 /**
@@ -106,7 +99,6 @@ sealed abstract class SignedNumber[T <: Number[T]] extends Number[T]
 sealed abstract class Int64 extends SignedNumber[Int64] {
   override def apply: A => Int64 = Int64(_)
   override def andMask = 0xffffffffffffffffL
-  override def hex: String = BitcoinSUtil.encodeHex(toLong)
 }
 
 /**
@@ -120,7 +112,7 @@ trait BaseNumbers[T] {
   def max: T
 }
 
-object Int64 extends Factory[Int64] with BaseNumbers[Int64] {
+object Int64 extends BaseNumbers[Int64] {
   private case class Int64Impl(underlying: BigInt) extends Int64 {
     require(underlying >= -9223372036854775808L,
       "Number was too small for a int64, got: " + underlying)
@@ -133,11 +125,6 @@ object Int64 extends Factory[Int64] with BaseNumbers[Int64] {
 
   lazy val min = Int64(-9223372036854775808L)
   lazy val max = Int64(9223372036854775807L)
-
-  override def fromBytes(bytes: ByteVector): Int64 = {
-    require(bytes.size <= 8, "We cannot have an Int64 be larger than 8 bytes")
-    Int64(BigInt(bytes.toArray).toLong)
-  }
 
   def apply(long: Long): Int64 = Int64(BigInt(long))
 
