@@ -30,7 +30,7 @@ sealed abstract class Satoshis extends CurrencyUnit {
   def ==(satoshis: Satoshis): Boolean = underlying == satoshis.underlying
 }
 
-object Satoshis extends BaseNumbers[Satoshis] {
+case object Satoshis extends BaseNumbers[Satoshis] {
 
   val min = Satoshis(Int64.min)
   val max = Satoshis(Int64.max)

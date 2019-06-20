@@ -62,7 +62,7 @@ trait BaseNumbers[T] {
   def max: T
 }
 
-object Int64 extends BaseNumbers[Int64] {
+case object Int64 extends BaseNumbers[Int64] {
   private case class Int64Impl(underlying: BigInt) extends Int64 {
     require(underlying >= -9223372036854775808L,
       "Number was too small for a int64, got: " + underlying)
