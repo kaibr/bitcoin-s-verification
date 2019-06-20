@@ -581,12 +581,11 @@ The \href{https://github.com/epfl-lara/stainless/issues/520}{issue number 520} o
 \subsection{Getting Rid of Abstract Type Member}
 
 Stainless output:
-{\footnotesize
-\begin{verbatim}
+\begin{lstlisting}[style=stainless]
   [ Error  ] Code.scala:60:3: Stainless doesn't support abstract type members
               type A
               ^^^^^^
-\end{verbatim}}
+\end{lstlisting}
 
 This should be easy to rewrite by using generics instead of an abstract type, right?
 Unfortunately not.
@@ -621,12 +620,11 @@ This limits the verification a bit, but as we only want to verify the addition i
 \subsection{Replacing the BigInt Constructor Argument With A String Literal}
 
 Stainless output:
-{\footnotesize
-\begin{verbatim}
+\begin{lstlisting}[style=stainless]
   [ Error  ] Code.scala:77:33: Only literal arguments are allowed for BigInt.
               def toBigInt: BigInt = BigInt(toLong)
                                             ^^^^^^
-\end{verbatim}}
+\end{lstlisting}
 
 As described before, Stainless supports only a subset of Scala.
 The BigInt from the Stainless library is a bit restricted.
@@ -653,12 +651,11 @@ After fixing all Stainless errors, a new error appears.
 \subsection{Getting Rid of Special Generics}
 
 Stainless output:
-{\footnotesize
-\begin{verbatim}
+\begin{lstlisting}[style=stainless]
   [ Error  ] Code.scala:7:30: Unknown type parameter type T
              sealed abstract class Number[T <: Number[T]]
                                          ^^^^^^^^^^^^^^
-\end{verbatim}}
+\end{lstlisting}
 
 This is a missing feature in Stainless.
 It does not support upper type boundaries on the class itself.
@@ -677,13 +674,12 @@ Now, there are two new errors.
 \subsection{Getting Rid of Concrete Type}
 
 Stainless output:
-{\footnotesize
-\begin{verbatim}
+\begin{lstlisting}[style=stainless]
   [Warning ] Code.scala:9:3: Could not extract tree in class: type A =
              BigInt (class scala.reflect.internal.Trees$TypeDef)
              type A = BigInt
              ^^^^^^^^^^^^^^^
-\end{verbatim}}
+\end{lstlisting}
 
 This is easy.
 We just replace all occurrence of A with BigInt, since A is not overwritten in an implementing class.
@@ -697,13 +693,12 @@ Now it should work without this change.
 \label{sec:bound_check}
 
 Stainless output:
-{\footnotesize
-\begin{verbatim}
+\begin{lstlisting}[style=stainless]
   [ Error  ] Code.scala:22:14: Unknown call to & on result (BigInt) with arguments
              List(Number.this.andMask) of type List(BigInt)
             require((result & andMask) == result,
                     ^^^^^^^^^^^^^^^^
-\end{verbatim}}
+\end{lstlisting}
 
 Due to the restrictions on BigInt, we can not use the \& function either.
 Simplified code:
@@ -732,11 +727,10 @@ Running Stainless produces again new errors.
 \subsection{Extracting Private Inner Classes}
 
 Stainless output:
-{\footnotesize
-\begin{verbatim}
+\begin{lstlisting}[style=stainless]
   [Warning ] Code.scala:90:3: Could not extract tree in class: case private
              class SatoshisImpl extends Satoshis with Product with Serializable {
-\end{verbatim}}
+\end{lstlisting}
 
 Stainless can not extract the private class inside the object.
 Bitcoin-S uses this a lot, because they separate the class from its implementation.
@@ -758,8 +752,7 @@ Now we get some weird warnings about require.
 \subsection{Removing Second Parameter of Require}
 
 Stainless output:
-{\footnotesize
-\begin{verbatim}
+\begin{lstlisting}[style=stainless]
   [Warning ] Code.scala:51:3: Could not extract tree in class: scala.this.Predef
              .require(Int64Impl.this.underlying.>=(math.this.BigInt.long2bigInt(
              -9223372036854775808L)), "Number was too small for a int64, got: "
@@ -773,7 +766,7 @@ Stainless output:
             require(underlying <= 9223372036854775807L,
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^...
   [ Error  ] checkResult$0 depends on missing dependencies: require$1.
-\end{verbatim}}
+\end{lstlisting}
 
 Seems like Stainless does not support the second string parameter of require or at least it throws a warning about it.
 We can safely remove the string parameters from the requires, since they only serve as error messages.
@@ -784,10 +777,9 @@ A new error appears.
 \subsection{Rewriting BigInt Comparison with Long}
 
 Stainless output:
-{\footnotesize
-\begin{verbatim}
+\begin{lstlisting}[style=stainless]
   [ Error  ] inv$4 depends on missing dependencies: long2bigInt$0.
-\end{verbatim}}
+\end{lstlisting}
 
 This error is hard to understand, but we can see that there is a missing Long to BigInt conversion.
 So we search for all Long values in the code.
@@ -802,8 +794,7 @@ Looks like it can not compare a BigInt with a Long value.
 We can easily convert this Long value to a BigInt with a string literal parameter by passing these numbers as strings to the BigInt constructor.
 
 Finally, we get some output from Stainless about the verification in the code.
-{\footnotesize
-\begin{verbatim}
+\begin{lstlisting}[style=stainless]
 [...]
 [Warning ]  => INVALID
 [Warning ] Found counter-example:
@@ -813,7 +804,7 @@ Finally, we get some output from Stainless about the verification in the code.
 [  Info  ] +  precond. (call checkResult(thiss, underlying(thiss) + u ...)  invalid  Code.scala:16:45
 [...]
 [  Info  ] total: 5  valid: 4  (4 from cache) invalid: 1  unknown: 0  time:  1.317
-\end{verbatim}}
+\end{lstlisting}
 
 This shows that there is an invalid specification in checkResult and Stainless prints a counterexample for it.
 
@@ -853,12 +844,11 @@ There is another problem with Bitcoin-S.
 Bitcoin-S-Core uses require as a fail-fast method whereas Stainless needs it to verify the code.
 
 The Stainless output again:
-{\footnotesize
-\begin{verbatim}
+\begin{lstlisting}[style=stainless]
   [Warning ] Found counter-example:
   [Warning ]   thiss: { x: Object | @unchecked isNumber(x) } -> Int64Impl(0)
   [Warning ]   num: { x: Object | @unchecked isInt64(x) }    -> Int64Impl(9223372036854775808)
-\end{verbatim}}
+\end{lstlisting}
 
 Corresponding code:
 
@@ -895,13 +885,12 @@ Thus, we need to add the restriction from checkResult to the addition too.
 \end{lstlisting}
 
 Stainless finds another counter example:
-{\footnotesize
-\begin{verbatim}
+\begin{lstlisting}[style=stainless]
   [Warning ] Found counter-example:
   [Warning ]   num: { x: Object | @unchecked isInt64(x) }    -> Int64Impl(1)
   [Warning ]   thiss: { x: Object | @unchecked isNumber(x) } ->
                  Int64Impl(9223372036854775807)
-\end{verbatim}}
+\end{lstlisting}
 
 Sure, when adding one to the maximum Int64 the require does not hold anymore.
 Since we do only allow zero as a parameter, the easiest way is to restrict it to zero here too.
