@@ -5,7 +5,7 @@ package addition.modified.number
   * This is useful for dealing with codebases/protocols that rely on C's
   * unsigned integer types
   */
-sealed abstract class Number[T <: Number[T]] {
+sealed abstract class Number {
   type A = BigInt
 
   /** The underlying scala number used to to hold the number */
@@ -22,9 +22,9 @@ sealed abstract class Number[T <: Number[T]] {
   def andMask: BigInt
 
   /** Factory function to create the underlying T, for instance a UInt32 */
-  def apply: A => T
+  def apply: A => Int64
 
-  def +(num: T): T = apply(checkResult(underlying + num.underlying))
+  def +(num: Int64): Int64 = apply(checkResult(underlying + num.underlying))
 
   /**
     * Checks if the given result is within the range
@@ -41,12 +41,12 @@ sealed abstract class Number[T <: Number[T]] {
   * Represents a signed number in our number system
   * Instances of this is [[Int64]]
   */
-sealed abstract class SignedNumber[T <: Number[T]] extends Number[T]
+sealed abstract class SignedNumber extends Number
 
 /**
   * Represents a int64_t in C
   */
-sealed abstract class Int64 extends SignedNumber[Int64] {
+sealed abstract class Int64 extends SignedNumber {
   override def apply: A => Int64 = Int64(_)
   override def andMask = 0xffffffffffffffffL
 }
