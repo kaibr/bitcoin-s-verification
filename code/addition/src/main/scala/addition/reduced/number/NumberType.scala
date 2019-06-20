@@ -1,9 +1,6 @@
 package addition.reduced.number
 
 /**
-  * Created by chris on 6/4/16.
-  */
-/**
   * This abstract class is meant to represent a signed and unsigned number in C
   * This is useful for dealing with codebases/protocols that rely on C's
   * unsigned integer types
