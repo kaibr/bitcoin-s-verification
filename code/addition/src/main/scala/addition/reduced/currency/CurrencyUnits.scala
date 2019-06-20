@@ -1,6 +1,6 @@
 package addition.reduced.currency
 
-import org.bitcoins.core.number.{BaseNumbers, BasicArithmetic, Int64}
+import addition.reduced.number.{BaseNumbers, BasicArithmetic, Int64}
 
 sealed abstract class CurrencyUnit
   extends BasicArithmetic[CurrencyUnit] {
