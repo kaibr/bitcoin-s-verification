@@ -1,7 +1,5 @@
 package addition.reduced.number
 
-import scala.util.Try
-
 /**
   * @define mulSafe
   * Some classes have restrictions on upper bounds

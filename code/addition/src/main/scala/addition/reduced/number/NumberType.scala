@@ -1,7 +1,5 @@
 package addition.reduced.number
 
-import scala.util.{Failure, Success, Try}
-
 /**
   * Created by chris on 6/4/16.
   */
