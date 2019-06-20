@@ -33,11 +33,6 @@ sealed abstract class Number[T <: Number[T]]
 
   override def +(num: T): T = apply(checkResult(underlying + num.underlying))
 
-  def >(num: T): Boolean = underlying > num.underlying
-  def >=(num: T): Boolean = underlying >= num.underlying
-  def <(num: T): Boolean = underlying < num.underlying
-  def <=(num: T): Boolean = underlying <= num.underlying
-
   /**
     * Checks if the given result is within the range
     * of this number type

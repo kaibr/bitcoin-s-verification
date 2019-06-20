@@ -8,22 +8,6 @@ sealed abstract class CurrencyUnit
 
   def satoshis: Satoshis
 
-  def >=(c: CurrencyUnit): Boolean = {
-    satoshis.underlying >= c.satoshis.underlying
-  }
-
-  def >(c: CurrencyUnit): Boolean = {
-    satoshis.underlying > c.satoshis.underlying
-  }
-
-  def <(c: CurrencyUnit): Boolean = {
-    satoshis.underlying < c.satoshis.underlying
-  }
-
-  def <=(c: CurrencyUnit): Boolean = {
-    satoshis.underlying <= c.satoshis.underlying
-  }
-
   def !=(c: CurrencyUnit): Boolean = !(this == c)
 
   def ==(c: CurrencyUnit): Boolean = satoshis == c.satoshis
