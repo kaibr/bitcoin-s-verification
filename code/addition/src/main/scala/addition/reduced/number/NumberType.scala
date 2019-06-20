@@ -32,9 +32,6 @@ sealed abstract class Number[T <: Number[T]]
   def apply: A => T
 
   override def +(num: T): T = apply(checkResult(underlying + num.underlying))
-  override def -(num: T): T = apply(checkResult(underlying - num.underlying))
-  override def *(factor: BigInt): T = apply(checkResult(underlying * factor))
-  override def *(num: T): T = apply(checkResult(underlying * num.underlying))
 
   def >(num: T): Boolean = underlying > num.underlying
   def >=(num: T): Boolean = underlying >= num.underlying

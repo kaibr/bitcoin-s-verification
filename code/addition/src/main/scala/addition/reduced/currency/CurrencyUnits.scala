@@ -32,22 +32,6 @@ sealed abstract class CurrencyUnit
     Satoshis(satoshis.underlying + c.satoshis.underlying)
   }
 
-  override def -(c: CurrencyUnit): CurrencyUnit = {
-    Satoshis(satoshis.underlying - c.satoshis.underlying)
-  }
-
-  override def *(factor: BigInt): CurrencyUnit = {
-    Satoshis(satoshis.underlying * factor)
-  }
-
-  override def *(c: CurrencyUnit): CurrencyUnit = {
-    Satoshis(satoshis.underlying * c.satoshis.underlying)
-  }
-
-  def unary_- : CurrencyUnit = {
-    Satoshis(-satoshis.underlying)
-  }
-
   def toBigDecimal: BigDecimal
 
   protected def underlying: A
