@@ -32,9 +32,10 @@
 \definecolor{gray}{rgb}{0.5,0.5,0.5}
 \definecolor{mauve}{rgb}{0.58,0,0.82}
 
-\lstset{
+\lstdefinestyle{scala}{
   language=scala,
-  basicstyle=\footnotesize\ttfamily,
+%  basicstyle=\footnotesize\ttfamily,
+  basicstyle=\scriptsize\ttfamily, % kai: temporary 
   breaklines=true,
   keywordstyle=\color{blue},
   commentstyle=\color{dkgreen},
@@ -45,6 +46,8 @@
   stringstyle=\color{mauve}
 }
 
+\lstdefinestyle{stainless}{numbers=none, breaklines=false,  basicstyle=\footnotesize\ttfamily,}
+ 
 \newcommand{\todo}[1]{{\par \color{red}#1}}
 
 
@@ -87,17 +90,17 @@ However, even in very well-tested software such as Bitcoin Core,
 serious bugs occur. The most recent example is the bug found in
 September 2018 \cite{cve201817144} which essentially allowed to
 arbitrarily create new coins. Such software is thus a worthwhile
-target for formal verification.
+target for formal verification. In this work, we set out to verify
+properties of the bitcoin-s library with the Stainless verifier.
 
-\paragraph{The bitcoin-s Library.} Here, we try to verify two
-properties of the bitcoin-s library
-\cite{BitcoinS:website,BitcoinS:github}, which implements parts of the
-Bitcoin protocol in Scala. In particular, it allows to serialize,
-deserialize, sign and validate transactions. The library uses
-immutable data structures and algebraic data types but is not written
-with formal verification in mind. According to the website, the
-library is used in production, ``handling millions of dollars each
-day'' \cite{BitcoinS:website}.
+\paragraph{The Bitcoin-S Library.} The bitcoin-s library is an
+implementation of parts of the Bitcoin protocol in Scala
+\cite{BitcoinS:website,BitcoinS:github}. In particular, it allows to
+serialize, deserialize, sign and validate transactions. The library
+uses immutable data structures and algebraic data types but is not
+written with formal verification in mind. According to the website,
+the library is used in production, handling significant amounts of
+cryptocurrency each day \cite{BitcoinS:website}.
 
 \paragraph{The Stainless Verifier.} Stainless is the successor of the
 Leon verifier
@@ -113,7 +116,7 @@ The following example from the Stainless documentation
 precondition is specified using the function \emph{require} and a
 postcondition using \emph{ensuring}.
 
-\begin{lstlisting}[language=Scala]
+\begin{lstlisting}[style=scala]
   def factorial(n: Int): Int = {
       require(n >= 0)
       if (n == 0) {
@@ -124,7 +127,7 @@ postcondition using \emph{ensuring}.
   } ensuring(res => res >= 0)
 \end{lstlisting}
 
-Our program happens to not satisfy the specification. An overflow in
+Our program happens not to satisfy the specification. An overflow in
 the 32-bit Int leads to a negative result for the input 17, as
 Stainless reports in Figure~\ref{fig:failed}. Changing the type from
 Int to BigInt will result in a successful verification.
@@ -162,14 +165,6 @@ code of Stainless on GitHub \cite{Stainless:github} in the folder
 
 
 
-
-
-
-
-
-
-
-
 \section{Trying to Verify the No-Inflation Property}
 
 Thus, we try to verify the property, that a non-coinbase transaction
@@ -199,7 +194,7 @@ Some code in this section is copied or adapted from the Bitcoin-S-Core
 transaction builder example \cite{BitcoinSCore:txbuilderexample}.
 Bitcoin-S-Core has a bitcoin transaction builder class with the
 following constructor:
-\begin{lstlisting}[language=scala]
+\begin{lstlisting}[style=scala, basicstyle=\scriptsize\tt]
   BitcoinTxBuilder(
     destinations: Seq[TransactionOutput], // where to send the money
     utxos: BitcoinTxBuilder.UTXOMap,      // unspent transaction outputs
@@ -219,7 +214,7 @@ Now we create a transaction.
 First, we need some money.  Thus, we create a fake transaction with
 one single output.  This transaction can be parsed from the bitcoin
 network, but we create one manually in order to see this process.
-\begin{lstlisting}[language=scala]
+\begin{lstlisting}[style=scala]
   val privKey = ECPrivateKey.freshPrivateKey
   val creditingSPK = P2PKHScriptPubKey(pubKey = privKey.publicKey)
 
@@ -249,7 +244,7 @@ transactions.  We use the index zero, because the previous transaction
 has only one output that becomes the first index zero.  If there were
 two previous outputs, the second output would become the index 1 and
 so on.
-\begin{lstlisting}[language=scala]
+\begin{lstlisting}[style=scala]
   val outPoint = TransactionOutPoint(prevTx.txId, UInt32.zero)
 
   val utxoSpendingInfo = BitcoinUTXOSpendingInfo(
@@ -268,7 +263,7 @@ This utxos are the inputs of our transaction.
 
 Second, we need destinations to spend the bitcoins to.
 For the sake of convenience we create only one.
-\begin{lstlisting}[language=scala]
+\begin{lstlisting}[style=scala]
   val destinationAmount = Satoshis(Int64(5000))
 
   val destinationSPK = P2PKHScriptPubKey(pubKey = ECPrivateKey.freshPrivateKey.publicKey)
@@ -285,14 +280,14 @@ size as well as some bitcoin network parameters.  The bitcoin network
 parameters are not important, so we use some static values normally
 used when testing.
 
-\begin{lstlisting}[language=scala]
+\begin{lstlisting}[style=scala]
   val feeRate = SatoshisPerByte(Satoshis.one)
 
   val networkParams = RegTest // some static values for testing
 \end{lstlisting}
 
 Now lets build the transaction with those data.
-\begin{lstlisting}[language=scala]
+\begin{lstlisting}[style=scala]
   val txBuilderF: Future[BitcoinTxBuilder] = BitcoinTxBuilder(
     destinations = destinations, // where to send the money
     utxos = utxos,               // unspent transaction outputs
@@ -320,11 +315,41 @@ string to the bitcoin network.
 
 Bitcoin-S offers a function called \emph{checkTransaction} located in the ScriptInterpreter object.
 This is its type signature:
-\begin{lstlisting}[language=scala]
+\begin{lstlisting}[style=scala]
   checkTransaction(transaction: Transaction): Boolean
 \end{lstlisting}
 
-\todo{kai: code zeigen}
+\begin{lstlisting}[style=scala]
+/**
+  * Checks the validity of a transaction in accordance to bitcoin core's CheckTransaction function
+  * https://github.com/bitcoin/bitcoin/blob/f7a21dae5dbf71d5bc00485215e84e6f2b309d0a/src/main.cpp#L939.
+  */
+def checkTransaction(transaction: Transaction): Boolean = {
+  val inputOutputsNotZero =
+    !(transaction.inputs.isEmpty || transaction.outputs.isEmpty)
+  val txNotLargerThanBlock = transaction.bytes.size < Consensus.maxBlockSize
+  val outputsSpendValidAmountsOfMoney = !transaction.outputs.exists(o =>
+    o.value < CurrencyUnits.zero || o.value > Consensus.maxMoney)
+
+  val outputValues = transaction.outputs.map(_.value)
+  val totalSpentByOutputs: CurrencyUnit =
+    outputValues.fold(CurrencyUnits.zero)(_ + _)
+  val allOutputsValidMoneyRange = validMoneyRange(totalSpentByOutputs)
+  val prevOutputs = transaction.inputs.map(_.previousOutput)
+  val noDuplicateInputs = prevOutputs.distinct.size == prevOutputs.size
+
+  val isValidScriptSigForCoinbaseTx = transaction.isCoinbase match {
+    case true =>
+      transaction.inputs.head.scriptSignature.asmBytes.size >= 2 &&
+        transaction.inputs.head.scriptSignature.asmBytes.size <= 100
+    case false =>
+      //since this is not a coinbase tx we cannot have any empty previous outs inside of inputs
+      !transaction.inputs.exists(_.previousOutput == EmptyTransactionOutPoint)
+  }
+  inputOutputsNotZero && txNotLargerThanBlock && outputsSpendValidAmountsOfMoney && noDuplicateInputs &&
+  allOutputsValidMoneyRange && noDuplicateInputs && isValidScriptSigForCoinbaseTx
+}
+\end{lstlisting}
 
 We can pass a transaction and it returns a Boolean indicating whether
 the transaction is valid or not.  So for example when we pass the
@@ -338,7 +363,7 @@ For example, it checks if there is either no input or no output.
 In this case we get false.
 
 The relevant part for the bug we found:
-\begin{lstlisting}[language=scala]
+\begin{lstlisting}[style=scala]
   val prevOutputTxIds = transaction.inputs.map(_.previousOutput.txId)
   val noDuplicateInputs = prevOutputTxIds.distinct.size == prevOutputTxIds.size
 \end{lstlisting}
@@ -356,14 +381,8 @@ because, as said, distinct removes the duplicates.
 We can see that there is a bug in the checkTransaction function from
 before, recognized and fixed through this work.
 
-\begin{figure}
-	\centering
-		\includegraphics[width=\textwidth]{bitcoin-s-pr-comment}
-	\caption{Comment on our PR \#435 on GitHub}
-\end{figure}
-
 Here is the relevant code of checkTransaction again:
-\begin{lstlisting}[language=scala]
+\begin{lstlisting}[style=scala]
   val prevOutputTxIds = transaction.inputs.map(_.previousOutput.txId)
   val noDuplicateInputs = prevOutputTxIds.distinct.size == prevOutputTxIds.size
 \end{lstlisting}
@@ -385,18 +404,13 @@ to check on TransactionOutPoint instead of TransactionOutPoint.txId,
 because TransactionOutPoint contains the txId as well as the output
 index it references.  So in pseudo code, we check on the tuple (tx,
 index) instead of (tx).  The fixed code:
-\begin{lstlisting}[language=scala]
+\begin{lstlisting}[style=scala]
   val prevOutputs = transaction.inputs.map(_.previousOutput)
   val noDuplicateInputs = prevOutputs.distinct.size == prevOutputs.size
 \end{lstlisting}
 
 Since TransactionOutPoint is a case class and Scala has a built in ==
 for case classes there is no need to implement TransactionOutPoint.==.
-\begin{figure}
-	\centering
-		\includegraphics[width=\textwidth]{bitcoin-s-pr}
-	\caption{Line changes for PR \#435 from GitHub}
-\end{figure}
 
 This was fixed in
 \href{https://github.com/bitcoin-s/bitcoin-s/pull/435}{pull request
@@ -494,17 +508,17 @@ changes from original to reduced (new folder):
 \todo{ramon,anna: explain what the code does and why}
 
 Here we can see the extracted code needed for the addition of CurrencyUnits:
-\lstinputlisting[language=scala]{../code/addition/src/main/scala/addition/reduced/number/NumberType.scala}
-\lstinputlisting[language=scala]{../code/addition/src/main/scala/addition/reduced/currency/CurrencyUnits.scala}
+\lstinputlisting[style=scala]{../code/addition/src/main/scala/addition/reduced/number/NumberType.scala}
+\lstinputlisting[style=scala]{../code/addition/src/main/scala/addition/reduced/currency/CurrencyUnits.scala}
 
 The additions' signature looks like this:
-\begin{lstlisting}[language=scala]
+\begin{lstlisting}[style=scala]
   +(c: CurrencyUnit): CurrencyUnit
 \end{lstlisting}
 
 When we run Stainless on this code (without any properties to prove), it throws the following errors:
-{\footnotesize
-\begin{verbatim}
+
+\begin{lstlisting}[style=stainless]
   [ Error  ] Code.scala:41:1: Objects cannot extend classes or implement traits,
              use a case object instead
            object Int64 extends BaseNumbers[Int64] {
@@ -520,7 +534,7 @@ When we run Stainless on this code (without any properties to prove), it throws 
             object Satoshis extends BaseNumbers[Satoshis] {
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^...
   [  Info  ] Shutting down executor service.
-\end{verbatim}}
+\end{lstlisting}
 
 So let's see how we can fix those errors.
 
@@ -564,7 +578,7 @@ Unfortunately not.
 The problem is, CurrencyUnit uses one of its implementing classes: Satoshis.
 
 Simplified code.
-\begin{lstlisting}[language=scala]
+\begin{lstlisting}[style=scala]
   sealed abstract class CurrencyUnit {
     type A
 
@@ -605,7 +619,7 @@ One such restriction is, that BigInt does not support dynamic BigInt constructio
 Thus, the constructor parameter of BitInt must be a literal argument.
 
 Again, a simplified code version.
-\begin{lstlisting}[language=scala]
+\begin{lstlisting}[style=scala]
   sealed abstract class Satoshis extends CurrencyUnit { 
     def toBigInt: BigInt = BigInt(toLong)
     def toLong: Long = underlying.toLong
@@ -634,7 +648,7 @@ Stainless output:
 This is a missing feature in Stainless.
 It does not support upper type boundaries on the class itself.
 To track this, \href{https://github.com/epfl-lara/stainless/issues/519}{issue 519} was created on GitHub during this work.
-\begin{lstlisting}[language=scala]
+\begin{lstlisting}[style=scala]
   sealed abstract class Number[T <: Number[T]] extends BasicArithmetic[T]  
 \end{lstlisting}
 
@@ -678,7 +692,7 @@ Stainless output:
 
 Due to the restrictions on BigInt, we can not use the \& function either.
 Simplified code:
-\begin{lstlisting}[language=scala]
+\begin{lstlisting}[style=scala]
   sealed abstract class Number extends BasicArithmetic[Int64] {
     def andMask: BigInt
 
@@ -712,7 +726,7 @@ Stainless output:
 Stainless can not extract the private class inside the object.
 Bitcoin-S uses this a lot, because they separate the class from its implementation.
 Simplified:
-\begin{lstlisting}[language=scala]
+\begin{lstlisting}[style=scala]
   object Int64 extends BaseNumbers[Int64] {
     private case class Int64Impl(underlying: BigInt) extends Int64 
   }
@@ -762,7 +776,7 @@ Stainless output:
 
 This error is hard to understand, but we can see that there is a missing Long to BigInt conversion.
 So we search for all Long values in the code.
-\begin{lstlisting}[language=scala]
+\begin{lstlisting}[style=scala]
   private case class Int64Impl(underlying: BigInt) extends Int64 {
     require(underlying >= -9223372036854775808L)
     require(underlying <= 9223372036854775807L)
@@ -795,18 +809,18 @@ Let's ignore this for a moment and write the specification for the \nameref{prop
 
 As specified, our verification must only support addition with zero.
 So we restrict the parameter to be zero in the precondition.
-\begin{lstlisting}[language=scala]
+\begin{lstlisting}[style=scala]
   require(c.satoshis == Satoshis.zero)
 \end{lstlisting}
 
 We ensure the result is the same value as \emph{this} in the postcondition.
-\begin{lstlisting}[language=scala]
+\begin{lstlisting}[style=scala]
   ensuring(res => res.satoshis == this.satoshis)
 \end{lstlisting}
 
 We can use equals (==) directly on Satoshis, because it is a case class.
 The addition will now look like this:
-\begin{lstlisting}[language=scala]
+\begin{lstlisting}[style=scala]
   override def +(c: CurrencyUnit): CurrencyUnit = {
     require(c.satoshis == Satoshis.zero)
     Satoshis(satoshis.underlying + c.satoshis.underlying)
@@ -833,7 +847,7 @@ The Stainless output again:
 
 Corresponding code:
 
-\begin{lstlisting}[language=scala]
+\begin{lstlisting}[style=scala]
   sealed abstract class Number extends BasicArithmetic[Int64] {
     override def +(num: Int64): Int64 = apply(checkResult(underlying + num.underlying))
 
@@ -853,7 +867,7 @@ So it can use a number bigger than the maximum Int64 and pass it to the addition
 The require in checkResult fails.
 
 Thus, we need to add the restriction from checkResult to the addition too.
-\begin{lstlisting}[language=scala]
+\begin{lstlisting}[style=scala]
   override def +(num: Int64): Int64 = {
     require(
           num.underlying <= BigInt("9223372036854775807")
@@ -888,7 +902,7 @@ Finally, everything is green and correctly verified.
 \end{figure}
 
 The verified code.
-\lstinputlisting[language=scala]{../code/currsniporig/src/main/scala/code/end/Code.scala}
+\lstinputlisting[style=scala]{../code/currsniporig/src/main/scala/code/end/Code.scala}
 
 But is it really the original code that we verified?
 And why did we have to change that much?
