@@ -519,20 +519,18 @@ The additions' signature looks like this:
 When we run Stainless on this code (without any properties to prove), it throws the following errors:
 
 \begin{lstlisting}[style=stainless]
-  [ Error  ] Code.scala:41:1: Objects cannot extend classes or implement traits,
-             use a case object instead
-           object Int64 extends BaseNumbers[Int64] {
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^...
-  [ Error  ] Code.scala:60:3: Stainless doesn't support abstract type members
-              type A
-              ^^^^^^
-  [ Error  ] Code.scala:77:33: Only literal arguments are allowed for BigInt.
+  [ Error  ] currency/CurrencyUnits.scala:6:3: Stainless doesn't support abstract type members
+             type A
+             ^^^^^^
+  [ Error  ] currency/CurrencyUnits.scala:26:33: Only literal arguments are allowed for BigInt.
               def toBigInt: BigInt = BigInt(toLong)
                                             ^^^^^^
-  [ Error  ] Code.scala:84:1: Objects cannot extend classes or implement traits,
-             use a case object instead
+  [ Error  ] currency/CurrencyUnits.scala:33:1: Objects cannot extend classes or implement traits, use a case object instead
             object Satoshis extends BaseNumbers[Satoshis] {
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^...
+  [ Error  ] number/NumberType.scala:65:1: Objects cannot extend classes or implement traits, use a case object instead
+            object Int64 extends BaseNumbers[Int64] {
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^...
   [  Info  ] Shutting down executor service.
 \end{lstlisting}
 
