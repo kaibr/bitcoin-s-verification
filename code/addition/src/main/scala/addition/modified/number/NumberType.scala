@@ -11,7 +11,6 @@ sealed abstract class Number {
   /** The underlying scala number used to to hold the number */
   protected def underlying: A
 
-  def toLong: Long = toBigInt.bigInteger.longValueExact()
   def toBigInt: BigInt = underlying
 
   /**
