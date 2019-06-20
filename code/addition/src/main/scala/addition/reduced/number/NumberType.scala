@@ -89,7 +89,7 @@ sealed abstract class Number[T <: Number[T]]
 
 /**
   * Represents a signed number in our number system
-  * Instances of this are [[Int32]] or [[Int64]]
+  * Instances of this is [[Int64]]
   */
 sealed abstract class SignedNumber[T <: Number[T]] extends Number[T]
 
