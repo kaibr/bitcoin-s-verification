@@ -1,6 +1,5 @@
 package addition.reduced.currency
 
-import org.bitcoins.core.consensus.Consensus
 import org.bitcoins.core.number.{BaseNumbers, BasicArithmetic, Int64}
 
 sealed abstract class CurrencyUnit
@@ -86,35 +85,6 @@ object Satoshis extends BaseNumbers[Satoshis] {
   private case class SatoshisImpl(underlying: Int64) extends Satoshis
 }
 
-sealed abstract class Bitcoins extends CurrencyUnit {
-  override type A = BigDecimal
-
-  override def toString: String = s"$toBigDecimal BTC"
-
-  override def toBigDecimal: BigDecimal = underlying
-
-  override def satoshis: Satoshis = {
-    val sat = underlying * CurrencyUnits.btcToSatoshiScalar
-    Satoshis(Int64(sat.toLongExact))
-  }
-}
-
-object Bitcoins extends BaseNumbers[Bitcoins] {
-  val min = Bitcoins((-Consensus.maxMoney).satoshis)
-  val max = Bitcoins(Consensus.maxMoney.satoshis)
-  val zero = Bitcoins(Satoshis.zero)
-  val one = Bitcoins(1)
-
-  def apply(satoshis: Satoshis): Bitcoins = {
-    val b: BigDecimal = satoshis.toLong * CurrencyUnits.satoshisToBTCScalar
-    Bitcoins(b)
-  }
-
-  def apply(underlying: BigDecimal): Bitcoins = BitcoinsImpl(underlying)
-
-  private case class BitcoinsImpl(underlying: BigDecimal) extends Bitcoins
-}
-
 object CurrencyUnits {
 
   /** The number you need to multiply BTC by to get it's satoshis */
@@ -126,7 +96,6 @@ object CurrencyUnits {
   val negativeSatoshi = Satoshis(Int64(-1))
 
   def toSatoshis(unit: CurrencyUnit): Satoshis = unit match {
-    case b: Bitcoins => b.satoshis
     case x: Satoshis => x
   }
 }
