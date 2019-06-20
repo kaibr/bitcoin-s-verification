@@ -582,29 +582,44 @@ The \href{https://github.com/epfl-lara/stainless/issues/520}{issue number 520} o
 
 Stainless output:
 \begin{lstlisting}[style=stainless]
-  [ Error  ] Code.scala:60:3: Stainless doesn't support abstract type members
-              type A
-              ^^^^^^
+  [ Error  ] currency/CurrencyUnits.scala:6:3: Stainless doesn't support abstract type members
+             type A
+             ^^^^^^
 \end{lstlisting}
 
 This should be easy to rewrite by using generics instead of an abstract type, right?
 Unfortunately not.
 The problem is, CurrencyUnit uses one of its implementing classes: Satoshis.
 
-Simplified code.
+Before:
 \begin{lstlisting}[style=scala]
-  sealed abstract class CurrencyUnit {
-    type A
+sealed abstract class CurrencyUnit {
+  type A
 
-    def +(c: CurrencyUnit): CurrencyUnit =
-      Satoshis(satoshis.underlying + c.satoshis.underlying)
+  def satoshis: Satoshis
 
-    protected def underlying: A
+  def !=(c: CurrencyUnit): Boolean = !(this == c)
+
+  def ==(c: CurrencyUnit): Boolean = satoshis == c.satoshis
+
+  def +(c: CurrencyUnit): CurrencyUnit = {
+    Satoshis(satoshis.underlying + c.satoshis.underlying)
   }
 
-  sealed abstract class Satoshis extends CurrencyUnit {
-    override type A = Int64
-  }
+  protected def underlying: A
+}
+
+sealed abstract class Satoshis extends CurrencyUnit {
+  override type A = Int64
+
+  override def satoshis: Satoshis = this
+
+  def toBigInt: BigInt = BigInt(toLong)
+
+  def toLong: Long = underlying.toLong
+
+  def ==(satoshis: Satoshis): Boolean = underlying == satoshis.underlying
+}
 \end{lstlisting}
 
 What happens, if we typify CurrencyUnit with A, meaning to make it generic with type A?
@@ -616,12 +631,39 @@ Maybe the Bitcoin-S developers should reimplement this part and not use Satoshis
 Since there is no easy way to fix it and the code should stay as much as possible the original, we just remove the abstract type and set it to Int64.
 This limits the verification a bit, but as we only want to verify the addition in satoshis, that's OK.
 
+After:
+\begin{lstlisting}[style=scala]
+sealed abstract class CurrencyUnit {
+  def satoshis: Satoshis
+
+  def !=(c: CurrencyUnit): Boolean = !(this == c)
+
+  def ==(c: CurrencyUnit): Boolean = satoshis == c.satoshis
+
+  def +(c: CurrencyUnit): CurrencyUnit = {
+    Satoshis(satoshis.underlying + c.satoshis.underlying)
+  }
+
+  protected def underlying: Int64
+}
+
+sealed abstract class Satoshis extends CurrencyUnit {
+  override def satoshis: Satoshis = this
+
+  def toBigInt: BigInt = BigInt(toLong)
+
+  def toLong: Long = underlying.toLong
+
+  def ==(satoshis: Satoshis): Boolean = underlying == satoshis.underlying
+}
+\end{lstlisting}
+
 
 \subsection{Replacing the BigInt Constructor Argument With A String Literal}
 
 Stainless output:
 \begin{lstlisting}[style=stainless]
-  [ Error  ] Code.scala:77:33: Only literal arguments are allowed for BigInt.
+  [ Error  ] currency/CurrencyUnits.scala:26:33: Only literal arguments are allowed for BigInt.
               def toBigInt: BigInt = BigInt(toLong)
                                             ^^^^^^
 \end{lstlisting}
@@ -631,12 +673,30 @@ The BigInt from the Stainless library is a bit restricted.
 One such restriction is, that BigInt does not support dynamic BigInt construction.
 Thus, the constructor parameter of BitInt must be a literal argument.
 
-Again, a simplified code version.
+Before:
 \begin{lstlisting}[style=scala]
-  sealed abstract class Satoshis extends CurrencyUnit { 
-    def toBigInt: BigInt = BigInt(toLong)
-    def toLong: Long = underlying.toLong
-  }
+sealed abstract class Satoshis extends CurrencyUnit {
+  override def satoshis: Satoshis = this
+
+  def toBigInt: BigInt = BigInt(toLong)
+
+  def toLong: Long = underlying.toLong
+
+  def ==(satoshis: Satoshis): Boolean = underlying == satoshis.underlying
+}
+\end{lstlisting}
+
+After:
+\begin{lstlisting}[style=scala]
+sealed abstract class Satoshis extends CurrencyUnit {
+  override def satoshis: Satoshis = this
+
+  def toBigInt: BigInt = underlying.toBigInt
+
+  def toLong: Long = underlying.toLong
+
+  def ==(satoshis: Satoshis): Boolean = underlying == satoshis.underlying
+}
 \end{lstlisting}
 
 This would be really hard to refactor, because Bitcoin-S tries to be as dynamic as possible so it can be used with cryptocurrencies other than bitcoins.
@@ -652,16 +712,112 @@ After fixing all Stainless errors, a new error appears.
 
 Stainless output:
 \begin{lstlisting}[style=stainless]
-  [ Error  ] Code.scala:7:30: Unknown type parameter type T
-             sealed abstract class Number[T <: Number[T]]
-                                         ^^^^^^^^^^^^^^
+  [ Error  ] number/NumberType.scala:8:30: Unknown type parameter type T
+  sealed abstract class Number[T <: Number[T]] {
+                               ^^^^^^^^^^^^^^
+
 \end{lstlisting}
 
 This is a missing feature in Stainless.
 It does not support upper type boundaries on the class itself.
 To track this, \href{https://github.com/epfl-lara/stainless/issues/519}{issue 519} was created on GitHub during this work.
+
+Before:
 \begin{lstlisting}[style=scala]
-  sealed abstract class Number[T <: Number[T]] extends BasicArithmetic[T]  
+sealed abstract class Number[T <: Number[T]] {
+  type A = BigInt
+
+  /** The underlying scala number used to to hold the number */
+  protected def underlying: A
+
+  def toLong: Long = toBigInt.bigInteger.longValueExact()
+  def toBigInt: BigInt = underlying
+
+  /**
+    * This is used to determine the valid amount of bytes in a number
+    * for instance a UInt8 has an andMask of 0xff
+    * a UInt32 has an andMask of 0xffffffff
+    */
+  def andMask: BigInt
+
+  /** Factory function to create the underlying T, for instance a UInt32 */
+  def apply: A => T
+
+  def +(num: T): T = apply(checkResult(underlying + num.underlying))
+
+  /**
+    * Checks if the given result is within the range
+    * of this number type
+    */
+  private def checkResult(result: BigInt): A = {
+    require((result & andMask) == result,
+      "Result was out of bounds, got: " + result)
+    result
+  }
+}
+
+/**
+  * Represents a signed number in our number system
+  * Instances of this is [[Int64]]
+  */
+sealed abstract class SignedNumber[T <: Number[T]] extends Number[T]
+
+/**
+  * Represents a int64_t in C
+  */
+sealed abstract class Int64 extends SignedNumber[Int64] {
+  override def apply: A => Int64 = Int64(_)
+  override def andMask = 0xffffffffffffffffL
+}
+\end{lstlisting}
+
+After:
+\begin{lstlisting}[style=scala]
+sealed abstract class Number {
+  type A = BigInt
+
+  /** The underlying scala number used to to hold the number */
+  protected def underlying: A
+
+  def toLong: Long = toBigInt.bigInteger.longValueExact()
+  def toBigInt: BigInt = underlying
+
+  /**
+    * This is used to determine the valid amount of bytes in a number
+    * for instance a UInt8 has an andMask of 0xff
+    * a UInt32 has an andMask of 0xffffffff
+    */
+  def andMask: BigInt
+
+  /** Factory function to create the underlying T, for instance a UInt32 */
+  def apply: A => Int64
+
+  def +(num: Int64): Int64 = apply(checkResult(underlying + num.underlying))
+
+  /**
+    * Checks if the given result is within the range
+    * of this number type
+    */
+  private def checkResult(result: BigInt): A = {
+    require((result & andMask) == result,
+      "Result was out of bounds, got: " + result)
+    result
+  }
+}
+
+/**
+  * Represents a signed number in our number system
+  * Instances of this is [[Int64]]
+  */
+sealed abstract class SignedNumber extends Number
+
+/**
+  * Represents a int64_t in C
+  */
+sealed abstract class Int64 extends SignedNumber {
+  override def apply: A => Int64 = Int64(_)
+  override def andMask = 0xffffffffffffffffL
+}
 \end{lstlisting}
 
 Despite this, in order to be able to continue, we make this a concrete type by replacing T with Int64.
@@ -669,6 +825,112 @@ Int64,  because Satoshis uses only Int64.
 There are other number types like UInt16 but for our property we don't need them.
 
 Now, there are two new errors.
+
+
+\subsection{Removing toLong}
+
+Stainless output:
+\begin{lstlisting}[style=stainless]
+  [ Error  ] number/NumberType.scala:14:22: Unknown call to bigInteger on Number.this.toBigInt (BigInt) with arguments List() of type List()
+             def toLong: Long = toBigInt.bigInteger.longValueExact()
+                                ^^^^^^^^^^^^^^^^^^^
+\end{lstlisting}
+
+
+Now that we do not depend on toLong anymore lets just remove it from out code.
+
+Before:
+\begin{lstlisting}[style=scala]
+sealed abstract class Satoshis extends CurrencyUnit {
+  override def satoshis: Satoshis = this
+
+  def toBigInt: BigInt = underlying.toBigInt
+
+  def toLong: Long = underlying.toLong
+
+  def ==(satoshis: Satoshis): Boolean = underlying == satoshis.underlying
+}  
+\end{lstlisting}
+
+After:
+\begin{lstlisting}[style=scala]
+sealed abstract class Satoshis extends CurrencyUnit {
+  override def satoshis: Satoshis = this
+
+  def toBigInt: BigInt = underlying.toBigInt
+
+  def ==(satoshis: Satoshis): Boolean = underlying == satoshis.underlying
+}  
+\end{lstlisting}
+
+And before:
+\begin{lstlisting}[style=scala]
+sealed abstract class Number {
+  type A = BigInt
+
+  /** The underlying scala number used to to hold the number */
+  protected def underlying: A
+
+  def toLong: Long = toBigInt.bigInteger.longValueExact()
+  def toBigInt: BigInt = underlying
+
+  /**
+    * This is used to determine the valid amount of bytes in a number
+    * for instance a UInt8 has an andMask of 0xff
+    * a UInt32 has an andMask of 0xffffffff
+    */
+  def andMask: BigInt
+
+  /** Factory function to create the underlying T, for instance a UInt32 */
+  def apply: A => Int64
+
+  def +(num: Int64): Int64 = apply(checkResult(underlying + num.underlying))
+
+  /**
+    * Checks if the given result is within the range
+    * of this number type
+    */
+  private def checkResult(result: BigInt): A = {
+    require((result & andMask) == result,
+      "Result was out of bounds, got: " + result)
+    result
+  }
+}  
+\end{lstlisting}
+
+After:
+\begin{lstlisting}[style=scala]
+sealed abstract class Number {
+  type A = BigInt
+
+  /** The underlying scala number used to to hold the number */
+  protected def underlying: A
+
+  def toBigInt: BigInt = underlying
+
+  /**
+    * This is used to determine the valid amount of bytes in a number
+    * for instance a UInt8 has an andMask of 0xff
+    * a UInt32 has an andMask of 0xffffffff
+    */
+  def andMask: BigInt
+
+  /** Factory function to create the underlying T, for instance a UInt32 */
+  def apply: A => Int64
+
+  def +(num: Int64): Int64 = apply(checkResult(underlying + num.underlying))
+
+  /**
+    * Checks if the given result is within the range
+    * of this number type
+    */
+  private def checkResult(result: BigInt): A = {
+    require((result & andMask) == result,
+      "Result was out of bounds, got: " + result)
+    result
+  }
+}
+\end{lstlisting}
 
 
 \subsection{Getting Rid of Concrete Type}
