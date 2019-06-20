@@ -19,7 +19,7 @@ sealed abstract class CurrencyUnit {
 sealed abstract class Satoshis extends CurrencyUnit {
   override def satoshis: Satoshis = this
 
-  def toBigInt: BigInt = BigInt(toLong)
+  def toBigInt: BigInt = underlying.toBigInt
 
   def toLong: Long = underlying.toLong
 
