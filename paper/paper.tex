@@ -39,7 +39,7 @@
   commentstyle=\color{dkgreen},
   numbers=left,
   %frame=single, % Border around box
-  numbersep=-7pt,
+  %numbersep=-7pt,
   numberstyle=\color{gray},
   stringstyle=\color{mauve}
 }
@@ -506,6 +506,32 @@ currencies like Satoshis.
 
 \subsection{Extracting the relevant Code}
 
+\todo{
+kai text
+
+extracted 3 classes (they are in code/addition/src/main/scala/addition/original)
+
+changes from original to reduced (new folder):
+  - package name
+
+  - removed numbers other than Int64
+
+  - removed extending Factory and NetworkElement abstract class. This includes some hex/byte conversion eg fromHex, hex, bytes, fromBytes, ...
+    \href{https://bitcoin-s.org/docs/core/core-intro\#the-basics}{description in section \#the-basics (cannot add link with hashtag)}
+    \href{https://github.com/bitcoin-s/bitcoin-s/blob/master/core/src/main/scala/org/bitcoins/core/protocol/NetworkElement.scala}{NetworkElement class}
+    \href{https://github.com/bitcoin-s/bitcoin-s/blob/master/core/src/main/scala/org/bitcoins/core/util/Factory.scala}{Factory class}
+
+  - removed Bitcoins class
+
+  - removed subtraction and multiplication, binary operations <<, >>, etc, comparision operator <=, >=, etc but not == and !=
+
+  - removed toBigDecimal
+
+  - removed object CurrencyUnits containing some variables to transform satoshis to btc (not used)
+
+  The code we use for the following sections is in reduced folder.
+}
+
 \todo{ramon: write this section}
 \todo{ramon: keep close to original code}
 \todo{ramon: for every transformation: before and after}
@@ -514,7 +540,9 @@ currencies like Satoshis.
 \todo{ramon,anna: explain what the code does and why}
 
 Here we can see the extracted code needed for the addition of CurrencyUnits:
-\lstinputlisting[language=scala]{../code/currsniporig/src/main/scala/code/initial/Code.scala}
+\lstinputlisting[language=scala]{../code/addition/src/main/scala/addition/reduced/number/BasicArithmetic.scala}
+\lstinputlisting[language=scala]{../code/addition/src/main/scala/addition/reduced/number/NumberType.scala}
+\lstinputlisting[language=scala]{../code/addition/src/main/scala/addition/reduced/currency/CurrencyUnits.scala}
 
 The additions' signature looks like this:
 \begin{lstlisting}[language=scala]
