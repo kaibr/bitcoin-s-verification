@@ -22,6 +22,11 @@
   urlcolor   = blue
 }
 
+% nicer bold
+\renewcommand{\bfdefault}{b}%
+
+% make paragraph headings bold instead of italics
+\renewcommand{\paragraph}{\textbf}%
 
 \definecolor{dkgreen}{rgb}{0,0.6,0}
 \definecolor{gray}{rgb}{0.5,0.5,0.5}
@@ -56,14 +61,14 @@
 \maketitle             
 
 \begin{abstract}
-  We try to verify properties of the Bitcoin-S library, a Scala
+  We try to verify properties of the bitcoin-s library, a Scala
   implementation of parts of the Bitcoin protocol. We use the
   Stainless verifier which supports programs in subset of Scala called
   the \emph{Pure Scala Fragment}. We first try to verify the property
-  that regular transactions never create new money. It turns out that
+  that regular transactions do not create new money. It turns out that
   there is too much code involved that lies outside of the supported
   fragment to make this feasible. However, in the process we uncover
-  and fix a bug in Bitcoin-S. We then turn to a much simpler (and less
+  and fix a bug in bitcoin-s. We then turn to a much simpler (and less
   interesting) property: that adding zero satoshis to a given amount
   of satoshis yields the given amount of satoshis. Here as well a
   significant part of the relevant code lies outside of the supported
@@ -79,45 +84,21 @@
 
 \todo{kai: motivation, bitcoin inflation bug, scala better suited for formal verification, bitcoin-s handling millions of dollars, this is a bit of a case study}
 
-\subsection{Formal Verification with Stainless}
-\label{sec:stainless}
 
-kai: successor of Leon verifier \cite{DBLP:conf/ecoop/BlancKKS13,DBLP:conf/pldi/VoirolKK15,DBLP:conf/pldi/BlancK15}
 
-Stainless is developed by "Lab for Automated Reasoning and Analysis"
-(LARA) at EPFL's School of Computer and Communication Sciences.  Using
-this framework we can verify the correctness of Scala programs.  The
-following overview of the framework is taken from the section
-\href{https://epfl-lara.github.io/stainless/intro.html}{Introduction}
-of the Stainless documentation \cite{Stainless:documentation}.
+\paragraph{The Stainless Verifier.} Stainless is the successor of the
+Leon verifier
+\cite{DBLP:conf/ecoop/BlancKKS13,DBLP:conf/pldi/VoirolKK15,DBLP:conf/pldi/BlancK15}
+and is developed at EPF Lausanne
+\cite{Stainless:documentation,Stainless:github}. It is intended to be
+used by programmers without training in formal verification and thus
+allows to write specifications in Scala and focusses on counterexample
+finding in addition to proving correctness.
 
-Stainless statically verifies that a program satisfies a given
-specification and that a program will not crash at runtime.  The
-framework covers all possible inputs and finds a counter examples for
-possible failures in a program which violate the given specification.
+The following example from \cite{Stainless:documentation} demonstrates
+this. Notice how a precondition is specified using the function
+\emph{require} and a postcondition using \emph{ensuring}.
 
-The main functions used to write a specification are \textit{require}
-and \textit{ensuring}.
-
-With \textit{require} we define a precondition of a function, which we
-want to verify.  \textit{require} is placed at the beginning of the
-function body.  \textit{require} specifies, if the parameter of the
-function holds against a certain condition.
-
-With \textit{ensuring}, we define the postcondition of a function.
-\textit{ensuring} is placed at the end of the function after the body.
-\textit{ensuring} specifies, if the return value or the result of the
-function satisfies a certain condition.
-
-On invoking Stainless, it tries to prove that the postcondition always
-holds, assuming the given precondition does hold.
-
-The following example demonstrates a simple formal specification for
-the function calculating a factorial.  This is a modified example from
-the section
-\href{https://epfl-lara.github.io/stainless/intro.html}{Introduction}
-of the Stainless documentation \cite{Stainless:documentation}, so
-Stainless reports an error verifying it.
 \begin{lstlisting}[language=Scala]
   def factorial(n: Int): Int = {
       require(n >= 0)
@@ -129,42 +110,22 @@ Stainless reports an error verifying it.
   } ensuring(res => res >= 0)
 \end{lstlisting}
 
-It recursively calculates the factorial of an integer number.
-The input of the function is constrained with \textit{require} to a non-negative value.
-The result should also be non-negative.
-Thus, Stainless will verify whether the result of the factorial calculation is non-negative for all non-negative inputs.
+Our program happens to not satisfy the specification. An overflow in
+the 32-bit Int leads to a negative result for the input 17, as
+Stainless reports in Figure~\ref{fig:failed}. Changing the type from
+Int to BigInt will result in a successful verification.
 
-Stainless can produce 3 outcomes of postcondition verification:
-\textit{valid}, \textit{invalid} and \textit{unknown}.  If the
-postcondition is \textit{valid} Stainless could prove that for any
-inputs constrained in the precondition, the postcondition always
-holds.  Reporting the postcondition as \textit{invalid} the framework
-could find at least one counterexample which satisfies the
-precondition but violates the postcondition.  If Stainless is unable
-to prove the postcondition or find a counterexample it reports the
-outcome \textit{unknown}.  In this case a timeout or an internal error
-occurred.  Furthermore, Stainless checks for calls in the code to the
-function with invalid arguments violating the precondition.  For
-example if we invoke factorial with a negative number it reports
-\textit{invalid}.
-
-Let's return to our incorrect example with factorial.
-Stainless reports the following result for the factorial verification from our example:
 \begin{figure}
 	\centering
 		\includegraphics[width=\textwidth]{output1.png}
 	\caption{Output of Stainless verification for calculating factorial of Int number}
-	\label{fig:output1}
+	\label{fig:failed}
 \end{figure}
 
-Stainless disproves the postcondition and gives the number 17 as a
-counterexample.  Due to an overflow in the 32 bit Int the result
-becomes a negative value.  The program would work correct by changing
-the type from Int to BigInt.
 
-Stainless supports only a subset of Scala. \todo{Anna It supports
-  blabla, in particular it supports not blablabla. (check class with
-  var)}
+\paragraph{The Pure Scala Fragment.} Stainless supports only a subset
+of Scala. \todo{Anna It supports blabla, in particular it supports not
+  blablabla. (check class with var)}
 
 \todo{why does stainless use its own BigInt etc?}
 
@@ -183,7 +144,6 @@ section
 code of Stainless on GitHub \cite{Stainless:github} in the folder
 \href{https://github.com/epfl-lara/stainless/tree/master/frontends/library/stainless}{\textit{frontends/library/stainless}}.
 
-Stainless verifies Scala programs using SMT (satisfiability modulo theories) solvers. 
 
 
 \subsection{The Properties to Verify}
