@@ -1,9 +1,8 @@
 package addition.reduced.currency
 
-import addition.reduced.number.{BaseNumbers, BasicArithmetic, Int64}
+import addition.reduced.number.{BaseNumbers, Int64}
 
-sealed abstract class CurrencyUnit
-  extends BasicArithmetic[CurrencyUnit] {
+sealed abstract class CurrencyUnit {
   type A
 
   def satoshis: Satoshis
@@ -12,7 +11,7 @@ sealed abstract class CurrencyUnit
 
   def ==(c: CurrencyUnit): Boolean = satoshis == c.satoshis
 
-  override def +(c: CurrencyUnit): CurrencyUnit = {
+  def +(c: CurrencyUnit): CurrencyUnit = {
     Satoshis(satoshis.underlying + c.satoshis.underlying)
   }
 

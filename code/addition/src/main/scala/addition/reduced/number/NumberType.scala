@@ -5,8 +5,7 @@ package addition.reduced.number
   * This is useful for dealing with codebases/protocols that rely on C's
   * unsigned integer types
   */
-sealed abstract class Number[T <: Number[T]]
-  extends BasicArithmetic[T] {
+sealed abstract class Number[T <: Number[T]] {
   type A = BigInt
 
   /** The underlying scala number used to to hold the number */
@@ -25,7 +24,7 @@ sealed abstract class Number[T <: Number[T]]
   /** Factory function to create the underlying T, for instance a UInt32 */
   def apply: A => T
 
-  override def +(num: T): T = apply(checkResult(underlying + num.underlying))
+  def +(num: T): T = apply(checkResult(underlying + num.underlying))
 
   /**
     * Checks if the given result is within the range

@@ -509,14 +509,14 @@ currencies like Satoshis.
 \todo{
 kai text
 
-extracted 3 classes (they are in code/addition/src/main/scala/addition/original)
+extracted 2 files (they are in code/addition/src/main/scala/addition/original)
 
 changes from original to reduced (new folder):
   - package name
 
   - removed numbers other than Int64
 
-  - removed extending Factory and NetworkElement abstract class. This includes some hex/byte conversion eg fromHex, hex, bytes, fromBytes, ...
+  - removed extending Factory, NetworkElement and BasicArithmetic. This includes some hex/byte conversion eg fromHex, hex, bytes, fromBytes, ... Just interfaces never referenced
     \href{https://bitcoin-s.org/docs/core/core-intro\#the-basics}{description in section \#the-basics (cannot add link with hashtag)}
     \href{https://github.com/bitcoin-s/bitcoin-s/blob/master/core/src/main/scala/org/bitcoins/core/protocol/NetworkElement.scala}{NetworkElement class}
     \href{https://github.com/bitcoin-s/bitcoin-s/blob/master/core/src/main/scala/org/bitcoins/core/util/Factory.scala}{Factory class}
@@ -540,7 +540,6 @@ changes from original to reduced (new folder):
 \todo{ramon,anna: explain what the code does and why}
 
 Here we can see the extracted code needed for the addition of CurrencyUnits:
-\lstinputlisting[language=scala]{../code/addition/src/main/scala/addition/reduced/number/BasicArithmetic.scala}
 \lstinputlisting[language=scala]{../code/addition/src/main/scala/addition/reduced/number/NumberType.scala}
 \lstinputlisting[language=scala]{../code/addition/src/main/scala/addition/reduced/currency/CurrencyUnits.scala}
 
