@@ -72,7 +72,7 @@
   interesting) property: that adding zero satoshis to a given amount
   of satoshis yields the given amount of satoshis. Here as well a
   significant part of the relevant code lies outside of the supported
-  fragment. However, after a series of equivalent transformations, we
+  fragment. However, after a series of equivalent transformations we
   arrive at code that we successfully verify.
 
 \keywords{Bitcoin  \and Scala \and Bitcoin-S \and Stainless.}
@@ -82,22 +82,36 @@
 
 \section{Introduction}
 
-\todo{kai: motivation, bitcoin inflation bug, scala better suited for formal verification, bitcoin-s handling millions of dollars, this is a bit of a case study}
+For software handling cryptocurrency, correctness is clearly crucial.
+However, even in very well-tested software such as Bitcoin Core,
+serious bugs occur. The most recent example is the bug found in
+September 2018 \cite{cve201817144} which essentially allowed to
+arbitrarily create new coins. Such software is thus a worthwhile
+target for formal verification.
 
-
+\paragraph{The bitcoin-s Library.} Here, we try to verify two
+properties of the bitcoin-s library
+\cite{BitcoinS:website,BitcoinS:github}, which implements parts of the
+Bitcoin protocol in Scala. In particular, it allows to serialize,
+deserialize, sign and validate transactions. The library uses
+immutable data structures and algebraic data types but is not written
+with formal verification in mind. According to the website, the
+library is used in production, ``handling millions of dollars each
+day'' \cite{BitcoinS:website}.
 
 \paragraph{The Stainless Verifier.} Stainless is the successor of the
 Leon verifier
 \cite{DBLP:conf/ecoop/BlancKKS13,DBLP:conf/pldi/VoirolKK15,DBLP:conf/pldi/BlancK15}
 and is developed at EPF Lausanne
-\cite{Stainless:documentation,Stainless:github}. It is intended to be
+\cite{Stainless:github}. It is intended to be
 used by programmers without training in formal verification and thus
 allows to write specifications in Scala and focusses on counterexample
 finding in addition to proving correctness.
 
-The following example from \cite{Stainless:documentation} demonstrates
-this. Notice how a precondition is specified using the function
-\emph{require} and a postcondition using \emph{ensuring}.
+The following example from the Stainless documentation
+\cite{Stainless:documentation} demonstrates this. Notice how a
+precondition is specified using the function \emph{require} and a
+postcondition using \emph{ensuring}.
 
 \begin{lstlisting}[language=Scala]
   def factorial(n: Int): Int = {
@@ -146,25 +160,18 @@ code of Stainless on GitHub \cite{Stainless:github} in the folder
 
 
 
-\subsection{The Properties to Verify}
-
-Bitcoin-S is a large project found on GitHub implementing many
-functionalities.  In this work we look at two of them, namely the
-\nameref{property_1} and the \nameref{property_2} described shortly.
-Thus, we go through the relevant code parts to verify those
-properties, look at some challenges with Stainless and see why we
-should write software with verification in mind.  In order to be able
-to verify Bitcoin-S, we have to rewrite parts of it in the subset of
-Scala supported by Stainless.
 
 
-\subsubsection{No-Inflation Property}
-\label{property_1}
 
-The decision to verify this property was inspired by the bug found in
-Bitcoin Core in September 2018 \cite{cve201817144} which allowed to
-spend the same unspent transaction output (UTXO) in a transaction
-multiple times.  Hence, new coins could be created out of the air.
+
+
+
+
+
+
+
+\section{Trying to Verify the No-Inflation Property}
+
 Thus, we try to verify the property, that a non-coinbase transaction
 cannot generate new coins.  Let's name it the \nameref{property_1}.
 
@@ -176,26 +183,6 @@ during the analysis of the \nameref{property_1} we look at a bug in
 Bitcoin-S found during this work and see the code changes for the
 bugfix in section \ref{sec:bugfix}.
 
-
-\subsubsection{Addition-with-Zero Property}
-\label{property_2}
-
-In Bitcoin-S there is a class \texttt{Satoshis} representing an amount of bitcoins.
-We look at the verification of the addition of Satoshis with zero Satoshis.
-This operation should result in the same amount of Satoshis.
-Let's call it the \nameref{property_2}.
-
-Using Stainless, we see the successful verification of this property.
-But the process of the verification with the tool requires many
-changes in the code, so that Stainless can accept it.  We look at all
-needed modifications in chapter \ref{chap:verify_add}.
-
-
-
-
-
-\section{Trying to Verify the No-Inflation Property}
-\label{chap:verify_check}
 
 This chapter describes the part of Bitcoin-S needed to verify the
 \nameref{property_1} described before.  We are going to create a
@@ -448,7 +435,18 @@ So let's look at the \nameref{property_2}.
 
 
 \section{Towards Verifying the Addition-with-Zero Property}
+
 \label{chap:verify_add}
+
+In Bitcoin-S there is a class \texttt{Satoshis} representing an amount of bitcoins.
+We look at the verification of the addition of Satoshis with zero Satoshis.
+This operation should result in the same amount of Satoshis.
+Let's call it the \nameref{property_2}.
+
+Using Stainless, we see the successful verification of this property.
+But the process of the verification with the tool requires many
+changes in the code, so that Stainless can accept it.  We look at all
+needed modifications in chapter \ref{chap:verify_add}.
 
 
 
