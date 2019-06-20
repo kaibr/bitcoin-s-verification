@@ -17,7 +17,6 @@ sealed abstract class Number[T <: Number[T]]
   /** The underlying scala number used to to hold the number */
   protected def underlying: A
 
-  def toInt: Int = toBigInt.bigInteger.intValueExact()
   def toLong: Long = toBigInt.bigInteger.longValueExact()
   def toBigInt: BigInt = underlying
 
