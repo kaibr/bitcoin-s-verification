@@ -14,16 +14,12 @@
 \renewcommand\UrlFont{\color{blue}\rmfamily}
 
 %\usepackage{courier}
-\usepackage{listings}
-\usepackage[dvipsnames]{xcolor}
-\colorlet{link}{MidnightBlue}
+\usepackage{listings, color}
 \hypersetup{
   colorlinks   = true,
-  linkbordercolor=link,
-  pdfborderstyle={/S/U/W .5},% border style will be underline of width 1pt
-     linkcolor  = link,
-     citecolor  = link,
-     urlcolor   = link
+  linkcolor  = blue,
+  citecolor  = blue,
+  urlcolor   = blue
 }
 
 
@@ -86,7 +82,7 @@
 \subsection{Formal Verification with Stainless}
 \label{sec:stainless}
 
-kai: successor of Leon verifier \cite{DBLP:conf/pldi/VoirolKK15,DBLP:conf/pldi/BlancK15}
+kai: successor of Leon verifier \cite{DBLP:conf/ecoop/BlancKKS13,DBLP:conf/pldi/VoirolKK15,DBLP:conf/pldi/BlancK15}
 
 Stainless is developed by "Lab for Automated Reasoning and Analysis"
 (LARA) at EPFL's School of Computer and Communication Sciences.  Using
