@@ -3,8 +3,6 @@ package addition.modified.currency
 import addition.modified.number.{BaseNumbers, Int64}
 
 sealed abstract class CurrencyUnit {
-  type A
-
   def satoshis: Satoshis
 
   def !=(c: CurrencyUnit): Boolean = !(this == c)
@@ -15,12 +13,10 @@ sealed abstract class CurrencyUnit {
     Satoshis(satoshis.underlying + c.satoshis.underlying)
   }
 
-  protected def underlying: A
+  protected def underlying: Int64
 }
 
 sealed abstract class Satoshis extends CurrencyUnit {
-  override type A = Int64
-
   override def satoshis: Satoshis = this
 
   def toBigInt: BigInt = BigInt(toLong)
