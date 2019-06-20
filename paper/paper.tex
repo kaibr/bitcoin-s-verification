@@ -46,7 +46,13 @@
   stringstyle=\color{mauve}
 }
 
-\lstdefinestyle{stainless}{numbers=none, breaklines=false,  basicstyle=\footnotesize\ttfamily,}
+\lstdefinestyle{stainless}{
+  numbers=none,
+  breaklines=true,
+  breakautoindent=true,
+  breakindent=63pt,
+  basicstyle=\footnotesize\ttfamily
+}
  
 \newcommand{\todo}[1]{{\par \color{red}#1}}
 
@@ -540,20 +546,31 @@ So let's see how we can fix those errors.
 \subsection{Turning Object into Case Object}
 
 Stainless output:
-{\footnotesize
-\begin{verbatim}
-  [ Error  ] Code.scala:41:1: Objects cannot extend classes or implement traits,
-             use a case object instead
-           object Int64 extends BaseNumbers[Int64] {
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^...
-  [ Error  ] Code.scala:84:1: Objects cannot extend classes or implement traits,
-            use a case object instead
+\begin{lstlisting}[style=stainless]
+  [ Error  ] currency/CurrencyUnits.scala:33:1: Objects cannot extend classes or implement traits, use a case object instead
             object Satoshis extends BaseNumbers[Satoshis] {
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^...
-\end{verbatim}}
+  [ Error  ] number/NumberType.scala:65:1: Objects cannot extend classes or implement traits, use a case object instead
+            object Int64 extends BaseNumbers[Int64] {
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^...
+\end{lstlisting}
+
+Code before:
+\begin{lstlisting}[style=scala]
+object Int64 extends BaseNumbers[Int64] { ... }
+object Satoshis extends BaseNumbers[Satoshis] { ... }
+\end{lstlisting}
+
+Code after:
+\begin{lstlisting}[style=scala]
+case object Int64 extends BaseNumbers[Int64] { ... }
+case object Satoshis extends BaseNumbers[Satoshis] { ... }
+\end{lstlisting}
 
 Here, we can just change the objects from object to case object.
 Stainless recommendation is to use objects for modules and case objects as algebraic data types.
+
+\todo{Ramon does this change semantics?}
 
 This is due to the internal design of Scala.
 It's possible to reason about case object but not about object.
