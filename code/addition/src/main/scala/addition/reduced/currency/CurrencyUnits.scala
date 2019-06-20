@@ -16,8 +16,6 @@ sealed abstract class CurrencyUnit
     Satoshis(satoshis.underlying + c.satoshis.underlying)
   }
 
-  def toBigDecimal: BigDecimal
-
   protected def underlying: A
 }
 
@@ -31,8 +29,6 @@ sealed abstract class Satoshis extends CurrencyUnit {
   }
 
   override def satoshis: Satoshis = this
-
-  override def toBigDecimal = BigDecimal(toBigInt)
 
   def toBigInt: BigInt = BigInt(toLong)
 
