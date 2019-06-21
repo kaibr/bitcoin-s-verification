@@ -937,10 +937,10 @@ sealed abstract class Number {
 
 Stainless output:
 \begin{lstlisting}[style=stainless]
-  [Warning ] Code.scala:9:3: Could not extract tree in class: type A =
-             BigInt (class scala.reflect.internal.Trees$TypeDef)
-             type A = BigInt
-             ^^^^^^^^^^^^^^^
+  [Warning ] number/NumberType.scala:9:3: Could not extract tree in class: type A = BigInt (class scala.reflect.internal.Trees$TypeDef)
+               type A = BigInt
+               ^^^^^^^^^^^^^^^
+
 \end{lstlisting}
 
 This is easy.
@@ -956,10 +956,10 @@ Now it should work without this change.
 
 Stainless output:
 \begin{lstlisting}[style=stainless]
-  [ Error  ] Code.scala:22:14: Unknown call to & on result (BigInt) with arguments
-             List(Number.this.andMask) of type List(BigInt)
-            require((result & andMask) == result,
-                    ^^^^^^^^^^^^^^^^
+  [ Error  ] number/NumberType.scala:33:14: Unknown call to & on result (BigInt) with arguments List(Number.this.andMask) of type List(BigInt)
+               require((result & andMask) == result,
+                       ^^^^^^^^^^^^^^^^
+
 \end{lstlisting}
 
 Due to the restrictions on BigInt, we can not use the \& function either.
@@ -990,8 +990,35 @@ Running Stainless produces again new errors.
 
 Stainless output:
 \begin{lstlisting}[style=stainless]
-  [Warning ] Code.scala:90:3: Could not extract tree in class: case private
-             class SatoshisImpl extends Satoshis with Product with Serializable {
+  [Warning ] currency/CurrencyUnits.scala:36:3: Could not extract tree in class: case private class SatoshisImpl extends Satoshis with Product with Serializable {
+  [Warning ]   <caseaccessor> <paramaccessor> private[this] val underlying: addition.modified.number.Int64 = _;
+  [Warning ]   <stable> <caseaccessor> <accessor> <paramaccessor> def underlying: addition.modified.number.Int64 = SatoshisImpl.this.underlying;
+  [Warning ]   def <init>(underlying: addition.modified.number.Int64): addition.modified.currency.Satoshis.SatoshisImpl = {
+  [Warning ]     SatoshisImpl.super.<init>();
+  [Warning ]     ()
+  [Warning ]   };
+  [Warning ]   <synthetic> def copy(underlying: addition.modified.number.Int64 = underlying): addition.modified.currency.Satoshis.SatoshisImpl = new SatoshisImpl(underlying);
+  [Warning ]   <synthetic> def copy$default$1: addition.modified.number.Int64 = SatoshisImpl.this.underlying;
+  [Warning ]   override <synthetic> def productPrefix: String = "SatoshisImpl";
+  [Warning ]   <synthetic> def productArity: Int = 1;
+  [Warning ]   <synthetic> def productElement(x$1: Int): Any = x$1 match {
+  [Warning ]     case 0 => SatoshisImpl.this.underlying
+  [Warning ]     case _ => throw new IndexOutOfBoundsException(x$1.toString())
+  [Warning ]   };
+  [Warning ]   override <synthetic> def productIterator: Iterator[Any] = runtime.this.ScalaRunTime.typedProductIterator[Any](SatoshisImpl.this);
+  [Warning ]   <synthetic> def canEqual(x$1: Any): Boolean = x$1.$isInstanceOf[addition.modified.currency.Satoshis.SatoshisImpl]();
+  [Warning ]   override <synthetic> def hashCode(): Int = ScalaRunTime.this._hashCode(SatoshisImpl.this);
+  [Warning ]   override <synthetic> def toString(): String = ScalaRunTime.this._toString(SatoshisImpl.this);
+  [Warning ]   override <synthetic> def equals(x$1: Any): Boolean = SatoshisImpl.this.eq(x$1.asInstanceOf[Object]).||(x$1 match {
+  [Warning ]   case (_: addition.modified.currency.Satoshis.SatoshisImpl) => true
+  [Warning ]   case _ => false
+  [Warning ] }.&&({
+  [Warning ]     <synthetic> val SatoshisImpl$1: addition.modified.currency.Satoshis.SatoshisImpl = x$1.asInstanceOf[addition.modified.currency.Satoshis.SatoshisImpl];
+  [Warning ]     SatoshisImpl.this.underlying.==(SatoshisImpl$1.underlying).&&(SatoshisImpl$1.canEqual(SatoshisImpl.this))
+  [Warning ]   }))
+  [Warning ] } (class scala.reflect.internal.Trees$ClassDef)
+                private case class SatoshisImpl(underlying: Int64) extends Satoshis
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 \end{lstlisting}
 
 Stainless can not extract the private class inside the object.
