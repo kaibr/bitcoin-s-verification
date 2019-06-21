@@ -1422,7 +1422,7 @@ private case class Int64Impl(underlying: BigInt) extends Int64 {
 \end{lstlisting}
 
 And before:
-\begin{latlisting}[style=scala]
+\begin{lstlisting}[style=scala]
 case object Int64 extends BaseNumbers[Int64] {
   lazy val zero = Int64(0)
   lazy val one = Int64(1)
@@ -1434,7 +1434,7 @@ case object Int64 extends BaseNumbers[Int64] {
 
   def apply(bigInt: BigInt): Int64 = Int64Impl(bigInt)
 }
-\end{latlisting}
+\end{lstlisting}
 
 After:
 \begin{lstlisting}[style=scala]
@@ -1453,17 +1453,37 @@ Looks like it can not compare a BigInt with a Long value.
 We can easily convert this Long value to a BigInt with a string literal parameter by passing these numbers as strings to the BigInt constructor.
 
 Finally, we get some output from Stainless about the verification in the code.
-\begin{lstlisting}[style=stainless]
-[...]
-[Warning ]  => INVALID
-[Warning ] Found counter-example:
-[Warning ]   thiss: { x: Object | @unchecked isNumber(x) } -> Int64Impl(0)
-[Warning ]   num: { x: Object | @unchecked isInt64(x) }    -> Int64Impl(9223372036854775808)
-[...]
-[  Info  ] +  precond. (call checkResult(thiss, underlying(thiss) + u ...)  invalid  Code.scala:16:45
-[...]
-[  Info  ] total: 5  valid: 4  (4 from cache) invalid: 1  unknown: 0  time:  1.317
-\end{lstlisting}
+
+\todo{kai special chars from stainless output what now?}
+% \begin{lstlisting}[style=stainless][Warning ] The Z3 native interface is not available. Falling back onto smt-z3.
+%   [  Info  ]  - Checking cache: 'adt invariant' VC for apply @33:39...
+%   [  Info  ]  - Checking cache: 'adt invariant' VC for apply @62:38...
+%   [  Info  ] Cache miss: 'adt invariant' VC for apply @62:38...
+%   [  Info  ] Cache hit: 'adt invariant' VC for apply @33:39...
+%   [  Info  ]  - Now solving 'adt invariant' VC for apply @62:38...
+%   [  Info  ]  - Result for 'adt invariant' VC for apply @62:38:
+%   [Warning ]  => INVALID
+%   [Warning ] Found counter-example:
+%   [Warning ]   bigInt: BigInt -> -9223372036854775809
+%   [  Info  ]  - Checking cache: 'precond. (call checkResult(thiss, underlying(thiss) + u ...)' VC for + @17:36...
+%   [  Info  ] Cache miss: 'precond. (call checkResult(thiss, underlying(thiss) + u ...)' VC for + @17:36...
+%   [  Info  ]  - Now solving 'precond. (call checkResult(thiss, underlying(thiss) + u ...)' VC for + @17:36...
+%   [  Info  ]  - Result for 'precond. (call checkResult(thiss, underlying(thiss) + u ...)' VC for + @17:36:
+%   [Warning ]  => INVALID
+%   [Warning ] Found counter-example:
+%   [Warning ]   num: Number   -> Int64Impl(9223372036854775807)
+%   [Warning ]   thiss: Number -> Int64Impl(1)
+%   [  Info  ]   ┌───────────────────┐
+%   [  Info  ] ╔═╡ stainless summary ╞══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+%   [  Info  ] ║ └───────────────────┘                                                                                                                      ║
+%   [  Info  ] ║ +      precond. (call checkResult(thiss, underlying(thiss) + u ...)  invalid           U:smt-z3  number/NumberType.scala:17:36       0.110 ║
+%   [  Info  ] ║ apply  adt invariant                                                 valid from cache            currency/CurrencyUnits.scala:33:39  1.136 ║
+%   [  Info  ] ║ apply  adt invariant                                                 invalid           U:smt-z3  number/NumberType.scala:62:38       0.394 ║
+%   [  Info  ] ╟┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄╢
+%   [  Info  ] ║ total: 3    valid: 1    (1 from cache) invalid: 2    unknown: 0    time:   1.640                                                           ║
+%   [  Info  ] ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+%   [  Info  ] Shutting down executor service.  
+% \end{lstlisting}
 
 This shows that there is an invalid specification in checkResult and Stainless prints a counterexample for it.
 
