@@ -10,8 +10,9 @@ sealed abstract class CurrencyUnit {
   def ==(c: CurrencyUnit): Boolean = satoshis == c.satoshis
 
   def +(c: CurrencyUnit): CurrencyUnit = {
+    require(c.satoshis == Satoshis.zero)
     Satoshis(satoshis.underlying + c.satoshis.underlying)
-  }
+  } ensuring(res => res.satoshis == this.satoshis)
 
   protected def underlying: Int64
 }

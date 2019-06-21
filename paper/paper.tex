@@ -1504,12 +1504,40 @@ We ensure the result is the same value as \emph{this} in the postcondition.
 \end{lstlisting}
 
 We can use equals (==) directly on Satoshis, because it is a case class.
+
+Before:
+\begin{lstlisting}[style=scala]
+sealed abstract class CurrencyUnit {
+  def satoshis: Satoshis
+
+  def !=(c: CurrencyUnit): Boolean = !(this == c)
+
+  def ==(c: CurrencyUnit): Boolean = satoshis == c.satoshis
+
+  def +(c: CurrencyUnit): CurrencyUnit = {
+    Satoshis(satoshis.underlying + c.satoshis.underlying)
+  }
+
+  protected def underlying: Int64
+}
+\end{lstlisting}
+
 The addition will now look like this:
 \begin{lstlisting}[style=scala]
+sealed abstract class CurrencyUnit {
+  def satoshis: Satoshis
+
+  def !=(c: CurrencyUnit): Boolean = !(this == c)
+
+  def ==(c: CurrencyUnit): Boolean = satoshis == c.satoshis
+  
   override def +(c: CurrencyUnit): CurrencyUnit = {
     require(c.satoshis == Satoshis.zero)
     Satoshis(satoshis.underlying + c.satoshis.underlying)
   } ensuring(res => res.satoshis == this.satoshis)
+
+  protected def underlying: Int64
+}
 \end{lstlisting}
 
 That's all we need to verify our addition.
