@@ -1220,23 +1220,96 @@ Now we get some weird warnings about require.
 
 Stainless output:
 \begin{lstlisting}[style=stainless]
-  [Warning ] Code.scala:51:3: Could not extract tree in class: scala.this.Predef
-             .require(Int64Impl.this.underlying.>=(math.this.BigInt.long2bigInt(
-             -9223372036854775808L)), "Number was too small for a int64, got: "
-             .+(Int64Impl.this.underlying)) (class scala.reflect.internal.Trees$Apply)
+  [Warning ] number/NumberType.scala:9:3: Could not extract tree in class: type A = BigInt (class scala.reflect.internal.Trees$TypeDef)
+            type A = BigInt
+            ^^^^^^^^^^^^^^^
+  [Warning ] number/NumberType.scala:71:3: Could not extract tree in class: scala.this.Predef.require(Int64Impl.this.underlying.>=(math.this.BigInt.long2bigInt(-9223372036854775808L)), "Number was too small for a int64, got: ".+(Int64Impl.this.underlying)) (class scala.reflect.internal.Trees$Apply)
             require(underlying >= -9223372036854775808L,
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^...
-  [Warning ] Code.scala:53:3: Could not extract tree in class: scala.this.Predef
-             .require(Int64Impl.this.underlying.<=(math.this.BigInt.long2bigInt(
-             9223372036854775807L)), "Number was too big for a int64, got: "
-             .+(Int64Impl.this.underlying)) (class scala.reflect.internal.Trees$Apply)
+  [Warning ] number/NumberType.scala:73:3: Could not extract tree in class: scala.this.Predef.require(Int64Impl.this.underlying.<=(math.this.BigInt.long2bigInt(9223372036854775807L)), "Number was too big for a int64, got: ".+(Int64Impl.this.underlying)) (class scala.reflect.internal.Trees$Apply)
             require(underlying <= 9223372036854775807L,
             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^...
   [ Error  ] checkResult$0 depends on missing dependencies: require$1.
+
 \end{lstlisting}
 
 Seems like Stainless does not support the second string parameter of require or at least it throws a warning about it.
 We can safely remove the string parameters from the requires, since they only serve as error messages.
+
+Before:
+\begin{lstlisting}[style=scala]
+private case class Int64Impl(underlying: BigInt) extends Int64 {
+  require(underlying >= -9223372036854775808L,
+    "Number was too small for a int64, got: " + underlying)
+  require(underlying <= 9223372036854775807L,
+    "Number was too big for a int64, got: " + underlying)
+}
+\end{lstlisting}
+
+After:
+\begin{lstlisting}[style=scala]
+private case class Int64Impl(underlying: BigInt) extends Int64 {
+  require(underlying >= -9223372036854775808L)
+  require(underlying <= 9223372036854775807L)
+}
+\end{lstlisting}
+
+And before:
+\begin{lstlisting}[style=scala]
+sealed abstract class Number {
+  type A = BigInt
+
+  /** The underlying scala number used to to hold the number */
+  protected def underlying: A
+
+  def toBigInt: BigInt = underlying
+
+  /** Factory function to create the underlying T, for instance a UInt32 */
+  def apply: A => Int64
+
+  def +(num: Int64): Int64 = apply(checkResult(underlying + num.underlying))
+
+  /**
+    * Checks if the given result is within the range
+    * of this number type
+    */
+  private def checkResult(result: BigInt): A = {
+    require(
+         result <= BigInt("9223372036854775807")
+      && result >= BigInt("-9223372036854775808"),
+      "Result was out of bounds, got: " + result)
+    result
+  }
+}
+\end{lstlisting}
+
+After:
+\begin{lstlisting}[style=scala]
+sealed abstract class Number {
+  type A = BigInt
+
+  /** The underlying scala number used to to hold the number */
+  protected def underlying: A
+
+  def toBigInt: BigInt = underlying
+
+  /** Factory function to create the underlying T, for instance a UInt32 */
+  def apply: A => Int64
+
+  def +(num: Int64): Int64 = apply(checkResult(underlying + num.underlying))
+
+  /**
+    * Checks if the given result is within the range
+    * of this number type
+    */
+  private def checkResult(result: BigInt): A = {
+    require(
+          result <= BigInt("9223372036854775807")
+      && result >= BigInt("-9223372036854775808"))
+    result
+  }
+}
+\end{lstlisting}
 
 A new error appears.
 
