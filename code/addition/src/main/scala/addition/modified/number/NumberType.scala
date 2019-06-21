@@ -56,13 +56,6 @@ trait BaseNumbers[T] {
 }
 
 case object Int64 extends BaseNumbers[Int64] {
-  private case class Int64Impl(underlying: BigInt) extends Int64 {
-    require(underlying >= -9223372036854775808L,
-      "Number was too small for a int64, got: " + underlying)
-    require(underlying <= 9223372036854775807L,
-      "Number was too big for a int64, got: " + underlying)
-  }
-
   lazy val zero = Int64(0)
   lazy val one = Int64(1)
 
@@ -72,4 +65,11 @@ case object Int64 extends BaseNumbers[Int64] {
   def apply(long: Long): Int64 = Int64(BigInt(long))
 
   def apply(bigInt: BigInt): Int64 = Int64Impl(bigInt)
+}
+
+private case class Int64Impl(underlying: BigInt) extends Int64 {
+  require(underlying >= -9223372036854775808L,
+    "Number was too small for a int64, got: " + underlying)
+  require(underlying <= 9223372036854775807L,
+    "Number was too big for a int64, got: " + underlying)
 }
