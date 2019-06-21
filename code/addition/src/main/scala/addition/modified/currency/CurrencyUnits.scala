@@ -25,13 +25,12 @@ sealed abstract class Satoshis extends CurrencyUnit {
 }
 
 case object Satoshis extends BaseNumbers[Satoshis] {
-
   val min = Satoshis(Int64.min)
   val max = Satoshis(Int64.max)
   val zero = Satoshis(Int64.zero)
   val one = Satoshis(Int64.one)
 
   def apply(int64: Int64): Satoshis = SatoshisImpl(int64)
-
-  private case class SatoshisImpl(underlying: Int64) extends Satoshis
 }
+
+private case class SatoshisImpl(underlying: Int64) extends Satoshis
