@@ -6,15 +6,13 @@ package addition.modified.number
   * unsigned integer types
   */
 sealed abstract class Number {
-  type A = BigInt
-
   /** The underlying scala number used to to hold the number */
-  protected def underlying: A
+  protected def underlying: BigInt
 
   def toBigInt: BigInt = underlying
 
   /** Factory function to create the underlying T, for instance a UInt32 */
-  def apply: A => Int64
+  def apply: BigInt => Int64
 
   def +(num: Int64): Int64 = apply(checkResult(underlying + num.underlying))
 
@@ -22,7 +20,7 @@ sealed abstract class Number {
     * Checks if the given result is within the range
     * of this number type
     */
-  private def checkResult(result: BigInt): A = {
+  private def checkResult(result: BigInt): BigInt = {
     require(
          result <= BigInt("9223372036854775807")
       && result >= BigInt("-9223372036854775808"))
@@ -40,7 +38,7 @@ sealed abstract class SignedNumber extends Number
   * Represents a int64_t in C
   */
 sealed abstract class Int64 extends SignedNumber {
-  override def apply: A => Int64 = Int64(_)
+  override def apply: BigInt => Int64 = Int64(_)
 }
 
 /**
