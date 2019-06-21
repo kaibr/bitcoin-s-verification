@@ -13,13 +13,6 @@ sealed abstract class Number {
 
   def toBigInt: BigInt = underlying
 
-  /**
-    * This is used to determine the valid amount of bytes in a number
-    * for instance a UInt8 has an andMask of 0xff
-    * a UInt32 has an andMask of 0xffffffff
-    */
-  def andMask: BigInt
-
   /** Factory function to create the underlying T, for instance a UInt32 */
   def apply: A => Int64
 
@@ -30,7 +23,9 @@ sealed abstract class Number {
     * of this number type
     */
   private def checkResult(result: BigInt): A = {
-    require((result & andMask) == result,
+    require(
+         result <= BigInt("9223372036854775807")
+      && result >= BigInt("-9223372036854775808"),
       "Result was out of bounds, got: " + result)
     result
   }
@@ -47,7 +42,6 @@ sealed abstract class SignedNumber extends Number
   */
 sealed abstract class Int64 extends SignedNumber {
   override def apply: A => Int64 = Int64(_)
-  override def andMask = 0xffffffffffffffffL
 }
 
 /**
