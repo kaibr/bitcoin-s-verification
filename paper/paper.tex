@@ -1097,6 +1097,41 @@ Stainless output:
                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 \end{lstlisting}
 
+And:
+\begin{lstlisting}[style=stainless]
+  [Warning ] number/NumberType.scala:59:3: Could not extract tree in class: case private class Int64Impl extends Int64 with Product with Serializable {
+    [Warning ]   <caseaccessor> <paramaccessor> private[this] val underlying: BigInt = _;
+    [Warning ]   <stable> <caseaccessor> <accessor> <paramaccessor> def underlying: BigInt = Int64Impl.this.underlying;
+    [Warning ]   def <init>(underlying: BigInt): addition.modified.number.Int64.Int64Impl = {
+    [Warning ]     Int64Impl.super.<init>();
+    [Warning ]     ()
+    [Warning ]   };
+    [Warning ]   scala.this.Predef.require(Int64Impl.this.underlying.>=(math.this.BigInt.long2bigInt(-9223372036854775808L)), "Number was too small for a int64, got: ".+(Int64Impl.this.underlying));
+    [Warning ]   scala.this.Predef.require(Int64Impl.this.underlying.<=(math.this.BigInt.long2bigInt(9223372036854775807L)), "Number was too big for a int64, got: ".+(Int64Impl.this.underlying));
+    [Warning ]   <synthetic> def copy(underlying: BigInt = underlying): addition.modified.number.Int64.Int64Impl = new Int64Impl(underlying);
+    [Warning ]   <synthetic> def copy$default$1: BigInt = Int64Impl.this.underlying;
+    [Warning ]   override <synthetic> def productPrefix: String = "Int64Impl";
+    [Warning ]   <synthetic> def productArity: Int = 1;
+    [Warning ]   <synthetic> def productElement(x$1: Int): Any = x$1 match {
+    [Warning ]     case 0 => Int64Impl.this.underlying
+    [Warning ]     case _ => throw new IndexOutOfBoundsException(x$1.toString())
+    [Warning ]   };
+    [Warning ]   override <synthetic> def productIterator: Iterator[Any] = runtime.this.ScalaRunTime.typedProductIterator[Any](Int64Impl.this);
+    [Warning ]   <synthetic> def canEqual(x$1: Any): Boolean = x$1.$isInstanceOf[addition.modified.number.Int64.Int64Impl]();
+    [Warning ]   override <synthetic> def hashCode(): Int = ScalaRunTime.this._hashCode(Int64Impl.this);
+    [Warning ]   override <synthetic> def toString(): String = ScalaRunTime.this._toString(Int64Impl.this);
+    [Warning ]   override <synthetic> def equals(x$1: Any): Boolean = Int64Impl.this.eq(x$1.asInstanceOf[Object]).||(x$1 match {
+    [Warning ]   case (_: addition.modified.number.Int64.Int64Impl) => true
+    [Warning ]   case _ => false
+    [Warning ] }.&&({
+    [Warning ]     <synthetic> val Int64Impl$1: addition.modified.number.Int64.Int64Impl = x$1.asInstanceOf[addition.modified.number.Int64.Int64Impl];
+    [Warning ]     Int64Impl.this.underlying.==(Int64Impl$1.underlying).&&(Int64Impl$1.canEqual(Int64Impl.this))
+    [Warning ]   }))
+    [Warning ] } (class scala.reflect.internal.Trees$ClassDef)
+                 private case class Int64Impl(underlying: BigInt) extends Int64 {
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^...
+\end{lstlisting}
+
 Stainless can not extract the private class inside the object.
 Bitcoin-S uses this a lot, because they separate the class from its implementation.
 
@@ -1127,6 +1162,50 @@ case object Satoshis extends BaseNumbers[Satoshis] {
 }
 
 private case class SatoshisImpl(underlying: Int64) extends Satoshis
+\end{lstlisting}
+
+And before:
+\begin{lstlisting}[style=scala]
+case object Int64 extends BaseNumbers[Int64] {
+  private case class Int64Impl(underlying: BigInt) extends Int64 {
+    require(underlying >= -9223372036854775808L,
+      "Number was too small for a int64, got: " + underlying)
+    require(underlying <= 9223372036854775807L,
+      "Number was too big for a int64, got: " + underlying)
+  }
+
+  lazy val zero = Int64(0)
+  lazy val one = Int64(1)
+
+  lazy val min = Int64(-9223372036854775808L)
+  lazy val max = Int64(9223372036854775807L)
+
+  def apply(long: Long): Int64 = Int64(BigInt(long))
+
+  def apply(bigInt: BigInt): Int64 = Int64Impl(bigInt)
+}
+\end{lstlisting}
+
+After:
+\begin{lstlisting}[style=scala]
+case object Int64 extends BaseNumbers[Int64] {
+  lazy val zero = Int64(0)
+  lazy val one = Int64(1)
+
+  lazy val min = Int64(-9223372036854775808L)
+  lazy val max = Int64(9223372036854775807L)
+
+  def apply(long: Long): Int64 = Int64(BigInt(long))
+
+  def apply(bigInt: BigInt): Int64 = Int64Impl(bigInt)
+}
+
+private case class Int64Impl(underlying: BigInt) extends Int64 {
+  require(underlying >= -9223372036854775808L,
+    "Number was too small for a int64, got: " + underlying)
+  require(underlying <= 9223372036854775807L,
+    "Number was too big for a int64, got: " + underlying)
+}
 \end{lstlisting}
 
 This is easy to fix.
