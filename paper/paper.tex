@@ -963,18 +963,94 @@ Stainless output:
 \end{lstlisting}
 
 Due to the restrictions on BigInt, we can not use the \& function either.
-Simplified code:
+Before:
 \begin{lstlisting}[style=scala]
-  sealed abstract class Number extends BasicArithmetic[Int64] {
-    def andMask: BigInt
+sealed abstract class Number {
+  type A = BigInt
 
-    override def +(num: Int64): Int64 = apply(checkResult(underlying + num.underlying))
+  /** The underlying scala number used to to hold the number */
+  protected def underlying: A
 
-    private def checkResult(result: BigInt): BigInt = {
-      require((result & andMask) == result, "Result was out of bounds, got: " + result)
-      result
-    }
+  def toBigInt: BigInt = underlying
+
+  /**
+    * This is used to determine the valid amount of bytes in a number
+    * for instance a UInt8 has an andMask of 0xff
+    * a UInt32 has an andMask of 0xffffffff
+    */
+  def andMask: BigInt
+
+  /** Factory function to create the underlying T, for instance a UInt32 */
+  def apply: A => Int64
+
+  def +(num: Int64): Int64 = apply(checkResult(underlying + num.underlying))
+
+  /**
+    * Checks if the given result is within the range
+    * of this number type
+    */
+  private def checkResult(result: BigInt): A = {
+    require((result & andMask) == result,
+      "Result was out of bounds, got: " + result)
+    result
   }
+}
+
+/**
+  * Represents a signed number in our number system
+  * Instances of this is [[Int64]]
+  */
+sealed abstract class SignedNumber extends Number
+
+/**
+  * Represents a int64_t in C
+  */
+sealed abstract class Int64 extends SignedNumber {
+  override def apply: A => Int64 = Int64(_)
+  override def andMask = 0xffffffffffffffffL
+}
+\end{lstlisting}
+
+After:
+\begin{lstlisting}[style=scala]
+sealed abstract class Number {
+  type A = BigInt
+
+  /** The underlying scala number used to to hold the number */
+  protected def underlying: A
+
+  def toBigInt: BigInt = underlying
+
+  /** Factory function to create the underlying T, for instance a UInt32 */
+  def apply: A => Int64
+
+  def +(num: Int64): Int64 = apply(checkResult(underlying + num.underlying))
+
+  /**
+    * Checks if the given result is within the range
+    * of this number type
+    */
+  private def checkResult(result: BigInt): A = {
+    require(
+          result <= BigInt("9223372036854775807")
+      && result >= BigInt("-9223372036854775808"),
+      "Result was out of bounds, got: " + result)
+    result
+  }
+}
+
+/**
+  * Represents a signed number in our number system
+  * Instances of this is [[Int64]]
+  */
+sealed abstract class SignedNumber extends Number
+
+/**
+  * Represents a int64_t in C
+  */
+sealed abstract class Int64 extends SignedNumber {
+  override def apply: A => Int64 = Int64(_)
+}
 \end{lstlisting}
 
 This is a bounds check.
