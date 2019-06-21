@@ -56,10 +56,8 @@ case object Int64 extends BaseNumbers[Int64] {
   lazy val zero = Int64(0)
   lazy val one = Int64(1)
 
-  lazy val min = Int64(-9223372036854775808L)
-  lazy val max = Int64(9223372036854775807L)
-
-  def apply(long: Long): Int64 = Int64(BigInt(long))
+  lazy val min = Int64(BigInt("-9223372036854775808"))
+  lazy val max = Int64(BigInt("9223372036854775807"))
 
   def apply(bigInt: BigInt): Int64 = Int64Impl(bigInt)
 }
