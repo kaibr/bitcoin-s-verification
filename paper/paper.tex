@@ -1394,11 +1394,12 @@ sealed abstract class Number {
 A new error appears.
 
 
-\subsection{Rewriting BigInt Comparison with Long}
+\subsection{Rewriting BigInt to Long Conversions}
 
 Stainless output:
 \begin{lstlisting}[style=stainless]
   [ Error  ] inv$4 depends on missing dependencies: long2bigInt$0.
+  [ Error  ] apply$14 depends on missing dependencies: BigInt$0, apply$15.
 \end{lstlisting}
 
 This error is hard to understand, but we can see that there is a missing Long to BigInt conversion.
@@ -1418,6 +1419,34 @@ private case class Int64Impl(underlying: BigInt) extends Int64 {
   require(underlying >= BigInt("-9223372036854775808"))
   require(underlying <= BigInt("9223372036854775807"))
 }  
+\end{lstlisting}
+
+And before:
+\begin{latlisting}[style=scala]
+case object Int64 extends BaseNumbers[Int64] {
+  lazy val zero = Int64(0)
+  lazy val one = Int64(1)
+
+  lazy val min = Int64(-9223372036854775808L)
+  lazy val max = Int64(9223372036854775807L)
+
+  def apply(long: Long): Int64 = Int64(BigInt(long))
+
+  def apply(bigInt: BigInt): Int64 = Int64Impl(bigInt)
+}
+\end{latlisting}
+
+After:
+\begin{lstlisting}[style=scala]
+case object Int64 extends BaseNumbers[Int64] {
+  lazy val zero = Int64(0)
+  lazy val one = Int64(1)
+
+  lazy val min = Int64(BigInt("-9223372036854775808"))
+  lazy val max = Int64(BigInt("9223372036854775807"))
+
+  def apply(bigInt: BigInt): Int64 = Int64Impl(bigInt)
+}
 \end{lstlisting}
 
 Looks like it can not compare a BigInt with a Long value.
