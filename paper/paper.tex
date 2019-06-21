@@ -1323,11 +1323,21 @@ Stainless output:
 
 This error is hard to understand, but we can see that there is a missing Long to BigInt conversion.
 So we search for all Long values in the code.
+
+Before:
 \begin{lstlisting}[style=scala]
-  private case class Int64Impl(underlying: BigInt) extends Int64 {
-    require(underlying >= -9223372036854775808L)
-    require(underlying <= 9223372036854775807L)
-  }
+private case class Int64Impl(underlying: BigInt) extends Int64 {
+  require(underlying >= -9223372036854775808L)
+  require(underlying <= 9223372036854775807L)
+}
+\end{lstlisting}
+
+After:
+\begin{lstlisting}[style=scala]
+private case class Int64Impl(underlying: BigInt) extends Int64 {
+  require(underlying >= BigInt("-9223372036854775808"))
+  require(underlying <= BigInt("9223372036854775807"))
+}  
 \end{lstlisting}
 
 Looks like it can not compare a BigInt with a Long value.

@@ -67,6 +67,6 @@ case object Int64 extends BaseNumbers[Int64] {
 }
 
 private case class Int64Impl(underlying: BigInt) extends Int64 {
-  require(underlying >= -9223372036854775808L)
-  require(underlying <= 9223372036854775807L)
+  require(underlying >= BigInt("-9223372036854775808"))
+  require(underlying <= BigInt("9223372036854775807"))
 }
