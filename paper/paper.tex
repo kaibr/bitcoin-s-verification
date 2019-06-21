@@ -1023,11 +1023,34 @@ Stainless output:
 
 Stainless can not extract the private class inside the object.
 Bitcoin-S uses this a lot, because they separate the class from its implementation.
-Simplified:
+
+Before:
 \begin{lstlisting}[style=scala]
-  object Int64 extends BaseNumbers[Int64] {
-    private case class Int64Impl(underlying: BigInt) extends Int64 
-  }
+case object Satoshis extends BaseNumbers[Satoshis] {
+  val min = Satoshis(Int64.min)
+  val max = Satoshis(Int64.max)
+  val zero = Satoshis(Int64.zero)
+  val one = Satoshis(Int64.one)
+
+  def apply(int64: Int64): Satoshis = SatoshisImpl(int64)
+
+  private case class SatoshisImpl(underlying: Int64) extends Satoshis
+}
+\end{lstlisting}
+
+After:
+\begin{lstlisting}[style=scala]
+case object Satoshis extends BaseNumbers[Satoshis] {
+
+  val min = Satoshis(Int64.min)
+  val max = Satoshis(Int64.max)
+  val zero = Satoshis(Int64.zero)
+  val one = Satoshis(Int64.one)
+
+  def apply(int64: Int64): Satoshis = SatoshisImpl(int64)
+}
+
+private case class SatoshisImpl(underlying: Int64) extends Satoshis
 \end{lstlisting}
 
 This is easy to fix.
