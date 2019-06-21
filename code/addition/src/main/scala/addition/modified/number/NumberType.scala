@@ -25,8 +25,7 @@ sealed abstract class Number {
   private def checkResult(result: BigInt): A = {
     require(
          result <= BigInt("9223372036854775807")
-      && result >= BigInt("-9223372036854775808"),
-      "Result was out of bounds, got: " + result)
+      && result >= BigInt("-9223372036854775808"))
     result
   }
 }
@@ -68,8 +67,6 @@ case object Int64 extends BaseNumbers[Int64] {
 }
 
 private case class Int64Impl(underlying: BigInt) extends Int64 {
-  require(underlying >= -9223372036854775808L,
-    "Number was too small for a int64, got: " + underlying)
-  require(underlying <= 9223372036854775807L,
-    "Number was too big for a int64, got: " + underlying)
+  require(underlying >= -9223372036854775808L)
+  require(underlying <= 9223372036854775807L)
 }
