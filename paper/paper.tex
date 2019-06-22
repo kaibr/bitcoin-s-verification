@@ -1572,15 +1572,15 @@ Stainless output now: \todo{kai special chars again}
 %   [Warning ]   num: Number   -> Int64Impl(9223372036854775807)
 %   [Warning ]   thiss: Number -> Int64Impl(1)
 %   [  Info  ]   ┌───────────────────┐
-%   [  Info  ] ╔═╡ stainless summary ╞═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
-%   [  Info  ] ║ └───────────────────┘                                                                                                                                                                             ║
-%   [  Info  ] ║ +      postcondition                                                 valid from cache            ../../../../../bin/../src/main/scala/addition/modified/currency/CurrencyUnits.scala:12:3   1.266 ║
-%   [  Info  ] ║ +      precond. (call checkResult(thiss, underlying(thiss) + u ...)  invalid           U:smt-z3  ../../../../../bin/../src/main/scala/addition/modified/number/NumberType.scala:17:36       0.089 ║
-%   [  Info  ] ║ apply  adt invariant                                                 valid from cache            ../../../../../bin/../src/main/scala/addition/modified/currency/CurrencyUnits.scala:34:39  0.194 ║
-%   [  Info  ] ║ apply  adt invariant                                                 invalid           U:smt-z3  ../../../../../bin/../src/main/scala/addition/modified/number/NumberType.scala:62:38       0.348 ║
-%   [  Info  ] ╟┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄╢
-%   [  Info  ] ║ total: 4    valid: 2    (2 from cache) invalid: 2    unknown: 0    time:   1.897                                                                                                                  ║
-%   [  Info  ] ╚═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+%   [  Info  ] ╔═╡ stainless summary ╞══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+%   [  Info  ] ║ └───────────────────┘                                                                                                                      ║
+%   [  Info  ] ║ +      postcondition                                                 valid from cache            currency/CurrencyUnits.scala:12:3   1.266 ║
+%   [  Info  ] ║ +      precond. (call checkResult(thiss, underlying(thiss) + u ...)  invalid           U:smt-z3  number/NumberType.scala:17:36       0.089 ║
+%   [  Info  ] ║ apply  adt invariant                                                 valid from cache            currency/CurrencyUnits.scala:34:39  0.194 ║
+%   [  Info  ] ║ apply  adt invariant                                                 invalid           U:smt-z3  number/NumberType.scala:62:38       0.348 ║
+%   [  Info  ] ╟┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄╢
+%   [  Info  ] ║ total: 4    valid: 2    (2 from cache) invalid: 2    unknown: 0    time:   1.897                                                           ║
+%   [  Info  ] ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 %   [  Info  ] Shutting down executor service.
 % \end{lstlisting}
 
