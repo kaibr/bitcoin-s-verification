@@ -147,16 +147,42 @@ Int to BigInt will result in a successful verification.
 
 
 \paragraph{The Pure Scala Fragment.} Stainless supports only a subset
-of Scala. \todo{Anna It supports blabla, in particular it supports not
-  blablabla. (check class with var)}
-
-\todo{why does stainless use its own BigInt etc?}
-
-They call this Pure Scala.  You can find the specification of Pure
+of Scala. They call this Pure Scala.  You can find the specification of Pure
 Scala on the Stainless documentation website
 \cite{Stainless:documentation} in the section
 \href{https://epfl-lara.github.io/stainless/purescala.html}{Pure
   Scala}.
+\todo{Kai: check the text
+
+It supports Algebraic Data Type definitions in the form of 
+Abstract Class and Case Class/Case Object,
+inheritance of an Abstract Class by a Case Class/Case Object,
+Object for grouping classes and functions,  
+short-circuit interpretation of boolean expressions, 
+Generics with invariant type parameters and simple hierarchy 
+(subclasses define the same type parameters in the same order),
+default values of function parameters,
+Pattern matching, 
+Values,
+anonymous classes and more.
+  
+As an extension to Pure Scala Stainless supports some imperative features.
+It supports 
+declaring a variable in a local scope of a function, 
+declaring a variable in trait without assigning a default value,
+while loops,
+case classes with \textit{var} arguments.
+  
+In particular Stainless does not support
+Class definition,
+inheritance by Object,
+abstract type members,
+variance annotations, upper and lower type bounds in generics,
+variables in classes and objects,
+private inner classes,
+messages as a second argument in the Require function and more.}
+
+\todo{why does stainless use its own BigInt etc?}
 
 In addition, Stainless has its own library with annotations,
 reimplementation of some core data types, collections and input-output
