@@ -525,19 +525,19 @@ The additions' signature looks like this:
 When we run Stainless on this code (without any properties to prove), it throws the following errors:
 
 \begin{lstlisting}[style=stainless]
-  [ Error  ] currency/CurrencyUnits.scala:6:3: Stainless doesn't support abstract type members
-             type A
-             ^^^^^^
-  [ Error  ] currency/CurrencyUnits.scala:26:33: Only literal arguments are allowed for BigInt.
-              def toBigInt: BigInt = BigInt(toLong)
-                                            ^^^^^^
-  [ Error  ] currency/CurrencyUnits.scala:33:1: Objects cannot extend classes or implement traits, use a case object instead
-            object Satoshis extends BaseNumbers[Satoshis] {
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^...
-  [ Error  ] number/NumberType.scala:65:1: Objects cannot extend classes or implement traits, use a case object instead
-            object Int64 extends BaseNumbers[Int64] {
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^...
-  [  Info  ] Shutting down executor service.
+[ Error  ] currency/CurrencyUnits.scala:6:3: Stainless doesn't support abstract type members
+            type A
+            ^^^^^^
+[ Error  ] currency/CurrencyUnits.scala:26:33: Only literal arguments are allowed for BigInt.
+            def toBigInt: BigInt = BigInt(toLong)
+                                          ^^^^^^
+[ Error  ] currency/CurrencyUnits.scala:33:1: Objects cannot extend classes or implement traits, use a case object instead
+          object Satoshis extends BaseNumbers[Satoshis] {
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^...
+[ Error  ] number/NumberType.scala:65:1: Objects cannot extend classes or implement traits, use a case object instead
+          object Int64 extends BaseNumbers[Int64] {
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^...
+[  Info  ] Shutting down executor service.
 \end{lstlisting}
 
 So let's see how we can fix those errors.
@@ -547,12 +547,12 @@ So let's see how we can fix those errors.
 
 Stainless output:
 \begin{lstlisting}[style=stainless]
-  [ Error  ] currency/CurrencyUnits.scala:33:1: Objects cannot extend classes or implement traits, use a case object instead
-            object Satoshis extends BaseNumbers[Satoshis] {
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^...
-  [ Error  ] number/NumberType.scala:65:1: Objects cannot extend classes or implement traits, use a case object instead
-            object Int64 extends BaseNumbers[Int64] {
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^...
+[ Error  ] currency/CurrencyUnits.scala:33:1: Objects cannot extend classes or implement traits, use a case object instead
+          object Satoshis extends BaseNumbers[Satoshis] {
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^...
+[ Error  ] number/NumberType.scala:65:1: Objects cannot extend classes or implement traits, use a case object instead
+          object Int64 extends BaseNumbers[Int64] {
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^...
 \end{lstlisting}
 
 Code before:
@@ -582,9 +582,9 @@ The \href{https://github.com/epfl-lara/stainless/issues/520}{issue number 520} o
 
 Stainless output:
 \begin{lstlisting}[style=stainless]
-  [ Error  ] currency/CurrencyUnits.scala:6:3: Stainless doesn't support abstract type members
-             type A
-             ^^^^^^
+[ Error  ] currency/CurrencyUnits.scala:6:3: Stainless doesn't support abstract type members
+            type A
+            ^^^^^^
 \end{lstlisting}
 
 This should be easy to rewrite by using generics instead of an abstract type, right?
@@ -663,9 +663,9 @@ sealed abstract class Satoshis extends CurrencyUnit {
 
 Stainless output:
 \begin{lstlisting}[style=stainless]
-  [ Error  ] currency/CurrencyUnits.scala:26:33: Only literal arguments are allowed for BigInt.
-              def toBigInt: BigInt = BigInt(toLong)
-                                            ^^^^^^
+[ Error  ] currency/CurrencyUnits.scala:26:33: Only literal arguments are allowed for BigInt.
+            def toBigInt: BigInt = BigInt(toLong)
+                                          ^^^^^^
 \end{lstlisting}
 
 As described before, Stainless supports only a subset of Scala.
@@ -712,10 +712,9 @@ After fixing all Stainless errors, a new error appears.
 
 Stainless output:
 \begin{lstlisting}[style=stainless]
-  [ Error  ] number/NumberType.scala:8:30: Unknown type parameter type T
-  sealed abstract class Number[T <: Number[T]] {
-                               ^^^^^^^^^^^^^^
-
+[ Error  ] number/NumberType.scala:8:30: Unknown type parameter type T
+          sealed abstract class Number[T <: Number[T]] {
+                                        ^^^^^^^^^^^^^^
 \end{lstlisting}
 
 This is a missing feature in Stainless.
@@ -831,9 +830,9 @@ Now, there are two new errors.
 
 Stainless output:
 \begin{lstlisting}[style=stainless]
-  [ Error  ] number/NumberType.scala:14:22: Unknown call to bigInteger on Number.this.toBigInt (BigInt) with arguments List() of type List()
-             def toLong: Long = toBigInt.bigInteger.longValueExact()
-                                ^^^^^^^^^^^^^^^^^^^
+[ Error  ] number/NumberType.scala:14:22: Unknown call to bigInteger on Number.this.toBigInt (BigInt) with arguments List() of type List()
+            def toLong: Long = toBigInt.bigInteger.longValueExact()
+                              ^^^^^^^^^^^^^^^^^^^
 \end{lstlisting}
 
 
@@ -937,10 +936,9 @@ sealed abstract class Number {
 
 Stainless output:
 \begin{lstlisting}[style=stainless]
-  [Warning ] number/NumberType.scala:9:3: Could not extract tree in class: type A = BigInt (class scala.reflect.internal.Trees$TypeDef)
-               type A = BigInt
-               ^^^^^^^^^^^^^^^
-
+[Warning ] number/NumberType.scala:9:3: Could not extract tree in class: type A = BigInt (class scala.reflect.internal.Trees$TypeDef)
+              type A = BigInt
+              ^^^^^^^^^^^^^^^
 \end{lstlisting}
 
 Before:
@@ -1036,10 +1034,9 @@ Now it should work without this change.
 
 Stainless output:
 \begin{lstlisting}[style=stainless]
-  [ Error  ] number/NumberType.scala:33:14: Unknown call to & on result (BigInt) with arguments List(Number.this.andMask) of type List(BigInt)
-               require((result & andMask) == result,
-                       ^^^^^^^^^^^^^^^^
-
+[ Error  ] number/NumberType.scala:33:14: Unknown call to & on result (BigInt) with arguments List(Number.this.andMask) of type List(BigInt)
+              require((result & andMask) == result,
+                      ^^^^^^^^^^^^^^^^
 \end{lstlisting}
 
 Due to the restrictions on BigInt, we can not use the \& function either.
@@ -1146,70 +1143,70 @@ Running Stainless produces again new errors.
 
 Stainless output:
 \begin{lstlisting}[style=stainless]
-  [Warning ] currency/CurrencyUnits.scala:36:3: Could not extract tree in class: case private class SatoshisImpl extends Satoshis with Product with Serializable {
-  [Warning ]   <caseaccessor> <paramaccessor> private[this] val underlying: addition.modified.number.Int64 = _;
-  [Warning ]   <stable> <caseaccessor> <accessor> <paramaccessor> def underlying: addition.modified.number.Int64 = SatoshisImpl.this.underlying;
-  [Warning ]   def <init>(underlying: addition.modified.number.Int64): addition.modified.currency.Satoshis.SatoshisImpl = {
-  [Warning ]     SatoshisImpl.super.<init>();
-  [Warning ]     ()
-  [Warning ]   };
-  [Warning ]   <synthetic> def copy(underlying: addition.modified.number.Int64 = underlying): addition.modified.currency.Satoshis.SatoshisImpl = new SatoshisImpl(underlying);
-  [Warning ]   <synthetic> def copy$default$1: addition.modified.number.Int64 = SatoshisImpl.this.underlying;
-  [Warning ]   override <synthetic> def productPrefix: String = "SatoshisImpl";
-  [Warning ]   <synthetic> def productArity: Int = 1;
-  [Warning ]   <synthetic> def productElement(x$1: Int): Any = x$1 match {
-  [Warning ]     case 0 => SatoshisImpl.this.underlying
-  [Warning ]     case _ => throw new IndexOutOfBoundsException(x$1.toString())
-  [Warning ]   };
-  [Warning ]   override <synthetic> def productIterator: Iterator[Any] = runtime.this.ScalaRunTime.typedProductIterator[Any](SatoshisImpl.this);
-  [Warning ]   <synthetic> def canEqual(x$1: Any): Boolean = x$1.$isInstanceOf[addition.modified.currency.Satoshis.SatoshisImpl]();
-  [Warning ]   override <synthetic> def hashCode(): Int = ScalaRunTime.this._hashCode(SatoshisImpl.this);
-  [Warning ]   override <synthetic> def toString(): String = ScalaRunTime.this._toString(SatoshisImpl.this);
-  [Warning ]   override <synthetic> def equals(x$1: Any): Boolean = SatoshisImpl.this.eq(x$1.asInstanceOf[Object]).||(x$1 match {
-  [Warning ]   case (_: addition.modified.currency.Satoshis.SatoshisImpl) => true
-  [Warning ]   case _ => false
-  [Warning ] }.&&({
-  [Warning ]     <synthetic> val SatoshisImpl$1: addition.modified.currency.Satoshis.SatoshisImpl = x$1.asInstanceOf[addition.modified.currency.Satoshis.SatoshisImpl];
-  [Warning ]     SatoshisImpl.this.underlying.==(SatoshisImpl$1.underlying).&&(SatoshisImpl$1.canEqual(SatoshisImpl.this))
-  [Warning ]   }))
-  [Warning ] } (class scala.reflect.internal.Trees$ClassDef)
-                private case class SatoshisImpl(underlying: Int64) extends Satoshis
-                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+[Warning ] currency/CurrencyUnits.scala:36:3: Could not extract tree in class: case private class SatoshisImpl extends Satoshis with Product with Serializable {
+[Warning ]   <caseaccessor> <paramaccessor> private[this] val underlying: addition.modified.number.Int64 = _;
+[Warning ]   <stable> <caseaccessor> <accessor> <paramaccessor> def underlying: addition.modified.number.Int64 = SatoshisImpl.this.underlying;
+[Warning ]   def <init>(underlying: addition.modified.number.Int64): addition.modified.currency.Satoshis.SatoshisImpl = {
+[Warning ]     SatoshisImpl.super.<init>();
+[Warning ]     ()
+[Warning ]   };
+[Warning ]   <synthetic> def copy(underlying: addition.modified.number.Int64 = underlying): addition.modified.currency.Satoshis.SatoshisImpl = new SatoshisImpl(underlying);
+[Warning ]   <synthetic> def copy$default$1: addition.modified.number.Int64 = SatoshisImpl.this.underlying;
+[Warning ]   override <synthetic> def productPrefix: String = "SatoshisImpl";
+[Warning ]   <synthetic> def productArity: Int = 1;
+[Warning ]   <synthetic> def productElement(x$1: Int): Any = x$1 match {
+[Warning ]     case 0 => SatoshisImpl.this.underlying
+[Warning ]     case _ => throw new IndexOutOfBoundsException(x$1.toString())
+[Warning ]   };
+[Warning ]   override <synthetic> def productIterator: Iterator[Any] = runtime.this.ScalaRunTime.typedProductIterator[Any](SatoshisImpl.this);
+[Warning ]   <synthetic> def canEqual(x$1: Any): Boolean = x$1.$isInstanceOf[addition.modified.currency.Satoshis.SatoshisImpl]();
+[Warning ]   override <synthetic> def hashCode(): Int = ScalaRunTime.this._hashCode(SatoshisImpl.this);
+[Warning ]   override <synthetic> def toString(): String = ScalaRunTime.this._toString(SatoshisImpl.this);
+[Warning ]   override <synthetic> def equals(x$1: Any): Boolean = SatoshisImpl.this.eq(x$1.asInstanceOf[Object]).||(x$1 match {
+[Warning ]   case (_: addition.modified.currency.Satoshis.SatoshisImpl) => true
+[Warning ]   case _ => false
+[Warning ] }.&&({
+[Warning ]     <synthetic> val SatoshisImpl$1: addition.modified.currency.Satoshis.SatoshisImpl = x$1.asInstanceOf[addition.modified.currency.Satoshis.SatoshisImpl];
+[Warning ]     SatoshisImpl.this.underlying.==(SatoshisImpl$1.underlying).&&(SatoshisImpl$1.canEqual(SatoshisImpl.this))
+[Warning ]   }))
+[Warning ] } (class scala.reflect.internal.Trees$ClassDef)
+              private case class SatoshisImpl(underlying: Int64) extends Satoshis
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 \end{lstlisting}
 
 And:
 \begin{lstlisting}[style=stainless]
-  [Warning ] number/NumberType.scala:59:3: Could not extract tree in class: case private class Int64Impl extends Int64 with Product with Serializable {
-    [Warning ]   <caseaccessor> <paramaccessor> private[this] val underlying: BigInt = _;
-    [Warning ]   <stable> <caseaccessor> <accessor> <paramaccessor> def underlying: BigInt = Int64Impl.this.underlying;
-    [Warning ]   def <init>(underlying: BigInt): addition.modified.number.Int64.Int64Impl = {
-    [Warning ]     Int64Impl.super.<init>();
-    [Warning ]     ()
-    [Warning ]   };
-    [Warning ]   scala.this.Predef.require(Int64Impl.this.underlying.>=(math.this.BigInt.long2bigInt(-9223372036854775808L)), "Number was too small for a int64, got: ".+(Int64Impl.this.underlying));
-    [Warning ]   scala.this.Predef.require(Int64Impl.this.underlying.<=(math.this.BigInt.long2bigInt(9223372036854775807L)), "Number was too big for a int64, got: ".+(Int64Impl.this.underlying));
-    [Warning ]   <synthetic> def copy(underlying: BigInt = underlying): addition.modified.number.Int64.Int64Impl = new Int64Impl(underlying);
-    [Warning ]   <synthetic> def copy$default$1: BigInt = Int64Impl.this.underlying;
-    [Warning ]   override <synthetic> def productPrefix: String = "Int64Impl";
-    [Warning ]   <synthetic> def productArity: Int = 1;
-    [Warning ]   <synthetic> def productElement(x$1: Int): Any = x$1 match {
-    [Warning ]     case 0 => Int64Impl.this.underlying
-    [Warning ]     case _ => throw new IndexOutOfBoundsException(x$1.toString())
-    [Warning ]   };
-    [Warning ]   override <synthetic> def productIterator: Iterator[Any] = runtime.this.ScalaRunTime.typedProductIterator[Any](Int64Impl.this);
-    [Warning ]   <synthetic> def canEqual(x$1: Any): Boolean = x$1.$isInstanceOf[addition.modified.number.Int64.Int64Impl]();
-    [Warning ]   override <synthetic> def hashCode(): Int = ScalaRunTime.this._hashCode(Int64Impl.this);
-    [Warning ]   override <synthetic> def toString(): String = ScalaRunTime.this._toString(Int64Impl.this);
-    [Warning ]   override <synthetic> def equals(x$1: Any): Boolean = Int64Impl.this.eq(x$1.asInstanceOf[Object]).||(x$1 match {
-    [Warning ]   case (_: addition.modified.number.Int64.Int64Impl) => true
-    [Warning ]   case _ => false
-    [Warning ] }.&&({
-    [Warning ]     <synthetic> val Int64Impl$1: addition.modified.number.Int64.Int64Impl = x$1.asInstanceOf[addition.modified.number.Int64.Int64Impl];
-    [Warning ]     Int64Impl.this.underlying.==(Int64Impl$1.underlying).&&(Int64Impl$1.canEqual(Int64Impl.this))
-    [Warning ]   }))
-    [Warning ] } (class scala.reflect.internal.Trees$ClassDef)
-                 private case class Int64Impl(underlying: BigInt) extends Int64 {
-                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^...
+[Warning ] number/NumberType.scala:59:3: Could not extract tree in class: case private class Int64Impl extends Int64 with Product with Serializable {
+[Warning ]   <caseaccessor> <paramaccessor> private[this] val underlying: BigInt = _;
+[Warning ]   <stable> <caseaccessor> <accessor> <paramaccessor> def underlying: BigInt = Int64Impl.this.underlying;
+[Warning ]   def <init>(underlying: BigInt): addition.modified.number.Int64.Int64Impl = {
+[Warning ]     Int64Impl.super.<init>();
+[Warning ]     ()
+[Warning ]   };
+[Warning ]   scala.this.Predef.require(Int64Impl.this.underlying.>=(math.this.BigInt.long2bigInt(-9223372036854775808L)), "Number was too small for a int64, got: ".+(Int64Impl.this.underlying));
+[Warning ]   scala.this.Predef.require(Int64Impl.this.underlying.<=(math.this.BigInt.long2bigInt(9223372036854775807L)), "Number was too big for a int64, got: ".+(Int64Impl.this.underlying));
+[Warning ]   <synthetic> def copy(underlying: BigInt = underlying): addition.modified.number.Int64.Int64Impl = new Int64Impl(underlying);
+[Warning ]   <synthetic> def copy$default$1: BigInt = Int64Impl.this.underlying;
+[Warning ]   override <synthetic> def productPrefix: String = "Int64Impl";
+[Warning ]   <synthetic> def productArity: Int = 1;
+[Warning ]   <synthetic> def productElement(x$1: Int): Any = x$1 match {
+[Warning ]     case 0 => Int64Impl.this.underlying
+[Warning ]     case _ => throw new IndexOutOfBoundsException(x$1.toString())
+[Warning ]   };
+[Warning ]   override <synthetic> def productIterator: Iterator[Any] = runtime.this.ScalaRunTime.typedProductIterator[Any](Int64Impl.this);
+[Warning ]   <synthetic> def canEqual(x$1: Any): Boolean = x$1.$isInstanceOf[addition.modified.number.Int64.Int64Impl]();
+[Warning ]   override <synthetic> def hashCode(): Int = ScalaRunTime.this._hashCode(Int64Impl.this);
+[Warning ]   override <synthetic> def toString(): String = ScalaRunTime.this._toString(Int64Impl.this);
+[Warning ]   override <synthetic> def equals(x$1: Any): Boolean = Int64Impl.this.eq(x$1.asInstanceOf[Object]).||(x$1 match {
+[Warning ]   case (_: addition.modified.number.Int64.Int64Impl) => true
+[Warning ]   case _ => false
+[Warning ] }.&&({
+[Warning ]     <synthetic> val Int64Impl$1: addition.modified.number.Int64.Int64Impl = x$1.asInstanceOf[addition.modified.number.Int64.Int64Impl];
+[Warning ]     Int64Impl.this.underlying.==(Int64Impl$1.underlying).&&(Int64Impl$1.canEqual(Int64Impl.this))
+[Warning ]   }))
+[Warning ] } (class scala.reflect.internal.Trees$ClassDef)
+              private case class Int64Impl(underlying: BigInt) extends Int64 {
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^...
 \end{lstlisting}
 
 Stainless can not extract the private class inside the object.
@@ -1300,17 +1297,16 @@ Now we get some weird warnings about require.
 
 Stainless output:
 \begin{lstlisting}[style=stainless]
-  [Warning ] number/NumberType.scala:9:3: Could not extract tree in class: type A = BigInt (class scala.reflect.internal.Trees$TypeDef)
-            type A = BigInt
-            ^^^^^^^^^^^^^^^
-  [Warning ] number/NumberType.scala:71:3: Could not extract tree in class: scala.this.Predef.require(Int64Impl.this.underlying.>=(math.this.BigInt.long2bigInt(-9223372036854775808L)), "Number was too small for a int64, got: ".+(Int64Impl.this.underlying)) (class scala.reflect.internal.Trees$Apply)
-            require(underlying >= -9223372036854775808L,
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^...
-  [Warning ] number/NumberType.scala:73:3: Could not extract tree in class: scala.this.Predef.require(Int64Impl.this.underlying.<=(math.this.BigInt.long2bigInt(9223372036854775807L)), "Number was too big for a int64, got: ".+(Int64Impl.this.underlying)) (class scala.reflect.internal.Trees$Apply)
-            require(underlying <= 9223372036854775807L,
-            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^...
-  [ Error  ] checkResult$0 depends on missing dependencies: require$1.
-
+[Warning ] number/NumberType.scala:9:3: Could not extract tree in class: type A = BigInt (class scala.reflect.internal.Trees$TypeDef)
+          type A = BigInt
+          ^^^^^^^^^^^^^^^
+[Warning ] number/NumberType.scala:71:3: Could not extract tree in class: scala.this.Predef.require(Int64Impl.this.underlying.>=(math.this.BigInt.long2bigInt(-9223372036854775808L)), "Number was too small for a int64, got: ".+(Int64Impl.this.underlying)) (class scala.reflect.internal.Trees$Apply)
+          require(underlying >= -9223372036854775808L,
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^...
+[Warning ] number/NumberType.scala:73:3: Could not extract tree in class: scala.this.Predef.require(Int64Impl.this.underlying.<=(math.this.BigInt.long2bigInt(9223372036854775807L)), "Number was too big for a int64, got: ".+(Int64Impl.this.underlying)) (class scala.reflect.internal.Trees$Apply)
+          require(underlying <= 9223372036854775807L,
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^...
+[ Error  ] checkResult$0 depends on missing dependencies: require$1.
 \end{lstlisting}
 
 Seems like Stainless does not support the second string parameter of require or at least it throws a warning about it.
@@ -1398,8 +1394,8 @@ A new error appears.
 
 Stainless output:
 \begin{lstlisting}[style=stainless]
-  [ Error  ] inv$4 depends on missing dependencies: long2bigInt$0.
-  [ Error  ] apply$14 depends on missing dependencies: BigInt$0, apply$15.
+[ Error  ] inv$4 depends on missing dependencies: long2bigInt$0.
+[ Error  ] apply$14 depends on missing dependencies: BigInt$0, apply$15.
 \end{lstlisting}
 
 This error is hard to understand, but we can see that there is a missing Long to BigInt conversion.
@@ -1456,33 +1452,33 @@ Finally, we get some output from Stainless about the verification in the code.
 
 \todo{kai special chars from stainless output what now?}
 % \begin{lstlisting}[style=stainless][Warning ] The Z3 native interface is not available. Falling back onto smt-z3.
-%   [  Info  ]  - Checking cache: 'adt invariant' VC for apply @33:39...
-%   [  Info  ]  - Checking cache: 'adt invariant' VC for apply @62:38...
-%   [  Info  ] Cache miss: 'adt invariant' VC for apply @62:38...
-%   [  Info  ] Cache hit: 'adt invariant' VC for apply @33:39...
-%   [  Info  ]  - Now solving 'adt invariant' VC for apply @62:38...
-%   [  Info  ]  - Result for 'adt invariant' VC for apply @62:38:
-%   [Warning ]  => INVALID
-%   [Warning ] Found counter-example:
-%   [Warning ]   bigInt: BigInt -> -9223372036854775809
-%   [  Info  ]  - Checking cache: 'precond. (call checkResult(thiss, underlying(thiss) + u ...)' VC for + @17:36...
-%   [  Info  ] Cache miss: 'precond. (call checkResult(thiss, underlying(thiss) + u ...)' VC for + @17:36...
-%   [  Info  ]  - Now solving 'precond. (call checkResult(thiss, underlying(thiss) + u ...)' VC for + @17:36...
-%   [  Info  ]  - Result for 'precond. (call checkResult(thiss, underlying(thiss) + u ...)' VC for + @17:36:
-%   [Warning ]  => INVALID
-%   [Warning ] Found counter-example:
-%   [Warning ]   num: Number   -> Int64Impl(9223372036854775807)
-%   [Warning ]   thiss: Number -> Int64Impl(1)
-%   [  Info  ]   ┌───────────────────┐
-%   [  Info  ] ╔═╡ stainless summary ╞══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
-%   [  Info  ] ║ └───────────────────┘                                                                                                                      ║
-%   [  Info  ] ║ +      precond. (call checkResult(thiss, underlying(thiss) + u ...)  invalid           U:smt-z3  number/NumberType.scala:17:36       0.110 ║
-%   [  Info  ] ║ apply  adt invariant                                                 valid from cache            currency/CurrencyUnits.scala:33:39  1.136 ║
-%   [  Info  ] ║ apply  adt invariant                                                 invalid           U:smt-z3  number/NumberType.scala:62:38       0.394 ║
-%   [  Info  ] ╟┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄╢
-%   [  Info  ] ║ total: 3    valid: 1    (1 from cache) invalid: 2    unknown: 0    time:   1.640                                                           ║
-%   [  Info  ] ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
-%   [  Info  ] Shutting down executor service.  
+% [  Info  ]  - Checking cache: 'adt invariant' VC for apply @33:39...
+% [  Info  ]  - Checking cache: 'adt invariant' VC for apply @62:38...
+% [  Info  ] Cache miss: 'adt invariant' VC for apply @62:38...
+% [  Info  ] Cache hit: 'adt invariant' VC for apply @33:39...
+% [  Info  ]  - Now solving 'adt invariant' VC for apply @62:38...
+% [  Info  ]  - Result for 'adt invariant' VC for apply @62:38:
+% [Warning ]  => INVALID
+% [Warning ] Found counter-example:
+% [Warning ]   bigInt: BigInt -> -9223372036854775809
+% [  Info  ]  - Checking cache: 'precond. (call checkResult(thiss, underlying(thiss) + u ...)' VC for + @17:36...
+% [  Info  ] Cache miss: 'precond. (call checkResult(thiss, underlying(thiss) + u ...)' VC for + @17:36...
+% [  Info  ]  - Now solving 'precond. (call checkResult(thiss, underlying(thiss) + u ...)' VC for + @17:36...
+% [  Info  ]  - Result for 'precond. (call checkResult(thiss, underlying(thiss) + u ...)' VC for + @17:36:
+% [Warning ]  => INVALID
+% [Warning ] Found counter-example:
+% [Warning ]   num: Number   -> Int64Impl(9223372036854775807)
+% [Warning ]   thiss: Number -> Int64Impl(1)
+% [  Info  ]   ┌───────────────────┐
+% [  Info  ] ╔═╡ stainless summary ╞══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+% [  Info  ] ║ └───────────────────┘                                                                                                                      ║
+% [  Info  ] ║ +      precond. (call checkResult(thiss, underlying(thiss) + u ...)  invalid           U:smt-z3  number/NumberType.scala:17:36       0.110 ║
+% [  Info  ] ║ apply  adt invariant                                                 valid from cache            currency/CurrencyUnits.scala:33:39  1.136 ║
+% [  Info  ] ║ apply  adt invariant                                                 invalid           U:smt-z3  number/NumberType.scala:62:38       0.394 ║
+% [  Info  ] ╟┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄╢
+% [  Info  ] ║ total: 3    valid: 1    (1 from cache) invalid: 2    unknown: 0    time:   1.640                                                           ║
+% [  Info  ] ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+% [  Info  ] Shutting down executor service.  
 % \end{lstlisting}
 
 This shows that there is an invalid specification in checkResult and Stainless prints a counterexample for it.
@@ -1551,37 +1547,38 @@ There is another problem with Bitcoin-S.
 Bitcoin-S-Core uses require as a fail-fast method whereas Stainless needs it to verify the code.
 
 Stainless output now: \todo{kai special chars again}
-% \begin{lstlisting}[style=stainless][Warning ] The Z3 native interface is not available. Falling back onto smt-z3.
-%   [  Info  ]  - Checking cache: 'postcondition' VC for + @12:3...
-%   [  Info  ]  - Checking cache: 'adt invariant' VC for apply @34:39...
-%   [  Info  ]  - Checking cache: 'adt invariant' VC for apply @62:38...
-%   [  Info  ] Cache miss: 'adt invariant' VC for apply @62:38...
-%   [  Info  ] Cache hit: 'adt invariant' VC for apply @34:39...
-%   [  Info  ] Cache hit: 'postcondition' VC for + @12:3...
-%   [  Info  ]  - Now solving 'adt invariant' VC for apply @62:38...
-%   [  Info  ]  - Result for 'adt invariant' VC for apply @62:38:
-%   [Warning ]  => INVALID
-%   [Warning ] Found counter-example:
-%   [Warning ]   bigInt: BigInt -> -9223372036854775809
-%   [  Info  ]  - Checking cache: 'precond. (call checkResult(thiss, underlying(thiss) + u ...)' VC for + @17:36...
-%   [  Info  ] Cache miss: 'precond. (call checkResult(thiss, underlying(thiss) + u ...)' VC for + @17:36...
-%   [  Info  ]  - Now solving 'precond. (call checkResult(thiss, underlying(thiss) + u ...)' VC for + @17:36...
-%   [  Info  ]  - Result for 'precond. (call checkResult(thiss, underlying(thiss) + u ...)' VC for + @17:36:
-%   [Warning ]  => INVALID
-%   [Warning ] Found counter-example:
-%   [Warning ]   num: Number   -> Int64Impl(9223372036854775807)
-%   [Warning ]   thiss: Number -> Int64Impl(1)
-%   [  Info  ]   ┌───────────────────┐
-%   [  Info  ] ╔═╡ stainless summary ╞══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
-%   [  Info  ] ║ └───────────────────┘                                                                                                                      ║
-%   [  Info  ] ║ +      postcondition                                                 valid from cache            currency/CurrencyUnits.scala:12:3   1.266 ║
-%   [  Info  ] ║ +      precond. (call checkResult(thiss, underlying(thiss) + u ...)  invalid           U:smt-z3  number/NumberType.scala:17:36       0.089 ║
-%   [  Info  ] ║ apply  adt invariant                                                 valid from cache            currency/CurrencyUnits.scala:34:39  0.194 ║
-%   [  Info  ] ║ apply  adt invariant                                                 invalid           U:smt-z3  number/NumberType.scala:62:38       0.348 ║
-%   [  Info  ] ╟┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄╢
-%   [  Info  ] ║ total: 4    valid: 2    (2 from cache) invalid: 2    unknown: 0    time:   1.897                                                           ║
-%   [  Info  ] ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
-%   [  Info  ] Shutting down executor service.
+% \begin{lstlisting}[style=stainless]
+% [Warning ] The Z3 native interface is not available. Falling back onto smt-z3.
+% [  Info  ]  - Checking cache: 'postcondition' VC for + @12:3...
+% [  Info  ]  - Checking cache: 'adt invariant' VC for apply @34:39...
+% [  Info  ]  - Checking cache: 'adt invariant' VC for apply @62:38...
+% [  Info  ] Cache miss: 'adt invariant' VC for apply @62:38...
+% [  Info  ] Cache hit: 'adt invariant' VC for apply @34:39...
+% [  Info  ] Cache hit: 'postcondition' VC for + @12:3...
+% [  Info  ]  - Now solving 'adt invariant' VC for apply @62:38...
+% [  Info  ]  - Result for 'adt invariant' VC for apply @62:38:
+% [Warning ]  => INVALID
+% [Warning ] Found counter-example:
+% [Warning ]   bigInt: BigInt -> -9223372036854775809
+% [  Info  ]  - Checking cache: 'precond. (call checkResult(thiss, underlying(thiss) + u ...)' VC for + @17:36...
+% [  Info  ] Cache miss: 'precond. (call checkResult(thiss, underlying(thiss) + u ...)' VC for + @17:36...
+% [  Info  ]  - Now solving 'precond. (call checkResult(thiss, underlying(thiss) + u ...)' VC for + @17:36...
+% [  Info  ]  - Result for 'precond. (call checkResult(thiss, underlying(thiss) + u ...)' VC for + @17:36:
+% [Warning ]  => INVALID
+% [Warning ] Found counter-example:
+% [Warning ]   num: Number   -> Int64Impl(9223372036854775807)
+% [Warning ]   thiss: Number -> Int64Impl(1)
+% [  Info  ]   ┌───────────────────┐
+% [  Info  ] ╔═╡ stainless summary ╞══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+% [  Info  ] ║ └───────────────────┘                                                                                                                      ║
+% [  Info  ] ║ +      postcondition                                                 valid from cache            currency/CurrencyUnits.scala:12:3   1.266 ║
+% [  Info  ] ║ +      precond. (call checkResult(thiss, underlying(thiss) + u ...)  invalid           U:smt-z3  number/NumberType.scala:17:36       0.089 ║
+% [  Info  ] ║ apply  adt invariant                                                 valid from cache            currency/CurrencyUnits.scala:34:39  0.194 ║
+% [  Info  ] ║ apply  adt invariant                                                 invalid           U:smt-z3  number/NumberType.scala:62:38       0.348 ║
+% [  Info  ] ╟┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄╢
+% [  Info  ] ║ total: 4    valid: 2    (2 from cache) invalid: 2    unknown: 0    time:   1.897                                                           ║
+% [  Info  ] ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+% [  Info  ] Shutting down executor service.
 % \end{lstlisting}
 
 Corresponding code:
@@ -1630,10 +1627,10 @@ override def +(num: Int64): Int64 = {
 
 Stainless finds another counter example:
 \begin{lstlisting}[style=stainless]
-  [Warning ] Found counter-example:
-  [Warning ]   num: { x: Object | @unchecked isInt64(x) }    -> Int64Impl(1)
-  [Warning ]   thiss: { x: Object | @unchecked isNumber(x) } ->
-                 Int64Impl(9223372036854775807)
+[Warning ] Found counter-example:
+[Warning ]   num: { x: Object | @unchecked isInt64(x) }    -> Int64Impl(1)
+[Warning ]   thiss: { x: Object | @unchecked isNumber(x) } ->
+                Int64Impl(9223372036854775807)
 \end{lstlisting}
 
 Sure, when adding one to the maximum Int64 the require does not hold anymore.
@@ -1762,21 +1759,21 @@ Finally, everything is green and correctly verified. \todo{kai special chars}
 % [  Info  ]  - Checking cache: 'precond. (call apply(Int64(), 0))' VC for zero @68:19...
 % [  Info  ] Cache hit: 'precond. (call apply(Int64(), 0))' VC for zero @68:19...
 % [  Info  ]   ┌───────────────────┐
-% [  Info  ] ╔═╡ stainless summary ╞═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
-% [  Info  ] ║ └───────────────────┘                                                                                                                                                                             ║
-% [  Info  ] ║ +      postcondition                                                 valid             U:smt-z3  ../../../../../bin/../src/main/scala/addition/modified/currency/CurrencyUnits.scala:12:3   0.643 ║
-% [  Info  ] ║ +      precond. (call +(underlying(satoshis(thiss)), underlyin ...)  valid from cache            ../../../../../bin/../src/main/scala/addition/modified/currency/CurrencyUnits.scala:14:14  0.097 ║
-% [  Info  ] ║ +      precond. (call checkResult(thiss, underlying(thiss) + u ...)  valid from cache            ../../../../../bin/../src/main/scala/addition/modified/number/NumberType.scala:22:11       0.015 ║
-% [  Info  ] ║ apply  adt invariant                                                 valid from cache            ../../../../../bin/../src/main/scala/addition/modified/currency/CurrencyUnits.scala:34:39  0.005 ║
-% [  Info  ] ║ apply  precond. (call apply(Int64(), bigInt))                        valid             U:smt-z3  ../../../../../bin/../src/main/scala/addition/modified/number/NumberType.scala:52:5        0.187 ║
-% [  Info  ] ║ apply  adt invariant                                                 valid from cache            ../../../../../bin/../src/main/scala/addition/modified/number/NumberType.scala:79:5        0.017 ║
-% [  Info  ] ║ max    precond. (call apply(Int64(), 9223372036854775807))           valid from cache            ../../../../../bin/../src/main/scala/addition/modified/number/NumberType.scala:72:18       0.001 ║
-% [  Info  ] ║ min    precond. (call apply(Int64(), -9223372036854775808))          valid from cache            ../../../../../bin/../src/main/scala/addition/modified/number/NumberType.scala:71:18       0.001 ║
-% [  Info  ] ║ one    precond. (call apply(Int64(), 1))                             valid from cache            ../../../../../bin/../src/main/scala/addition/modified/number/NumberType.scala:69:18       0.915 ║
-% [  Info  ] ║ zero   precond. (call apply(Int64(), 0))                             valid from cache            ../../../../../bin/../src/main/scala/addition/modified/number/NumberType.scala:68:19       0.001 ║
-% [  Info  ] ╟┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄╢
-% [  Info  ] ║ total: 10   valid: 10   (8 from cache) invalid: 0    unknown: 0    time:   1.882                                                                                                                  ║
-% [  Info  ] ╚═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+% [  Info  ] ╔═╡ stainless summary ╞══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+% [  Info  ] ║ └───────────────────┘                                                                                                                      ║
+% [  Info  ] ║ +      postcondition                                                 valid             U:smt-z3  currency/CurrencyUnits.scala:12:3   0.643 ║
+% [  Info  ] ║ +      precond. (call +(underlying(satoshis(thiss)), underlyin ...)  valid from cache            currency/CurrencyUnits.scala:14:14  0.097 ║
+% [  Info  ] ║ +      precond. (call checkResult(thiss, underlying(thiss) + u ...)  valid from cache            number/NumberType.scala:22:11       0.015 ║
+% [  Info  ] ║ apply  adt invariant                                                 valid from cache            currency/CurrencyUnits.scala:34:39  0.005 ║
+% [  Info  ] ║ apply  precond. (call apply(Int64(), bigInt))                        valid             U:smt-z3  number/NumberType.scala:52:5        0.187 ║
+% [  Info  ] ║ apply  adt invariant                                                 valid from cache            number/NumberType.scala:79:5        0.017 ║
+% [  Info  ] ║ max    precond. (call apply(Int64(), 9223372036854775807))           valid from cache            number/NumberType.scala:72:18       0.001 ║
+% [  Info  ] ║ min    precond. (call apply(Int64(), -9223372036854775808))          valid from cache            number/NumberType.scala:71:18       0.001 ║
+% [  Info  ] ║ one    precond. (call apply(Int64(), 1))                             valid from cache            number/NumberType.scala:69:18       0.915 ║
+% [  Info  ] ║ zero   precond. (call apply(Int64(), 0))                             valid from cache            number/NumberType.scala:68:19       0.001 ║
+% [  Info  ] ╟┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄╢
+% [  Info  ] ║ total: 10   valid: 10   (8 from cache) invalid: 0    unknown: 0    time:   1.882                                                           ║
+% [  Info  ] ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
 % [  Info  ] Shutting down executor service.
 % \end{lstlisting}
 
@@ -1789,7 +1786,8 @@ Finally, everything is green and correctly verified. \todo{kai special chars}
 % \end{figure}
 
 The verified code.
-\lstinputlisting[style=scala]{../code/currsniporig/src/main/scala/code/end/Code.scala}
+\lstinputlisting[style=scala]{../code/addition/src/main/scala/addition/modified/number/NumberType.scala}
+\lstinputlisting[style=scala]{../code/addition/src/main/scala/addition/modified/currency/CurrencyUnits.scala}
 
 But is it really the original code that we verified?
 And why did we have to change that much?
