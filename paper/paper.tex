@@ -1585,7 +1585,6 @@ Stainless output now: \todo{kai special chars again}
 % \end{lstlisting}
 
 Corresponding code:
-
 \begin{lstlisting}[style=scala]
 sealed abstract class Number {
   /** The underlying scala number used to to hold the number */
@@ -1604,7 +1603,7 @@ sealed abstract class Number {
     */
   private def checkResult(result: BigInt): BigInt = {
     require(
-          result <= BigInt("9223372036854775807")
+         result <= BigInt("9223372036854775807")
       && result >= BigInt("-9223372036854775808"))
     result
   }
@@ -1618,15 +1617,15 @@ The require in checkResult fails.
 
 Thus, we need to add the restriction from checkResult to the addition too.
 \begin{lstlisting}[style=scala]
-  override def +(num: Int64): Int64 = {
-    require(
-          num.underlying <= BigInt("9223372036854775807")
-      &&  num.underlying >= BigInt("-9223372036854775808")
-      && this.underlying <= BigInt("9223372036854775807")
-      && this.underlying >= BigInt("-9223372036854775808")
-    )
-    apply(checkResult(underlying + num.underlying))
-  }
+override def +(num: Int64): Int64 = {
+  require(
+       num.underlying <= BigInt("9223372036854775807")
+    && num.underlying >= BigInt("-9223372036854775808")
+    && this.underlying <= BigInt("9223372036854775807")
+    && this.underlying >= BigInt("-9223372036854775808")
+  )
+  apply(checkResult(underlying + num.underlying))
+}
 \end{lstlisting}
 
 Stainless finds another counter example:
@@ -1639,6 +1638,96 @@ Stainless finds another counter example:
 
 Sure, when adding one to the maximum Int64 the require does not hold anymore.
 Since we do only allow zero as a parameter, the easiest way is to restrict it to zero here too.
+
+Code after:
+\begin{lstlisting}[style=scala]
+sealed abstract class Number {
+  /** The underlying scala number used to to hold the number */
+  protected def underlying: BigInt
+
+  def toBigInt: BigInt = underlying
+
+  /** Factory function to create the underlying T, for instance a UInt32 */
+  def apply: BigInt => Int64
+
+  def +(num: Int64): Int64 = {
+    require(
+          num == Int64.zero
+      && this.underlying <= BigInt("9223372036854775807")
+      && this.underlying >= BigInt("-9223372036854775808"))
+    apply(checkResult(underlying + num.underlying))
+  }
+
+  /**
+    * Checks if the given result is within the range
+    * of this number type
+    */
+  private def checkResult(result: BigInt): BigInt = {
+    require(
+          result <= BigInt("9223372036854775807")
+      && result >= BigInt("-9223372036854775808"))
+    result
+  }
+}
+\end{lstlisting}
+
+The same problem occurs in the Int64 constructor.
+
+Before:
+\begin{lstlisting}[style=scala]
+sealed abstract class Int64 extends SignedNumber {
+  override def apply: BigInt => Int64 = Int64(_)
+}
+
+case object Int64 extends BaseNumbers[Int64] {
+  lazy val zero = Int64(0)
+  lazy val one = Int64(1)
+
+  lazy val min = Int64(BigInt("-9223372036854775808"))
+  lazy val max = Int64(BigInt("9223372036854775807"))
+
+  def apply(bigInt: BigInt): Int64 = Int64Impl(bigInt)
+}
+
+private case class Int64Impl(underlying: BigInt) extends Int64 {
+  require(underlying >= BigInt("-9223372036854775808"))
+  require(underlying <= BigInt("9223372036854775807"))
+}
+\end{lstlisting}
+
+After:
+\begin{lstlisting}[style=scala]
+sealed abstract class Int64 extends SignedNumber {
+  override def apply: BigInt => Int64 = bigInt => {
+    require(
+          bigInt >= BigInt("-9223372036854775808")
+      && bigInt <= BigInt("9223372036854775807"))
+
+    Int64(bigInt)
+  }
+}
+  
+case object Int64 extends BaseNumbers[Int64] {
+  lazy val zero = Int64(0)
+  lazy val one = Int64(1)
+
+  lazy val min = Int64(BigInt("-9223372036854775808"))
+  lazy val max = Int64(BigInt("9223372036854775807"))
+
+  def apply(bigInt: BigInt): Int64 = {
+    require(
+         bigInt >= BigInt("-9223372036854775808")
+      && bigInt <= BigInt("9223372036854775807"))
+
+    Int64Impl(bigInt)
+  }
+}
+
+private case class Int64Impl(underlying: BigInt) extends Int64 {
+  require(underlying >= BigInt("-9223372036854775808"))
+  require(underlying <= BigInt("9223372036854775807"))
+}
+\end{lstlisting}
 
 
 \subsection{Result}
