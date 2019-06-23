@@ -185,6 +185,7 @@ messages as a second argument in the Require function and more.}
 In addition, Stainless has its own library with annotations,
 reimplementation of some core data types, collections and input-output
 functions and more. \todo{Kai: check the text.
+
 This allows Stainless to map correctly operations 
 to mathematical function inside of SMT solver.
 Some elements of the library} are described on the website in the section
@@ -450,6 +451,7 @@ future.
 \subsection{Adjusting No-Inflation Property}
 
 \todo{Kai: check the text
+
 In order to verify a project, Stainless must be integrated into it.
 We can integrate it in an sbt project adding the Stainless Plugin 
 and the required resolver to pugins.sbt. 
@@ -460,14 +462,16 @@ Trying to integrate Stainless in Bitcoin-S caused a lot of troubles,
 mainly because of version conflicts.  For more details see chapter
 \ref{chap:appendix_arb}.
 
-After integrating Stainless in Bitcoin-S, there were many errors.  It
-takes too much time to fix them all so it should be easier to extract
+\todo{Kai: about errors, is it enough to reference to the chapter 4.2 where they are described??}
+\todo{After integrating the Stainless plugin in the Bitcoin-S sbt project, 
+there were many errors because of the different sbt versions.  
+Some errors are described in the section 4.2.}
+It takes too much time to fix them all so it should be easier to extract
 the classes needed for the \texttt{checkTransaction} function.
-\todo{anna: which errors?}
 
 The extracted code has more than 1500 lines.  After running Stainless
 on it, it still throws a huge bunch of errors about what Stainless can
-not reason about.  After fixing some of those errors, there appear new
+not reason about. After fixing some of those errors, there appear new
 ones.  So this would require changing nearly everything of the
 extracted code.
 
