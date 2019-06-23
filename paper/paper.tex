@@ -302,14 +302,12 @@ Now lets build the transaction with those data.
     network = networkParams      // bitcoin network information
   )
 
-  val signedTxF: Future[Transaction] = txBuilderF
-    .flatMap(_.sign)                       // call sign on the transaction builder
-    .map {
-      (tx: Transaction) => println(tx.hex) // transaction in hex for the bitcoin network
-    }
+  val txF: Future[Transaction] = txBuilderF.flatMap(_.sign)
+
+  val tx: Transaction = Await.result(signedTxF, 1 second)
 \end{lstlisting}
 
-\todo{ramon: change code to get an actual transaction, completely understand and explain the code}
+\todo{ramon: completely understand and explain the code}
 
 Line one to seven creates a transaction builder which is then signed
 on line ten.  We can now use our transaction object on line twelve.
