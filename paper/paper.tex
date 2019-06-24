@@ -404,8 +404,44 @@ size of the old, we know that there was no duplicate transaction id,
 because, as said, distinct removes the duplicates.
 
 
-\subsection{Fixing a Bug in Bitcoin-S}
-\label{sec:bugfix}
+
+
+\paragraph{Stainless integration problems.}
+
+\todo{Kai: check the text}
+
+In order to verify a project, Stainless must be integrated into it.
+We can integrate it in an sbt project adding the Stainless Plugin 
+and the required resolver to pugins.sbt. 
+Another option to use Stainless is to import its libraries in a program code 
+and verify a program from command line using the pre-packaged Stainless JAR file 
+or using the Stainless script built from source.
+Trying to integrate Stainless in Bitcoin-S caused a lot of troubles,
+mainly because of version conflicts.  For more details see chapter
+\ref{chap:appendix_arb}.
+
+\todo{Kai: about errors, is it enough to reference to the chapter 4.2 where they are described??}
+\todo{After integrating the Stainless plugin in the Bitcoin-S sbt project, 
+there were many errors because of the different sbt versions.  
+Some errors are described in the section 4.2.}
+It takes too much time to fix them all so it should be easier to extract
+the classes needed for the \texttt{checkTransaction} function.
+
+\paragraph{Extracting the relevant code.}
+The extracted code has more than 1500 lines.  After running Stainless
+on it, it still throws a huge bunch of errors about what Stainless can
+not reason about. After fixing some of those errors, there appear new
+ones.  So this would require changing nearly everything of the
+extracted code.
+
+Let's adjust the property from the \nameref{property_1} to the
+\nameref{property_2}, because there is not enough time to fix all
+these errors and write the verification.  This is way less interesting
+to verify but gives still many insights in what needs to be done to
+verify some parts of Bitcoin-S and other source code.
+
+
+\paragraph{Fixing a Bug in Bitcoin-S}
 
 We can see that there is a bug in the checkTransaction function from
 before, recognized and fixed through this work.
@@ -446,43 +482,6 @@ This was fixed in
   number 435} on GitHub at April 23, 2019, through this work along
 with a unit test to prevent this bug from appearing again in the
 future.
-
-
-\subsection{Adjusting No-Inflation Property}
-
-\todo{Kai: check the text
-
-In order to verify a project, Stainless must be integrated into it.
-We can integrate it in an sbt project adding the Stainless Plugin 
-and the required resolver to pugins.sbt. 
-Another option to use Stainless is to import its libraries in a program code 
-and verify a program from command line using the pre-packaged Stainless JAR file 
-or using the Stainless script built from source.}
-Trying to integrate Stainless in Bitcoin-S caused a lot of troubles,
-mainly because of version conflicts.  For more details see chapter
-\ref{chap:appendix_arb}.
-
-\todo{Kai: about errors, is it enough to reference to the chapter 4.2 where they are described??}
-\todo{After integrating the Stainless plugin in the Bitcoin-S sbt project, 
-there were many errors because of the different sbt versions.  
-Some errors are described in the section 4.2.}
-It takes too much time to fix them all so it should be easier to extract
-the classes needed for the \texttt{checkTransaction} function.
-
-The extracted code has more than 1500 lines.  After running Stainless
-on it, it still throws a huge bunch of errors about what Stainless can
-not reason about. After fixing some of those errors, there appear new
-ones.  So this would require changing nearly everything of the
-extracted code.
-
-Let's adjust the property from the \nameref{property_1} to the
-\nameref{property_2}, because there is not enough time to fix all
-these errors and write the verification.  This is way less interesting
-to verify but gives still many insights in what needs to be done to
-verify some parts of Bitcoin-S and other source code.
-
-So let's look at the \nameref{property_2}.
-
 
 
 \section{Towards Verifying the Addition-with-Zero Property}
@@ -553,6 +552,244 @@ The additions' signature looks like this:
   +(c: CurrencyUnit): CurrencyUnit
 \end{lstlisting}
 
+When we run Stainless on this code (without any properties to prove), it throws the following errors: \todo{describe errors: no support for abstract types, unsupported arguments for the BigInt constructor, unsupported inheritance for objects.}
+
+
+
+
+\subsection{Result}
+
+Finally, everything is green and correctly verified. \todo{kai special chars}
+% \begin{lstlisting}[style=scala]
+% [Warning ] The Z3 native interface is not available. Falling back onto smt-z3.
+% [  Info  ]  - Checking cache: 'precond. (call apply(Int64(), 1))' VC for one @69:18...
+% [  Info  ] Cache hit: 'precond. (call apply(Int64(), 1))' VC for one @69:18...
+% [  Info  ]  - Checking cache: 'precond. (call apply(Int64(), bigInt))' VC for apply @52:5...
+% [  Info  ] Cache miss: 'precond. (call apply(Int64(), bigInt))' VC for apply @52:5...
+% [  Info  ]  - Now solving 'precond. (call apply(Int64(), bigInt))' VC for apply @52:5...
+% [  Info  ]  - Result for 'precond. (call apply(Int64(), bigInt))' VC for apply @52:5:
+% [  Info  ]  => VALID
+% [  Info  ]  - Checking cache: 'precond. (call +(underlying(satoshis(thiss)), underlyin ...)' VC for + @14:14...
+% [  Info  ]  - Checking cache: 'postcondition' VC for + @12:3...
+% [  Info  ] Cache hit: 'precond. (call +(underlying(satoshis(thiss)), underlyin ...)' VC for + @14:14...
+% [  Info  ] Cache miss: 'postcondition' VC for + @12:3...
+% [  Info  ]  - Now solving 'postcondition' VC for + @12:3...
+% [  Info  ]  - Result for 'postcondition' VC for + @12:3:
+% [  Info  ]  => VALID
+% [  Info  ]  - Checking cache: 'precond. (call apply(Int64(), -9223372036854775808))' VC for min @71:18...
+% [  Info  ] Cache hit: 'precond. (call apply(Int64(), -9223372036854775808))' VC for min @71:18...
+% [  Info  ]  - Checking cache: 'adt invariant' VC for apply @34:39...
+% [  Info  ] Cache hit: 'adt invariant' VC for apply @34:39...
+% [  Info  ]  - Checking cache: 'precond. (call apply(Int64(), 9223372036854775807))' VC for max @72:18...
+% [  Info  ] Cache hit: 'precond. (call apply(Int64(), 9223372036854775807))' VC for max @72:18...
+% [  Info  ]  - Checking cache: 'adt invariant' VC for apply @79:5...
+% [  Info  ] Cache hit: 'adt invariant' VC for apply @79:5...
+% [  Info  ]  - Checking cache: 'precond. (call checkResult(thiss, underlying(thiss) + u ...)' VC for + @22:11...
+% [  Info  ] Cache hit: 'precond. (call checkResult(thiss, underlying(thiss) + u ...)' VC for + @22:11...
+% [  Info  ]  - Checking cache: 'precond. (call apply(Int64(), 0))' VC for zero @68:19...
+% [  Info  ] Cache hit: 'precond. (call apply(Int64(), 0))' VC for zero @68:19...
+% [  Info  ]   ┌───────────────────┐
+% [  Info  ] ╔═╡ stainless summary ╞══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
+% [  Info  ] ║ └───────────────────┘                                                                                                                      ║
+% [  Info  ] ║ +      postcondition                                                 valid             U:smt-z3  currency/CurrencyUnits.scala:12:3   0.643 ║
+% [  Info  ] ║ +      precond. (call +(underlying(satoshis(thiss)), underlyin ...)  valid from cache            currency/CurrencyUnits.scala:14:14  0.097 ║
+% [  Info  ] ║ +      precond. (call checkResult(thiss, underlying(thiss) + u ...)  valid from cache            number/NumberType.scala:22:11       0.015 ║
+% [  Info  ] ║ apply  adt invariant                                                 valid from cache            currency/CurrencyUnits.scala:34:39  0.005 ║
+% [  Info  ] ║ apply  precond. (call apply(Int64(), bigInt))                        valid             U:smt-z3  number/NumberType.scala:52:5        0.187 ║
+% [  Info  ] ║ apply  adt invariant                                                 valid from cache            number/NumberType.scala:79:5        0.017 ║
+% [  Info  ] ║ max    precond. (call apply(Int64(), 9223372036854775807))           valid from cache            number/NumberType.scala:72:18       0.001 ║
+% [  Info  ] ║ min    precond. (call apply(Int64(), -9223372036854775808))          valid from cache            number/NumberType.scala:71:18       0.001 ║
+% [  Info  ] ║ one    precond. (call apply(Int64(), 1))                             valid from cache            number/NumberType.scala:69:18       0.915 ║
+% [  Info  ] ║ zero   precond. (call apply(Int64(), 0))                             valid from cache            number/NumberType.scala:68:19       0.001 ║
+% [  Info  ] ╟┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄╢
+% [  Info  ] ║ total: 10   valid: 10   (8 from cache) invalid: 0    unknown: 0    time:   1.882                                                           ║
+% [  Info  ] ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
+% [  Info  ] Shutting down executor service.
+% \end{lstlisting}
+
+
+
+% \begin{figure}
+% 	\centering
+% 		\includegraphics[width=\textwidth]{final_verify_output}
+% 	\caption{Output of Stainless verification for addition with 0 of Bitcoin-S-Cores CurrencyUnit}
+% \end{figure}
+
+The verified code.
+\lstinputlisting[style=scala]{../code/addition/src/main/scala/addition/modified/number/NumberType.scala}
+\lstinputlisting[style=scala]{../code/addition/src/main/scala/addition/modified/currency/CurrencyUnits.scala}
+
+But is it really the original code that we verified?
+And why did we have to change that much?
+This and other questions will be answered in the next chapter.
+
+
+\section{Practical Challenges with Stainless}
+\label{chap:appendix_arb}
+
+In this chapter we look at the practical challenges that could occur
+by using Stainless.  Since Stainless is still in development and there
+is no 1.x release there might still be breaking changes and
+improvements fixing problems described now.
+
+
+\subsection{sbt vs JAR}
+
+We can either use the sbt plugin or a JAR file to check code with Stainless.
+
+Invoking the JAR on our source code Stainless will verify it.  If we
+have a bigger project, this becomes really tricky, because we must
+pass all files needed including the dependencies.  This is in contrast
+to the sbt plugin, where we can integrate Stainless in our compilation
+process.  When we call compile, Stainless verifies the code and stops
+the compilation if the verification fails.
+
+Having a static version configured in the sbt build file, every
+developer has the same Stainless features available.  This should
+prevent incompatibility with new or deprecated features when we use
+different plugins.
+
+So the sbt plugin has clear advantages over the JAR file since its
+integrated directly.  We do not have to download it manually and find
+the right version and if we bump the version we can just edit it in
+the build file and every developer is on the same version again.
+
+However, currently there are some drawbacks.  For example the sbt
+plugin does not always report errors.  We will see more about that
+shortly.
+
+
+\subsection{Integration into Bitcoin-S}
+
+During this work, Stainless updated the sbt plugin to support sbt
+1.2.8 from 0.13.17 and Scala 2.12.8 from 2.11.12.  So this section
+might be out of date now.
+
+Stainless requires and Scala recommends Java SE Development Kit 8.
+Newer Java versions won't work.
+
+To use the latest version of the sbt tool you have to build it
+locally.  You can run \texttt{sbt universal:stage} in the cloned
+Stainless git repository.  This generates
+\emph{frontends/scalac/target/universal/stage/bin/stainless-scalac}.
+
+Bitcoin-S-Core uses sbt 1.2.8 and Scala 2.12.8, while Stainless sbt
+plugin is on sbt 0.13.17 and Scala 2.11.12.
+
+Sbt introduced new features in the 1.x release used by Bitcoin-S.
+Most of them can be written the sbt 0.13.17 way.
+
+The bigger problem is, due to the different Scala and sbt versions,
+the following error after trying to go in a sbt shell:
+\begin{verbatim}
+  [warn] There may be incompatibilities among your library dependencies; run 'evicted'
+         to see detailed eviction warnings.
+  [error] java.lang.NoClassDefFoundError: sbt/SourcePosition
+  ...
+  Project loading failed: (r)etry, (q)uit, (l)ast, or (i)gnore?
+\end{verbatim}
+
+Downgrading Bitcoin-S sbt version to 0.13.17 fixes the error but then
+it can not load some libraries only compiled for newer versions.  So
+this would take too much time to fix and changes the Bitcoin-S code
+inadvertently.
+
+The next approach is to use the stainless cli instead of sbt.  Running
+stainless on all source files does not work, because dependencies are
+missing.  The parameter \emph{-classpath} can resolve it but the value
+of this parameter must be the paths to all the dependencies separated
+by a ':'.  Finally, \emph{core} depends on \emph{secp256k1jni},
+another package of Bitcoin-S written in Java.  So this needs to be in
+the source files to.
+
+The final command looks like this in \emph{core} folder of Bitcoin-S:
+\begin{lstlisting}[language=bash]
+  $ stainless
+    -classpath ".:$(find ~/.ivy2/ -type f -name *.jar | tr '\n' ':')"
+    $(find . -type f -name *.scala | tr '\n' ' ')
+    $(find ../secp256k1jni -type f -name *.java | tr '\n' ' ')
+\end{lstlisting}
+
+\emph{.ivy2} is the dependency cache of sbt.  The \emph{tr} replaces
+the first char with the second so a newline with either ':' or ' '.
+
+With this command, Stainless throws the next error:
+\begin{verbatim}
+  [Internal] Error: object scala.reflect.macros.internal.macroImpl in compiler mirror
+             not found.. Trace:
+  [Internal] - scala.reflect.internal.MissingRequirementError$.signal
+             (MissingRequirementError.scala:17)
+  ...
+  [Internal] object scala.reflect.macros.internal.macroImpl in compiler mirror not found.
+  [Internal] Please inform the authors of Inox about this message
+\end{verbatim}
+
+So we can not know how many errors will face us.  Let's go another
+way, because the errors may take too much time and it might lead to a
+next error.  We extract the code needed to verify a transaction mainly
+the class Transaction and ScriptInterpreter with many other classes
+they're depending on.
+
+After this extraction Stainless was successfully integrated with both
+sbt and JAR.
+
+Running \texttt{sbt compile} in the project with Stainless ended
+without error.  But it also ended with no output.  So we are not able
+to change the code so Stainless would accept it since we do not know
+what to change.
+
+So the sbt plugin does not always complain where the JAR file did.
+The open
+\href{https://github.com/epfl-lara/stainless/issues/484}{issue 484 on
+  GitHub} might describe exactly this error.
+
+Now we can finally run Stainless on our code.  But this leads us to
+the next findings.  We must rewrite most of the code, as described in
+the previous chapters.
+
+
+
+\section{Conclusion}
+\label{chap:conclusion}
+
+Because of the limitations of the verication tool, we could only
+verify a rewritten version of the original Bitcoin-S code.  So we can
+not guarantee the correctness of the addition of Satoshis with zero in
+Bitcoin-S.  Not all changes we made were as trivial as the replacement
+of objects with case objects.  For these non-trivial changes, as seen
+for example the bound check in section \ref{sec:bound_check}, we
+cannot say whether they are equivalent to the original implementation
+or not.
+
+So code should be written specically with formal verication in mind,
+in order to successfully verify it.  Otherwise, it needs a lot of
+changes in the software because verification is mathematical and the
+current software is written mostly in object-oriented style.  Software
+written in the functional paradigm would be much easier to reason
+about.
+
+Thus, either Stainless must find ways to translate more of built-in
+object-oriented patterns of Scala to their verification tool or
+developers must invest more in functional programming.
+
+Also, we found that trying to verify code reveals bugs as shown in
+section \ref{sec:bugfix}.  Finally, our work led to some feedback to
+the Stainless developers to improve the tool.
+
+\bibliographystyle{splncs04}
+\bibliography{bibliography}
+
+
+\appendix
+\section{Code Transformations} 
+
+\paragraph{Project Setup}
+\begin{itemize}
+\item clone our repo
+\item contains a stainless jar
+\item call the script blahblah
+\end{itemize}
+
 When we run Stainless on this code (without any properties to prove), it throws the following errors:
 
 \begin{lstlisting}[style=stainless]
@@ -570,6 +807,9 @@ When we run Stainless on this code (without any properties to prove), it throws 
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^...
 [  Info  ] Shutting down executor service.
 \end{lstlisting}
+
+
+
 
 So let's see how we can fix those errors.
 
@@ -1758,229 +1998,6 @@ private case class Int64Impl(underlying: BigInt) extends Int64 {
 \end{lstlisting}
 
 
-\subsection{Result}
-
-Finally, everything is green and correctly verified. \todo{kai special chars}
-% \begin{lstlisting}[style=scala]
-% [Warning ] The Z3 native interface is not available. Falling back onto smt-z3.
-% [  Info  ]  - Checking cache: 'precond. (call apply(Int64(), 1))' VC for one @69:18...
-% [  Info  ] Cache hit: 'precond. (call apply(Int64(), 1))' VC for one @69:18...
-% [  Info  ]  - Checking cache: 'precond. (call apply(Int64(), bigInt))' VC for apply @52:5...
-% [  Info  ] Cache miss: 'precond. (call apply(Int64(), bigInt))' VC for apply @52:5...
-% [  Info  ]  - Now solving 'precond. (call apply(Int64(), bigInt))' VC for apply @52:5...
-% [  Info  ]  - Result for 'precond. (call apply(Int64(), bigInt))' VC for apply @52:5:
-% [  Info  ]  => VALID
-% [  Info  ]  - Checking cache: 'precond. (call +(underlying(satoshis(thiss)), underlyin ...)' VC for + @14:14...
-% [  Info  ]  - Checking cache: 'postcondition' VC for + @12:3...
-% [  Info  ] Cache hit: 'precond. (call +(underlying(satoshis(thiss)), underlyin ...)' VC for + @14:14...
-% [  Info  ] Cache miss: 'postcondition' VC for + @12:3...
-% [  Info  ]  - Now solving 'postcondition' VC for + @12:3...
-% [  Info  ]  - Result for 'postcondition' VC for + @12:3:
-% [  Info  ]  => VALID
-% [  Info  ]  - Checking cache: 'precond. (call apply(Int64(), -9223372036854775808))' VC for min @71:18...
-% [  Info  ] Cache hit: 'precond. (call apply(Int64(), -9223372036854775808))' VC for min @71:18...
-% [  Info  ]  - Checking cache: 'adt invariant' VC for apply @34:39...
-% [  Info  ] Cache hit: 'adt invariant' VC for apply @34:39...
-% [  Info  ]  - Checking cache: 'precond. (call apply(Int64(), 9223372036854775807))' VC for max @72:18...
-% [  Info  ] Cache hit: 'precond. (call apply(Int64(), 9223372036854775807))' VC for max @72:18...
-% [  Info  ]  - Checking cache: 'adt invariant' VC for apply @79:5...
-% [  Info  ] Cache hit: 'adt invariant' VC for apply @79:5...
-% [  Info  ]  - Checking cache: 'precond. (call checkResult(thiss, underlying(thiss) + u ...)' VC for + @22:11...
-% [  Info  ] Cache hit: 'precond. (call checkResult(thiss, underlying(thiss) + u ...)' VC for + @22:11...
-% [  Info  ]  - Checking cache: 'precond. (call apply(Int64(), 0))' VC for zero @68:19...
-% [  Info  ] Cache hit: 'precond. (call apply(Int64(), 0))' VC for zero @68:19...
-% [  Info  ]   ┌───────────────────┐
-% [  Info  ] ╔═╡ stainless summary ╞══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
-% [  Info  ] ║ └───────────────────┘                                                                                                                      ║
-% [  Info  ] ║ +      postcondition                                                 valid             U:smt-z3  currency/CurrencyUnits.scala:12:3   0.643 ║
-% [  Info  ] ║ +      precond. (call +(underlying(satoshis(thiss)), underlyin ...)  valid from cache            currency/CurrencyUnits.scala:14:14  0.097 ║
-% [  Info  ] ║ +      precond. (call checkResult(thiss, underlying(thiss) + u ...)  valid from cache            number/NumberType.scala:22:11       0.015 ║
-% [  Info  ] ║ apply  adt invariant                                                 valid from cache            currency/CurrencyUnits.scala:34:39  0.005 ║
-% [  Info  ] ║ apply  precond. (call apply(Int64(), bigInt))                        valid             U:smt-z3  number/NumberType.scala:52:5        0.187 ║
-% [  Info  ] ║ apply  adt invariant                                                 valid from cache            number/NumberType.scala:79:5        0.017 ║
-% [  Info  ] ║ max    precond. (call apply(Int64(), 9223372036854775807))           valid from cache            number/NumberType.scala:72:18       0.001 ║
-% [  Info  ] ║ min    precond. (call apply(Int64(), -9223372036854775808))          valid from cache            number/NumberType.scala:71:18       0.001 ║
-% [  Info  ] ║ one    precond. (call apply(Int64(), 1))                             valid from cache            number/NumberType.scala:69:18       0.915 ║
-% [  Info  ] ║ zero   precond. (call apply(Int64(), 0))                             valid from cache            number/NumberType.scala:68:19       0.001 ║
-% [  Info  ] ╟┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄╢
-% [  Info  ] ║ total: 10   valid: 10   (8 from cache) invalid: 0    unknown: 0    time:   1.882                                                           ║
-% [  Info  ] ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
-% [  Info  ] Shutting down executor service.
-% \end{lstlisting}
-
-
-
-% \begin{figure}
-% 	\centering
-% 		\includegraphics[width=\textwidth]{final_verify_output}
-% 	\caption{Output of Stainless verification for addition with 0 of Bitcoin-S-Cores CurrencyUnit}
-% \end{figure}
-
-The verified code.
-\lstinputlisting[style=scala]{../code/addition/src/main/scala/addition/modified/number/NumberType.scala}
-\lstinputlisting[style=scala]{../code/addition/src/main/scala/addition/modified/currency/CurrencyUnits.scala}
-
-But is it really the original code that we verified?
-And why did we have to change that much?
-This and other questions will be answered in the next chapter.
-
-
-\section{Practical Challenges with Stainless}
-\label{chap:appendix_arb}
-
-In this chapter we look at the practical challenges that could occur
-by using Stainless.  Since Stainless is still in development and there
-is no 1.x release there might still be breaking changes and
-improvements fixing problems described now.
-
-
-\subsection{sbt vs JAR}
-
-We can either use the sbt plugin or a JAR file to check code with Stainless.
-
-Invoking the JAR on our source code Stainless will verify it.  If we
-have a bigger project, this becomes really tricky, because we must
-pass all files needed including the dependencies.  This is in contrast
-to the sbt plugin, where we can integrate Stainless in our compilation
-process.  When we call compile, Stainless verifies the code and stops
-the compilation if the verification fails.
-
-Having a static version configured in the sbt build file, every
-developer has the same Stainless features available.  This should
-prevent incompatibility with new or deprecated features when we use
-different plugins.
-
-So the sbt plugin has clear advantages over the JAR file since its
-integrated directly.  We do not have to download it manually and find
-the right version and if we bump the version we can just edit it in
-the build file and every developer is on the same version again.
-
-However, currently there are some drawbacks.  For example the sbt
-plugin does not always report errors.  We will see more about that
-shortly.
-
-
-\subsection{Integration into Bitcoin-S}
-
-During this work, Stainless updated the sbt plugin to support sbt
-1.2.8 from 0.13.17 and Scala 2.12.8 from 2.11.12.  So this section
-might be out of date now.
-
-Stainless requires and Scala recommends Java SE Development Kit 8.
-Newer Java versions won't work.
-
-To use the latest version of the sbt tool you have to build it
-locally.  You can run \texttt{sbt universal:stage} in the cloned
-Stainless git repository.  This generates
-\emph{frontends/scalac/target/universal/stage/bin/stainless-scalac}.
-
-Bitcoin-S-Core uses sbt 1.2.8 and Scala 2.12.8, while Stainless sbt
-plugin is on sbt 0.13.17 and Scala 2.11.12.
-
-Sbt introduced new features in the 1.x release used by Bitcoin-S.
-Most of them can be written the sbt 0.13.17 way.
-
-The bigger problem is, due to the different Scala and sbt versions,
-the following error after trying to go in a sbt shell:
-\begin{verbatim}
-  [warn] There may be incompatibilities among your library dependencies; run 'evicted'
-         to see detailed eviction warnings.
-  [error] java.lang.NoClassDefFoundError: sbt/SourcePosition
-  ...
-  Project loading failed: (r)etry, (q)uit, (l)ast, or (i)gnore?
-\end{verbatim}
-
-Downgrading Bitcoin-S sbt version to 0.13.17 fixes the error but then
-it can not load some libraries only compiled for newer versions.  So
-this would take too much time to fix and changes the Bitcoin-S code
-inadvertently.
-
-The next approach is to use the stainless cli instead of sbt.  Running
-stainless on all source files does not work, because dependencies are
-missing.  The parameter \emph{-classpath} can resolve it but the value
-of this parameter must be the paths to all the dependencies separated
-by a ':'.  Finally, \emph{core} depends on \emph{secp256k1jni},
-another package of Bitcoin-S written in Java.  So this needs to be in
-the source files to.
-
-The final command looks like this in \emph{core} folder of Bitcoin-S:
-\begin{lstlisting}[language=bash]
-  $ stainless
-    -classpath ".:$(find ~/.ivy2/ -type f -name *.jar | tr '\n' ':')"
-    $(find . -type f -name *.scala | tr '\n' ' ')
-    $(find ../secp256k1jni -type f -name *.java | tr '\n' ' ')
-\end{lstlisting}
-
-\emph{.ivy2} is the dependency cache of sbt.  The \emph{tr} replaces
-the first char with the second so a newline with either ':' or ' '.
-
-With this command, Stainless throws the next error:
-\begin{verbatim}
-  [Internal] Error: object scala.reflect.macros.internal.macroImpl in compiler mirror
-             not found.. Trace:
-  [Internal] - scala.reflect.internal.MissingRequirementError$.signal
-             (MissingRequirementError.scala:17)
-  ...
-  [Internal] object scala.reflect.macros.internal.macroImpl in compiler mirror not found.
-  [Internal] Please inform the authors of Inox about this message
-\end{verbatim}
-
-So we can not know how many errors will face us.  Let's go another
-way, because the errors may take too much time and it might lead to a
-next error.  We extract the code needed to verify a transaction mainly
-the class Transaction and ScriptInterpreter with many other classes
-they're depending on.
-
-After this extraction Stainless was successfully integrated with both
-sbt and JAR.
-
-Running \texttt{sbt compile} in the project with Stainless ended
-without error.  But it also ended with no output.  So we are not able
-to change the code so Stainless would accept it since we do not know
-what to change.
-
-So the sbt plugin does not always complain where the JAR file did.
-The open
-\href{https://github.com/epfl-lara/stainless/issues/484}{issue 484 on
-  GitHub} might describe exactly this error.
-
-Now we can finally run Stainless on our code.  But this leads us to
-the next findings.  We must rewrite most of the code, as described in
-the previous chapters.
-
-
-
-\section{Conclusion}
-\label{chap:conclusion}
-
-Because of the limitations of the verication tool, we could only
-verify a rewritten version of the original Bitcoin-S code.  So we can
-not guarantee the correctness of the addition of Satoshis with zero in
-Bitcoin-S.  Not all changes we made were as trivial as the replacement
-of objects with case objects.  For these non-trivial changes, as seen
-for example the bound check in section \ref{sec:bound_check}, we
-cannot say whether they are equivalent to the original implementation
-or not.
-
-So code should be written specically with formal verication in mind,
-in order to successfully verify it.  Otherwise, it needs a lot of
-changes in the software because verification is mathematical and the
-current software is written mostly in object-oriented style.  Software
-written in the functional paradigm would be much easier to reason
-about.
-
-Thus, either Stainless must find ways to translate more of built-in
-object-oriented patterns of Scala to their verification tool or
-developers must invest more in functional programming.
-
-Also, we found that trying to verify code reveals bugs as shown in
-section \ref{sec:bugfix}.  Finally, our work led to some feedback to
-the Stainless developers to improve the tool.
-
-
-\appendix
-\section{How to Setup Stainless} 
-\section{Code Transformations} 
 
 
 
@@ -2041,7 +2058,5 @@ the Stainless developers to improve the tool.
 % \cite{ref_article1,ref_book1,ref_proc1,ref_url1}.
 %
 
-\bibliographystyle{splncs04}
-\bibliography{bibliography}
 
 \end{document}
