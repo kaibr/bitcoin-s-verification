@@ -219,7 +219,7 @@ work and its fix.  In the end we see why the \nameref{property_1}
 needed to be changed to the \nameref{property_2}.
 
 
-\subsection{Creation of a Transaction}
+\paragraph{Creating a Transaction}
 
 Some code in this section is copied or adapted from the Bitcoin-S-Core
 transaction builder example \cite{BitcoinSCore:txbuilderexample}.
@@ -340,7 +340,7 @@ For example, after calling \emph{hex} on it, we can send the returned
 string to the bitcoin network.
 
 
-\subsection{Validation of a Transaction}
+\paragraph{Validating a Transaction}
 
 Bitcoin-S offers a function called \emph{checkTransaction} located in the ScriptInterpreter object.
 This is its type signature:
@@ -406,9 +406,12 @@ because, as said, distinct removes the duplicates.
 
 
 
-\paragraph{Stainless integration problems.}
+\paragraph{Trying Stainless on the entire project.}
 
-\todo{Kai: check the text}
+\begin{itemize}
+\item result sbt: no output
+\item result jar: 
+\end{itemize}
 
 In order to verify a project, Stainless must be integrated into it.
 We can integrate it in an sbt project adding the Stainless Plugin 
@@ -427,18 +430,16 @@ Some errors are described in the section 4.2.}
 It takes too much time to fix them all so it should be easier to extract
 the classes needed for the \texttt{checkTransaction} function.
 
-\paragraph{Extracting the relevant code.}
-The extracted code has more than 1500 lines.  After running Stainless
-on it, it still throws a huge bunch of errors about what Stainless can
-not reason about. After fixing some of those errors, there appear new
-ones.  So this would require changing nearly everything of the
-extracted code.
-
-Let's adjust the property from the \nameref{property_1} to the
-\nameref{property_2}, because there is not enough time to fix all
-these errors and write the verification.  This is way less interesting
-to verify but gives still many insights in what needs to be done to
-verify some parts of Bitcoin-S and other source code.
+\paragraph{Putting aside the No-Inflation Property.} Naively trying
+Stainless on the entire bitcoin-s codebase results in either no output
+(with sbt) or many errors (with jar). So we extract the relevant code
+to only verify that. However, the extracted code has more than 1500
+lines and liberally uses Scala features outside of the supported
+fragment.  We tried to transform the code into the supported fragment,
+but realize that a better approach is to first verify a simpler
+property with less code involved and then turn back to the
+no-inflation property with more experience. So we turn to the
+addition-with-zero property in the next section. \todo{explain}
 
 
 \paragraph{Fixing a Bug in Bitcoin-S}
@@ -508,7 +509,7 @@ it even easier, the addition of CurrencyUnits with zero.
 CurrencyUnits is an abstract class in Bitcoin-S, representing
 currencies like Satoshis.
 
-\subsection{Extracting the relevant Code}
+\paragraph{Extracting the relevant Code}
 
 \todo{
 kai text
@@ -554,86 +555,73 @@ The additions' signature looks like this:
 
 When we run Stainless on this code (without any properties to prove), it throws the following errors: \todo{describe errors: no support for abstract types, unsupported arguments for the BigInt constructor, unsupported inheritance for objects.}
 
+\paragraph{Transforming the Code}
 
+\todo{kai todo}
 
+\paragraph{Result}
 
-\subsection{Result}
-
-Finally, everything is green and correctly verified. \todo{kai special chars}
-% \begin{lstlisting}[style=scala]
-% [Warning ] The Z3 native interface is not available. Falling back onto smt-z3.
-% [  Info  ]  - Checking cache: 'precond. (call apply(Int64(), 1))' VC for one @69:18...
-% [  Info  ] Cache hit: 'precond. (call apply(Int64(), 1))' VC for one @69:18...
-% [  Info  ]  - Checking cache: 'precond. (call apply(Int64(), bigInt))' VC for apply @52:5...
-% [  Info  ] Cache miss: 'precond. (call apply(Int64(), bigInt))' VC for apply @52:5...
-% [  Info  ]  - Now solving 'precond. (call apply(Int64(), bigInt))' VC for apply @52:5...
-% [  Info  ]  - Result for 'precond. (call apply(Int64(), bigInt))' VC for apply @52:5:
-% [  Info  ]  => VALID
-% [  Info  ]  - Checking cache: 'precond. (call +(underlying(satoshis(thiss)), underlyin ...)' VC for + @14:14...
-% [  Info  ]  - Checking cache: 'postcondition' VC for + @12:3...
-% [  Info  ] Cache hit: 'precond. (call +(underlying(satoshis(thiss)), underlyin ...)' VC for + @14:14...
-% [  Info  ] Cache miss: 'postcondition' VC for + @12:3...
-% [  Info  ]  - Now solving 'postcondition' VC for + @12:3...
-% [  Info  ]  - Result for 'postcondition' VC for + @12:3:
-% [  Info  ]  => VALID
-% [  Info  ]  - Checking cache: 'precond. (call apply(Int64(), -9223372036854775808))' VC for min @71:18...
-% [  Info  ] Cache hit: 'precond. (call apply(Int64(), -9223372036854775808))' VC for min @71:18...
-% [  Info  ]  - Checking cache: 'adt invariant' VC for apply @34:39...
-% [  Info  ] Cache hit: 'adt invariant' VC for apply @34:39...
-% [  Info  ]  - Checking cache: 'precond. (call apply(Int64(), 9223372036854775807))' VC for max @72:18...
-% [  Info  ] Cache hit: 'precond. (call apply(Int64(), 9223372036854775807))' VC for max @72:18...
-% [  Info  ]  - Checking cache: 'adt invariant' VC for apply @79:5...
-% [  Info  ] Cache hit: 'adt invariant' VC for apply @79:5...
-% [  Info  ]  - Checking cache: 'precond. (call checkResult(thiss, underlying(thiss) + u ...)' VC for + @22:11...
-% [  Info  ] Cache hit: 'precond. (call checkResult(thiss, underlying(thiss) + u ...)' VC for + @22:11...
-% [  Info  ]  - Checking cache: 'precond. (call apply(Int64(), 0))' VC for zero @68:19...
-% [  Info  ] Cache hit: 'precond. (call apply(Int64(), 0))' VC for zero @68:19...
-% [  Info  ]   ┌───────────────────┐
-% [  Info  ] ╔═╡ stainless summary ╞══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╗
-% [  Info  ] ║ └───────────────────┘                                                                                                                      ║
-% [  Info  ] ║ +      postcondition                                                 valid             U:smt-z3  currency/CurrencyUnits.scala:12:3   0.643 ║
-% [  Info  ] ║ +      precond. (call +(underlying(satoshis(thiss)), underlyin ...)  valid from cache            currency/CurrencyUnits.scala:14:14  0.097 ║
-% [  Info  ] ║ +      precond. (call checkResult(thiss, underlying(thiss) + u ...)  valid from cache            number/NumberType.scala:22:11       0.015 ║
-% [  Info  ] ║ apply  adt invariant                                                 valid from cache            currency/CurrencyUnits.scala:34:39  0.005 ║
-% [  Info  ] ║ apply  precond. (call apply(Int64(), bigInt))                        valid             U:smt-z3  number/NumberType.scala:52:5        0.187 ║
-% [  Info  ] ║ apply  adt invariant                                                 valid from cache            number/NumberType.scala:79:5        0.017 ║
-% [  Info  ] ║ max    precond. (call apply(Int64(), 9223372036854775807))           valid from cache            number/NumberType.scala:72:18       0.001 ║
-% [  Info  ] ║ min    precond. (call apply(Int64(), -9223372036854775808))          valid from cache            number/NumberType.scala:71:18       0.001 ║
-% [  Info  ] ║ one    precond. (call apply(Int64(), 1))                             valid from cache            number/NumberType.scala:69:18       0.915 ║
-% [  Info  ] ║ zero   precond. (call apply(Int64(), 0))                             valid from cache            number/NumberType.scala:68:19       0.001 ║
-% [  Info  ] ╟┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄╢
-% [  Info  ] ║ total: 10   valid: 10   (8 from cache) invalid: 0    unknown: 0    time:   1.882                                                           ║
-% [  Info  ] ╚════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╝
-% [  Info  ] Shutting down executor service.
-% \end{lstlisting}
-
-
-
-% \begin{figure}
-% 	\centering
-% 		\includegraphics[width=\textwidth]{final_verify_output}
-% 	\caption{Output of Stainless verification for addition with 0 of Bitcoin-S-Cores CurrencyUnit}
-% \end{figure}
+Finally, everything is green and correctly verified. 
+\begin{figure}
+	\centering
+		\includegraphics[width=\textwidth]{final_verify_output}
+	\caption{Output of Stainless verification for addition with 0 of Bitcoin-S-Cores CurrencyUnit}
+\end{figure}
 
 The verified code.
 \lstinputlisting[style=scala]{../code/addition/src/main/scala/addition/modified/number/NumberType.scala}
 \lstinputlisting[style=scala]{../code/addition/src/main/scala/addition/modified/currency/CurrencyUnits.scala}
 
-But is it really the original code that we verified?
-And why did we have to change that much?
-This and other questions will be answered in the next chapter.
 
 
-\section{Practical Challenges with Stainless}
-\label{chap:appendix_arb}
+
+
+
+
+\section{Conclusion}
+\label{chap:conclusion}
+
+Because of the limitations of the verication tool, we could only
+verify a rewritten version of the original Bitcoin-S code.  So we can
+not guarantee the correctness of the addition of Satoshis with zero in
+Bitcoin-S.  Not all changes we made were as trivial as the replacement
+of objects with case objects.  For these non-trivial changes, as seen
+for example the bound check in section \ref{sec:bound_check}, we
+cannot say whether they are equivalent to the original implementation
+or not.
+
+So code should be written specically with formal verication in mind,
+in order to successfully verify it.  Otherwise, it needs a lot of
+changes in the software because verification is mathematical and the
+current software is written mostly in object-oriented style.  Software
+written in the functional paradigm would be much easier to reason
+about.
+
+Thus, either Stainless must find ways to translate more of built-in
+object-oriented patterns of Scala to their verification tool or
+developers must invest more in functional programming.
+
+Also, we found that trying to verify code reveals bugs as shown in
+section \ref{sec:bugfix}.  Finally, our work led to some feedback to
+the Stainless developers to improve the tool.
+
+\bibliographystyle{splncs04}
+\bibliography{bibliography}
+
+
+\appendix
+\section{Project Setup}
 
 In this chapter we look at the practical challenges that could occur
 by using Stainless.  Since Stainless is still in development and there
 is no 1.x release there might still be breaking changes and
 improvements fixing problems described now.
 
+\todo{nur über stainless-sbt-plugin reden damit man weiss wir haben es versucht}
 
-\subsection{sbt vs JAR}
+
+
+\subsection{stainless-sbt-plugin vs JAR}
 
 We can either use the sbt plugin or a JAR file to check code with Stainless.
 
@@ -655,9 +643,9 @@ the right version and if we bump the version we can just edit it in
 the build file and every developer is on the same version again.
 
 However, currently there are some drawbacks.  For example the sbt
-plugin does not always report errors.  We will see more about that
-shortly.
+plugin does not always report errors.
 
+We use the jar for everything. 
 
 \subsection{Integration into Bitcoin-S}
 
@@ -748,47 +736,18 @@ the next findings.  We must rewrite most of the code, as described in
 the previous chapters.
 
 
-
-\section{Conclusion}
-\label{chap:conclusion}
-
-Because of the limitations of the verication tool, we could only
-verify a rewritten version of the original Bitcoin-S code.  So we can
-not guarantee the correctness of the addition of Satoshis with zero in
-Bitcoin-S.  Not all changes we made were as trivial as the replacement
-of objects with case objects.  For these non-trivial changes, as seen
-for example the bound check in section \ref{sec:bound_check}, we
-cannot say whether they are equivalent to the original implementation
-or not.
-
-So code should be written specically with formal verication in mind,
-in order to successfully verify it.  Otherwise, it needs a lot of
-changes in the software because verification is mathematical and the
-current software is written mostly in object-oriented style.  Software
-written in the functional paradigm would be much easier to reason
-about.
-
-Thus, either Stainless must find ways to translate more of built-in
-object-oriented patterns of Scala to their verification tool or
-developers must invest more in functional programming.
-
-Also, we found that trying to verify code reveals bugs as shown in
-section \ref{sec:bugfix}.  Finally, our work led to some feedback to
-the Stainless developers to improve the tool.
-
-\bibliographystyle{splncs04}
-\bibliography{bibliography}
-
-
-\appendix
-\section{Code Transformations} 
-
-\paragraph{Project Setup}
 \begin{itemize}
 \item clone our repo
+\item jar vs sbt, you can use both
 \item contains a stainless jar
 \item call the script blahblah
 \end{itemize}
+
+
+
+\section{Code Transformations} 
+
+These are the code transformations needed to Verify the Addition-with-Zero Property.
 
 When we run Stainless on this code (without any properties to prove), it throws the following errors:
 
