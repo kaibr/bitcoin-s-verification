@@ -22,8 +22,15 @@
   urlcolor   = blue
 }
 
+
+
+%\usepackage{newtxtext}
+%\usepackage{newtxmath}
+\usepackage[zerostyle=b,scaled=.9]{newtxtt}
+
 % nicer bold
 \renewcommand{\bfdefault}{b}%
+
 
 % make paragraph headings bold instead of italics
 \renewcommand{\paragraph}{\textbf}%
@@ -34,8 +41,8 @@
 
 \lstdefinestyle{scala}{
   language=scala,
-%  basicstyle=\footnotesize\ttfamily,
-  basicstyle=\scriptsize\ttfamily, % kai: temporary 
+  basicstyle=\footnotesize\ttfamily,
+%  basicstyle=\scriptsize\ttfamily, % kai: temporary 
   breaklines=true,
   keywordstyle=\color{blue},
   commentstyle=\color{dkgreen},
@@ -65,7 +72,7 @@
 
 \authorrunning{R. Boss et al.}
 \institute{Bern University of Applied Sciences, CH-2501 Biel, Switzerland
-\email{ramon.boss@outlook.com,kai.bruennler@bfh.ch,\\anna.doukmak@gmail.com}}
+\email{ramon.boss@outlook.com, kai.bruennler@bfh.ch,\\anna.doukmak@gmail.com}}
 
 \maketitle             
 
@@ -117,11 +124,12 @@ used by programmers without training in formal verification and thus
 allows to write specifications in Scala and focusses on counterexample
 finding in addition to proving correctness.
 
-The following example from the Stainless documentation
+The example in Figure~\ref{fig:factorial} from the Stainless documentation
 \cite{Stainless:documentation} demonstrates this. Notice how a
 precondition is specified using the function \emph{require} and a
 postcondition using \emph{ensuring}.
 
+\begin{figure}
 \begin{lstlisting}[style=scala]
   def factorial(n: Int): Int = {
       require(n >= 0)
@@ -132,7 +140,9 @@ postcondition using \emph{ensuring}.
       }
   } ensuring(res => res >= 0)
 \end{lstlisting}
-
+	\caption{Factorial program with specification}
+	\label{fig:factorial}
+\end{figure}
 Our program happens not to satisfy the specification. An overflow in
 the 32-bit Int leads to a negative result for the input 17, as
 Stainless reports in Figure~\ref{fig:failed}. Changing the type from
@@ -146,53 +156,35 @@ Int to BigInt will result in a successful verification.
 \end{figure}
 
 
-\paragraph{The Pure Scala Fragment.} Stainless supports only a subset
-of Scala. They call this Pure Scala.  You can find the specification of Pure
-Scala on the Stainless documentation website
+\paragraph{The Pure Scala Fragment.} The Scala fragment supported by
+Stainless is described in the Stainless documentation
 \cite{Stainless:documentation} in the section
 \href{https://epfl-lara.github.io/stainless/purescala.html}{Pure
   Scala}.
-\todo{Kai: check the text
 
-It supports Algebraic Data Type definitions in the form of 
-Abstract Class and Case Class/Case Object,
-inheritance of an Abstract Class by a Case Class/Case Object,
-Object for grouping classes and functions,  
-short-circuit interpretation of boolean expressions, 
-Generics with invariant type parameters and simple hierarchy 
-(subclasses define the same type parameters in the same order),
-default values of function parameters,
-Pattern matching, 
-Values,
-anonymous classes and more.
+It comprises algebraic data types in the form of abstract classes,
+case classes and case objects, objects for grouping classes and
+functions, boolean expressions with short-circuit interpretation,
+generics with invariant type parameters, default values of function
+parameters, pattern matching, local and anonymous classes and more.
   
-As an extension to Pure Scala Stainless supports some imperative features.
-It supports 
-declaring a variable in a local scope of a function, 
-declaring a variable in trait without assigning a default value,
-while loops,
-case classes with \textit{var} arguments.
-  
-In particular Stainless does not support
-Class definition,
-inheritance by Object,
-abstract type members,
-variance annotations, upper and lower type bounds in generics,
-variables in classes and objects,
-private inner classes,
-messages as a second argument in the Require function and more.}
+In addition to Pure Scala Stainless also supports some imperative
+features, such as using a (mutable) variable in a local scope of a
+function and while loops. They turn out not to be relevant for the
+current work.
 
-In addition, Stainless has its own library with annotations,
-reimplementation of some core data types, collections and input-output
-functions and more. \todo{Kai: check the text.
+What will turn out to be more relevant are the following Scala
+features which Stainless does not support, such as: (concrete) class
+definitions, inheritance by objects, abstract type members, variance
+annotations, upper and lower type bounds in generics and private inner
+classes.
 
-This allows Stainless to map correctly operations 
-to mathematical function inside of SMT solver.
-Some elements of the library} are described on the website in the section
-\href{https://epfl-lara.github.io/stainless/library.html}{Stainless
-  Library}.  There are more details about the library in the source
-code of Stainless on GitHub \cite{Stainless:github} in the folder
-\href{https://github.com/epfl-lara/stainless/tree/master/frontends/library/stainless}{\textit{frontends/library/stainless}}.
+In addition, Stainless has its own library of some core data types and
+functions which need to be mapped correctly to functions inside of the
+SMT solver that Stainless ultimately relies on. Those data types in
+general do not have all the methods of the Scala data types. We will see an example of a method 
+of the BigInt type that Scala provides but Stainless does not.
+\todo{question viktor: where is BigInt??}
 
 
 
@@ -225,13 +217,13 @@ Some code in this section is copied or adapted from the Bitcoin-S-Core
 transaction builder example \cite{BitcoinSCore:txbuilderexample}.
 Bitcoin-S-Core has a bitcoin transaction builder class with the
 following constructor:
-\begin{lstlisting}[style=scala, basicstyle=\scriptsize\tt]
+\begin{lstlisting}[style=scala]
   BitcoinTxBuilder(
-    destinations: Seq[TransactionOutput], // where to send the money
-    utxos: BitcoinTxBuilder.UTXOMap,      // unspent transaction outputs
-    feeRate: FeeUnit,                     // fee rate per byte
-    changeSPK: ScriptPubKey,              // where to send the change
-    network: BitcoinNetwork               // bitcoin network information
+    destinations: Seq[TransactionOutput], 
+    utxos: BitcoinTxBuilder.UTXOMap,      
+    feeRate: FeeUnit,                     
+    changeSPK: ScriptPubKey,              
+    network: BitcoinNetwork               
   ): Future[BitcoinTxBuilder]
 \end{lstlisting}
 
