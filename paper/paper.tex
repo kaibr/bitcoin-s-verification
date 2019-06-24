@@ -332,7 +332,7 @@ Now lets build the transaction with those data.
   val tx: Transaction = Await.result(signedTxF, 1 second)
 \end{lstlisting}
 
-\todo{ramon: completely understand and explain the code}
+\todo{kai: do you need more explanation?}
 
 Line one to seven creates a transaction builder which is then signed
 on line ten.  We can now use our transaction object on line twelve.
@@ -800,7 +800,7 @@ case object Satoshis extends BaseNumbers[Satoshis] { ... }
 Here, we can just change the objects from object to case object.
 Stainless recommendation is to use objects for modules and case objects as algebraic data types.
 
-\todo{Ramon does this change semantics?}
+\todo{Kai this does not change the semantic}
 
 This is due to the internal design of Scala.
 It's possible to reason about case object but not about object.
@@ -820,6 +820,8 @@ Stainless output:
 This should be easy to rewrite by using generics instead of an abstract type, right?
 Unfortunately not.
 The problem is, CurrencyUnit uses one of its implementing classes: Satoshis.
+
+\todo{kai this does not change the semantic}
 
 Before:
 \begin{lstlisting}[style=scala]
@@ -903,6 +905,8 @@ The BigInt from the Stainless library is a bit restricted.
 One such restriction is, that BigInt does not support dynamic BigInt construction.
 Thus, the constructor parameter of BitInt must be a literal argument.
 
+\todo{kai this does not change semantic}
+
 Before:
 \begin{lstlisting}[style=scala]
 sealed abstract class Satoshis extends CurrencyUnit {
@@ -946,6 +950,8 @@ Stainless output:
           sealed abstract class Number[T <: Number[T]] {
                                         ^^^^^^^^^^^^^^
 \end{lstlisting}
+
+\todo{kai this does not change semantic}
 
 This is a missing feature in Stainless.
 It does not support upper type boundaries on the class itself.
@@ -1065,6 +1071,7 @@ Stainless output:
                               ^^^^^^^^^^^^^^^^^^^
 \end{lstlisting}
 
+\todo{kai This does not change semantic}
 
 Now that we do not depend on toLong anymore lets just remove it from out code.
 
@@ -1171,6 +1178,8 @@ Stainless output:
               ^^^^^^^^^^^^^^^
 \end{lstlisting}
 
+\todo{kai this does not change semantic}
+
 Before:
 \begin{lstlisting}[style=scala]
 sealed abstract class Number {
@@ -1268,6 +1277,8 @@ Stainless output:
               require((result & andMask) == result,
                       ^^^^^^^^^^^^^^^^
 \end{lstlisting}
+
+\todo{kai here we do not know if it changes semantic}
 
 Due to the restrictions on BigInt, we can not use the \& function either.
 Before:
@@ -1442,6 +1453,8 @@ And:
 Stainless can not extract the private class inside the object.
 Bitcoin-S uses this a lot, because they separate the class from its implementation.
 
+\todo{kai this does not change semantic}
+
 Before:
 \begin{lstlisting}[style=scala]
 case object Satoshis extends BaseNumbers[Satoshis] {
@@ -1542,6 +1555,8 @@ Stainless output:
 Seems like Stainless does not support the second string parameter of require or at least it throws a warning about it.
 We can safely remove the string parameters from the requires, since they only serve as error messages.
 
+\todo{kai this does not change semantic}
+
 Before:
 \begin{lstlisting}[style=scala]
 private case class Int64Impl(underlying: BigInt) extends Int64 {
@@ -1630,6 +1645,8 @@ Stainless output:
 
 This error is hard to understand, but we can see that there is a missing Long to BigInt conversion.
 So we search for all Long values in the code.
+
+\todo{kai this does not change semantic}
 
 Before:
 \begin{lstlisting}[style=scala]
