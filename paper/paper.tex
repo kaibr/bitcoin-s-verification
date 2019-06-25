@@ -179,12 +179,15 @@ definitions, inheritance by objects, abstract type members, variance
 annotations, upper and lower type bounds in generics and private inner
 classes.
 
+\todo{anna: stainless unterstützt anscheinend type bounds prinzipiell
+  (nur nicht selbstreferenzierende)? siehe B.4, stainless issue 519}
+
 In addition, Stainless has its own library of some core data types and
 functions which need to be mapped correctly to functions inside of the
 SMT solver that Stainless ultimately relies on. Those data types in
-general do not have all the methods of the Scala data types. We will see an example of a method 
-of the BigInt type that Scala provides but Stainless does not.
-\todo{question viktor: where is BigInt??}
+general do not have all the methods of the Scala data types. We will
+see an example of a method of the BigInt type that Scala provides but
+Stainless does not.  \todo{question viktor: where is BigInt??}
 
 
 
