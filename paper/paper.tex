@@ -766,7 +766,7 @@ When we run Stainless on this code (without any properties to prove), it throws 
 So let's see how we can fix those errors.
 
 
-\subsection{Turning Object into Case Object}
+\subsection{An Inheriting Object}
 
 Stainless output:
 \begin{lstlisting}[style=stainless]
@@ -801,7 +801,7 @@ This needs a fundamental knowledge of Scala and some functional paradigms that s
 The \href{https://github.com/epfl-lara/stainless/issues/520}{issue number 520} on Stainless GitHub gives some thoughts, if you want to know more.
 
 
-\subsection{Getting Rid of Abstract Type Member}
+\subsection{Abstract Type Member}
 
 Stainless output:
 \begin{lstlisting}[style=stainless]
@@ -884,7 +884,7 @@ sealed abstract class Satoshis extends CurrencyUnit {
 \end{lstlisting}
 
 
-\subsection{Replacing the BigInt Constructor Argument With A String Literal}
+\subsection{Non-Literal BigInt Constructor Argument}
 
 Stainless output:
 \begin{lstlisting}[style=stainless]
@@ -935,7 +935,7 @@ So, instead of converting the underlying to Long and back to BigInt we convert u
 After fixing all Stainless errors, a new error appears.
 
 
-\subsection{Getting Rid of Special Generics}
+\subsection{Self-Reference in Type Parameter Bound}
 
 Stainless output:
 \begin{lstlisting}[style=stainless]
@@ -1055,8 +1055,8 @@ There are other number types like UInt16 but for our property we don't need them
 Now, there are two new errors.
 
 
-\subsection{Removing toLong}
-
+\subsection{Missing Member \texttt{bigInteger} in BigInt}
+\todo{Ramon is .bigInteger missing in Stainless?}
 Stainless output:
 \begin{lstlisting}[style=stainless]
 [ Error  ] number/NumberType.scala:14:22: Unknown call to bigInteger on Number.this.toBigInt (BigInt) with arguments List() of type List()
@@ -1162,7 +1162,7 @@ sealed abstract class Number {
 \end{lstlisting}
 
 
-\subsection{Getting Rid of Concrete Type}
+\subsection{Type Member}
 
 Stainless output:
 \begin{lstlisting}[style=stainless]
@@ -1261,7 +1261,7 @@ This was a missing feature in Stainless that was fixed on Mai 28, 2019 with \hre
 Now it should work without this change.
 
 
-\subsection{Replacing the BigInt \&-Function With Bound Check}
+\subsection{Missing Bitwise-And Method on BigInt}
 \label{sec:bound_check}
 
 Stainless output:
@@ -1373,7 +1373,7 @@ Again the code gets a bit more static and it's not the exact same code anymore.
 Running Stainless produces again new errors.
 
 
-\subsection{Extracting Private Inner Classes}
+\subsection{Inner Class in Case Object}
 
 Stainless output:
 \begin{lstlisting}[style=stainless]
@@ -1479,7 +1479,7 @@ But for our property it does not change anything.
 Now we get some weird warnings about require.
 
 
-\subsection{Removing Second Parameter of Require}
+\subsection{Message Parameter in Require}
 
 Stainless output:
 \begin{lstlisting}[style=stainless]
@@ -1578,7 +1578,7 @@ sealed abstract class Number {
 A new error appears.
 
 
-\subsection{Rewriting BigInt to Long Conversions}
+\subsection{Missing Implicit Long to BigInt Conversion}
 
 Stainless output:
 \begin{lstlisting}[style=stainless]
@@ -1663,6 +1663,10 @@ Finally, we get some output from Stainless about the verification in the code.
 This shows that there is an invalid specification in checkResult and Stainless prints a counterexample for it.
 
 Let's ignore this for a moment and write the specification for the \nameref{property_2}.
+
+
+\subsection{Missing BigInt Constructor with Long Argument}
+\todo{Split code from above}
 
 
 \subsection{Writing Specification for the Property}
