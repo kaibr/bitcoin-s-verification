@@ -1,6 +1,11 @@
 
 \documentclass[runningheads]{llncs}
 
+% to have bookmarks in pdf
+% remove for final version
+\usepackage[open,openlevel=5]{bookmark}
+\setcounter{tocdepth}{5}
+
 \usepackage{graphicx}
 % Used for displaying a sample figure. If possible, figure files should
 % be included in EPS format.
@@ -176,47 +181,35 @@ current work.
 What will turn out to be more relevant are the following Scala
 features which Stainless does not support, such as: (concrete) class
 definitions, inheritance by objects, abstract type members, variance
-annotations, upper and lower type bounds in generics and private inner
-classes.
-
-\todo{anna: stainless unterstützt anscheinend type bounds prinzipiell
-  (nur nicht selbstreferenzierende)? siehe B.4, stainless issue 519}
+annotations and private inner classes.
 
 In addition, Stainless has its own library of some core data types and
 functions which need to be mapped correctly to functions inside of the
 SMT solver that Stainless ultimately relies on. Those data types in
-general do not have all the methods of the Scala data types. We will
-see an example of a method of the BigInt type that Scala provides but
-Stainless does not.  \todo{question viktor: where is BigInt??}
+general do not have all the methods of the Scala data types. For
+example, the BigInt type in Scala has a methods for bitwise operations
+while the BigInt type in Stainless does not.
+
+\paragraph{Outline.} In the next section we try to verify the property
+that a regular (non-coinbase) transaction cannot generate new
+coins. We call it the \emph{no-inflation property}. Trying to verify
+it, we uncover and fix a bug in the bitcoin-s library. We find that
+there is too much code involved that lies outside of the supported
+fragment to currently make this verification feasible. Instead, in
+Section~3 we turn to a simpler property to verify. The simplest
+possible property we could think of was the fact that adding zero
+satoshis to a given amount of satoshis yields the given amount of
+satoshis. We call it the \emph{addition-with-zero property}. Here as
+well we see that a significant part of the code lies outside of the
+supported fragment. However, after a series of equivalent
+transformations we arrive at code that we successfully
+verify. \todo{conclusions: what now?}
 
 
-
-\section{Trying to Verify the No-Inflation Property}
-
-Thus, we try to verify the property, that a non-coinbase transaction
-cannot generate new coins.  Let's name it the \nameref{property_1}.
-
-As we can see later in chapter \ref{chap:verify_check}, we must
-rewrite a huge part of the code implementing this property.  This
-reimplementation into Pure Scala needs a lot of time.  So, we adjust
-the plan and verify another functionality of Bitcoin-S.  Nevertheless,
-during the analysis of the \nameref{property_1} we look at a bug in
-Bitcoin-S found during this work and see the code changes for the
-bugfix in section \ref{sec:bugfix}.
+\section{The No-Inflation Property}
 
 
-This chapter describes the part of Bitcoin-S needed to verify the
-\nameref{property_1} described before.  We are going to create a
-transaction and show the relevant parts of the method
-\texttt{checkTransaction}, where transactions are checked against some
-properties.  Then, we will see the bug in Bitcoin-S found during this
-work and its fix.  In the end we see why the \nameref{property_1}
-needed to be changed to the \nameref{property_2}.
-
-
-\paragraph{Creating a Transaction}
-
-Some code in this section is copied or adapted from the Bitcoin-S-Core
+\paragraph{Creating a Transaction} Some code in this section is copied or adapted from the Bitcoin-S-Core
 transaction builder example \cite{BitcoinSCore:txbuilderexample}.
 Bitcoin-S-Core has a bitcoin transaction builder class with the
 following constructor:
@@ -289,6 +282,7 @@ This utxos are the inputs of our transaction.
 
 Second, we need destinations to spend the bitcoins to.
 For the sake of convenience we create only one.
+
 \begin{lstlisting}[style=scala]
   val destinationAmount = Satoshis(Int64(5000))
 
@@ -478,7 +472,7 @@ with a unit test to prevent this bug from appearing again in the
 future.
 
 
-\section{Towards Verifying the Addition-with-Zero Property}
+\section{The Addition-with-Zero Property}
 
 \label{chap:verify_add}
 
