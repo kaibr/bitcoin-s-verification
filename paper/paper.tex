@@ -530,8 +530,8 @@ the relevant code. Also, we removed all binary operations on Number that are not
   - removed object CurrencyUnits containing some variables to transform satoshis to btc (not used)
 
   The code we use for the following sections is in reduced folder.
-}
 
+  
 Here we can see the extracted code needed for the addition of CurrencyUnits:
 \lstinputlisting[style=scala]{../code/addition/src/main/scala/addition/reduced/number/NumberType.scala}
 \lstinputlisting[style=scala]{../code/addition/src/main/scala/addition/reduced/currency/CurrencyUnits.scala}
@@ -541,11 +541,69 @@ The additions' signature looks like this:
   +(c: CurrencyUnit): CurrencyUnit
 \end{lstlisting}
 
-When we run Stainless on this code (without any properties to prove), it throws the following errors: \todo{describe errors: no support for abstract types, unsupported arguments for the BigInt constructor, unsupported inheritance for objects.}
+When we run Stainless on this code (without any properties to prove),
+it throws the following errors: \todo{describe errors: no support for
+  abstract types, unsupported arguments for the BigInt constructor,
+  unsupported inheritance for objects.}
 
-\paragraph{Transforming the Code}
+\paragraph{Transforming the Code.}
 
 \todo{kai todo}
+
+
+\paragraph{The Specification.}
+
+As specified, our verification must only support addition with zero.
+So we restrict the parameter to be zero in the precondition.
+\begin{lstlisting}[style=scala]
+  require(c.satoshis == Satoshis.zero)
+\end{lstlisting}
+
+We ensure the result is the same value as \emph{this} in the postcondition.
+\begin{lstlisting}[style=scala]
+  ensuring(res => res.satoshis == this.satoshis)
+\end{lstlisting}
+
+We can use equals (==) directly on Satoshis, because it is a case class.
+
+Before:
+\begin{lstlisting}[style=scala]
+sealed abstract class CurrencyUnit {
+  def satoshis: Satoshis
+
+  def !=(c: CurrencyUnit): Boolean = !(this == c)
+
+  def ==(c: CurrencyUnit): Boolean = satoshis == c.satoshis
+
+  def +(c: CurrencyUnit): CurrencyUnit = {
+    Satoshis(satoshis.underlying + c.satoshis.underlying)
+  }
+
+  protected def underlying: Int64
+}
+\end{lstlisting}
+
+The addition will now look like this:
+\begin{lstlisting}[style=scala]
+sealed abstract class CurrencyUnit {
+  def satoshis: Satoshis
+
+  def !=(c: CurrencyUnit): Boolean = !(this == c)
+
+  def ==(c: CurrencyUnit): Boolean = satoshis == c.satoshis
+  
+  override def +(c: CurrencyUnit): CurrencyUnit = {
+    require(c.satoshis == Satoshis.zero)
+    Satoshis(satoshis.underlying + c.satoshis.underlying)
+  } ensuring(res => res.satoshis == this.satoshis)
+
+  protected def underlying: Int64
+}
+\end{lstlisting}
+
+That's all we need to verify our addition.
+
+
 
 \paragraph{Result}
 
@@ -1667,233 +1725,6 @@ Let's ignore this for a moment and write the specification for the \nameref{prop
 \todo{Split code from above}
 
 
-\subsection{Writing Specification for the Property}
-
-As specified, our verification must only support addition with zero.
-So we restrict the parameter to be zero in the precondition.
-\begin{lstlisting}[style=scala]
-  require(c.satoshis == Satoshis.zero)
-\end{lstlisting}
-
-We ensure the result is the same value as \emph{this} in the postcondition.
-\begin{lstlisting}[style=scala]
-  ensuring(res => res.satoshis == this.satoshis)
-\end{lstlisting}
-
-We can use equals (==) directly on Satoshis, because it is a case class.
-
-Before:
-\begin{lstlisting}[style=scala]
-sealed abstract class CurrencyUnit {
-  def satoshis: Satoshis
-
-  def !=(c: CurrencyUnit): Boolean = !(this == c)
-
-  def ==(c: CurrencyUnit): Boolean = satoshis == c.satoshis
-
-  def +(c: CurrencyUnit): CurrencyUnit = {
-    Satoshis(satoshis.underlying + c.satoshis.underlying)
-  }
-
-  protected def underlying: Int64
-}
-\end{lstlisting}
-
-The addition will now look like this:
-\begin{lstlisting}[style=scala]
-sealed abstract class CurrencyUnit {
-  def satoshis: Satoshis
-
-  def !=(c: CurrencyUnit): Boolean = !(this == c)
-
-  def ==(c: CurrencyUnit): Boolean = satoshis == c.satoshis
-  
-  override def +(c: CurrencyUnit): CurrencyUnit = {
-    require(c.satoshis == Satoshis.zero)
-    Satoshis(satoshis.underlying + c.satoshis.underlying)
-  } ensuring(res => res.satoshis == this.satoshis)
-
-  protected def underlying: Int64
-}
-\end{lstlisting}
-
-That's all we need to verify our addition.
-
-Now we will look into the previous error.
-
-
-\subsection{Propagating Require}
-
-There is another problem with Bitcoin-S.
-Bitcoin-S-Core uses require as a fail-fast method whereas Stainless needs it to verify the code.
-
-Stainless output now:
-\begin{lstlisting}[style=stainless]
-[  Info  ]  - Checking cache: 'postcondition' VC for + @12:3...
-[  Info  ]  - Checking cache: 'adt invariant' VC for apply @34:39...
-[  Info  ]  - Checking cache: 'adt invariant' VC for apply @62:38...
-[  Info  ] Cache miss: 'adt invariant' VC for apply @62:38...
-[  Info  ] Cache hit: 'adt invariant' VC for apply @34:39...
-[  Info  ] Cache hit: 'postcondition' VC for + @12:3...
-[  Info  ]  - Now solving 'adt invariant' VC for apply @62:38...
-[  Info  ]  - Result for 'adt invariant' VC for apply @62:38:
-[Warning ]  => INVALID
-[Warning ] Found counter-example:
-[Warning ]   bigInt: BigInt -> -9223372036854775809
-[  Info  ]  - Checking cache: 'precond. (call checkResult(thiss, underlying(thiss) + u ...)' VC for + @17:36...
-[  Info  ] Cache miss: 'precond. (call checkResult(thiss, underlying(thiss) + u ...)' VC for + @17:36...
-[  Info  ]  - Now solving 'precond. (call checkResult(thiss, underlying(thiss) + u ...)' VC for + @17:36...
-[  Info  ]  - Result for 'precond. (call checkResult(thiss, underlying(thiss) + u ...)' VC for + @17:36:
-[Warning ]  => INVALID
-[Warning ] Found counter-example:
-[Warning ]   num: Number   -> Int64Impl(9223372036854775807)
-[Warning ]   thiss: Number -> Int64Impl(1)
-\end{lstlisting}
-
-Corresponding code:
-\begin{lstlisting}[style=scala]
-sealed abstract class Number {
-  /** The underlying scala number used to to hold the number */
-  protected def underlying: BigInt
-
-  def toBigInt: BigInt = underlying
-
-  /** Factory function to create the underlying T, for instance a UInt32 */
-  def apply: BigInt => Int64
-
-  def +(num: Int64): Int64 = apply(checkResult(underlying + num.underlying))
-
-  /**
-    * Checks if the given result is within the range
-    * of this number type
-    */
-  private def checkResult(result: BigInt): BigInt = {
-    require(
-         result <= BigInt("9223372036854775807")
-      && result >= BigInt("-9223372036854775808"))
-    result
-  }
-}
-\end{lstlisting}
-
-But how does Stainless find a counter example ignoring the require in checkResult?
-Since Stainless is a static verification tool, it tests every possibility.
-So it can use a number bigger than the maximum Int64 and pass it to the addition.
-The require in checkResult fails.
-
-Thus, we need to add the restriction from checkResult to the addition too.
-\begin{lstlisting}[style=scala]
-override def +(num: Int64): Int64 = {
-  require(
-       num.underlying <= BigInt("9223372036854775807")
-    && num.underlying >= BigInt("-9223372036854775808")
-    && this.underlying <= BigInt("9223372036854775807")
-    && this.underlying >= BigInt("-9223372036854775808")
-  )
-  apply(checkResult(underlying + num.underlying))
-}
-\end{lstlisting}
-
-Stainless finds another counter example:
-\begin{lstlisting}[style=stainless]
-[Warning ] Found counter-example:
-[Warning ]   num: { x: Object | @unchecked isInt64(x) }    -> Int64Impl(1)
-[Warning ]   thiss: { x: Object | @unchecked isNumber(x) } ->
-                Int64Impl(9223372036854775807)
-\end{lstlisting}
-
-Sure, when adding one to the maximum Int64 the require does not hold anymore.
-Since we do only allow zero as a parameter, the easiest way is to restrict it to zero here too.
-
-Code after:
-\begin{lstlisting}[style=scala]
-sealed abstract class Number {
-  /** The underlying scala number used to to hold the number */
-  protected def underlying: BigInt
-
-  def toBigInt: BigInt = underlying
-
-  /** Factory function to create the underlying T, for instance a UInt32 */
-  def apply: BigInt => Int64
-
-  def +(num: Int64): Int64 = {
-    require(
-          num == Int64.zero
-      && this.underlying <= BigInt("9223372036854775807")
-      && this.underlying >= BigInt("-9223372036854775808"))
-    apply(checkResult(underlying + num.underlying))
-  }
-
-  /**
-    * Checks if the given result is within the range
-    * of this number type
-    */
-  private def checkResult(result: BigInt): BigInt = {
-    require(
-          result <= BigInt("9223372036854775807")
-      && result >= BigInt("-9223372036854775808"))
-    result
-  }
-}
-\end{lstlisting}
-
-The same problem occurs in the Int64 constructor.
-
-Before:
-\begin{lstlisting}[style=scala]
-sealed abstract class Int64 extends SignedNumber {
-  override def apply: BigInt => Int64 = Int64(_)
-}
-
-case object Int64 extends BaseNumbers[Int64] {
-  lazy val zero = Int64(0)
-  lazy val one = Int64(1)
-
-  lazy val min = Int64(BigInt("-9223372036854775808"))
-  lazy val max = Int64(BigInt("9223372036854775807"))
-
-  def apply(bigInt: BigInt): Int64 = Int64Impl(bigInt)
-}
-
-private case class Int64Impl(underlying: BigInt) extends Int64 {
-  require(underlying >= BigInt("-9223372036854775808"))
-  require(underlying <= BigInt("9223372036854775807"))
-}
-\end{lstlisting}
-
-After:
-\begin{lstlisting}[style=scala]
-sealed abstract class Int64 extends SignedNumber {
-  override def apply: BigInt => Int64 = bigInt => {
-    require(
-          bigInt >= BigInt("-9223372036854775808")
-      && bigInt <= BigInt("9223372036854775807"))
-
-    Int64(bigInt)
-  }
-}
-  
-case object Int64 extends BaseNumbers[Int64] {
-  lazy val zero = Int64(0)
-  lazy val one = Int64(1)
-
-  lazy val min = Int64(BigInt("-9223372036854775808"))
-  lazy val max = Int64(BigInt("9223372036854775807"))
-
-  def apply(bigInt: BigInt): Int64 = {
-    require(
-         bigInt >= BigInt("-9223372036854775808")
-      && bigInt <= BigInt("9223372036854775807"))
-
-    Int64Impl(bigInt)
-  }
-}
-
-private case class Int64Impl(underlying: BigInt) extends Int64 {
-  require(underlying >= BigInt("-9223372036854775808"))
-  require(underlying <= BigInt("9223372036854775807"))
-}
-\end{lstlisting}
 
 
 
