@@ -796,35 +796,22 @@ the previous chapters.
 
 \section{Code Transformations} 
 
-These are the code transformations needed to Verify the Addition-with-Zero Property.
+Here we see in detail how to transform the bitcoin-s code into the
+Scala fragment supported by Stainless. All subsections start with the
+code on which Stainless is called, followed by the Stainless error
+message(s) and finally a description of the changes we make to the
+code.
 
-When we run Stainless on this code (without any properties to prove), it throws the following errors:
-
-\begin{lstlisting}[style=stainless]
-[ Error  ] currency/CurrencyUnits.scala:6:3: Stainless doesn't support abstract type members
-            type A
-            ^^^^^^
-[ Error  ] currency/CurrencyUnits.scala:26:33: Only literal arguments are allowed for BigInt.
-            def toBigInt: BigInt = BigInt(toLong)
-                                          ^^^^^^
-[ Error  ] currency/CurrencyUnits.scala:33:1: Objects cannot extend classes or implement traits, use a case object instead
-          object Satoshis extends BaseNumbers[Satoshis] {
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^...
-[ Error  ] number/NumberType.scala:65:1: Objects cannot extend classes or implement traits, use a case object instead
-          object Int64 extends BaseNumbers[Int64] {
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^...
-[  Info  ] Shutting down executor service.
-\end{lstlisting}
+We claim that all transformations are equivalent in the sense that if
+the addition-with-zero property holds for the transformed code, then
+it also holds for the code before the transformation.
 
 
+\subsection{Inheriting Objects}
 
+\lstinputlisting[style=scala]{../code/addition/src/main/scala/addition/reduced/currency/CurrencyUnits.scala}
+\lstinputlisting[style=scala]{../code/addition/src/main/scala/addition/reduced/number/NumberType.scala}
 
-So let's see how we can fix those errors.
-
-
-\subsection{An Inheriting Object}
-
-Stainless output:
 \begin{lstlisting}[style=stainless]
 [ Error  ] currency/CurrencyUnits.scala:33:1: Objects cannot extend classes or implement traits, use a case object instead
           object Satoshis extends BaseNumbers[Satoshis] {
@@ -834,32 +821,19 @@ Stainless output:
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^...
 \end{lstlisting}
 
-Code before:
-\begin{lstlisting}[style=scala]
-object Int64 extends BaseNumbers[Int64] { ... }
-object Satoshis extends BaseNumbers[Satoshis] { ... }
-\end{lstlisting}
+Here, we can just turn the objects into case objects by literally just
+changing the word \texttt{object} into \texttt{case object} on lines
+33 and 65 in the two respective files.
 
-Code after:
-\begin{lstlisting}[style=scala]
-case object Int64 extends BaseNumbers[Int64] { ... }
-case object Satoshis extends BaseNumbers[Satoshis] { ... }
-\end{lstlisting}
-
-Here, we can just change the objects from object to case object.
-Stainless recommendation is to use objects for modules and case objects as algebraic data types.
-
-\todo{Kai this does not change the semantic}
-
-This is due to the internal design of Scala.
-It's possible to reason about case object but not about object.
-This needs a fundamental knowledge of Scala and some functional paradigms that should not be part of this thesis.
-The \href{https://github.com/epfl-lara/stainless/issues/520}{issue number 520} on Stainless GitHub gives some thoughts, if you want to know more.
+That transformation is equivalent. Case objects have some additional
+properties (in particular, being serializable) and they inherit from
+\texttt{Product} instead of \texttt{AnyRef}, but none of our code
+depends on any of that.
 
 
-\subsection{Abstract Type Member}
+\subsection{Abstract Type Members}
 
-Stainless output:
+
 \begin{lstlisting}[style=stainless]
 [ Error  ] currency/CurrencyUnits.scala:6:3: Stainless doesn't support abstract type members
             type A
@@ -870,7 +844,6 @@ This should be easy to rewrite by using generics instead of an abstract type, ri
 Unfortunately not.
 The problem is, CurrencyUnit uses one of its implementing classes: Satoshis.
 
-\todo{kai this does not change the semantic}
 
 Before:
 \begin{lstlisting}[style=scala]
@@ -907,10 +880,12 @@ What happens, if we typify CurrencyUnit with A, meaning to make it generic with 
 
 Satoshis extends CurrencyUnit with type Int64, so it would be of type CurrencyUnit[Int64].
 That's too specific, because the return type of the addition is then CurrencyUnit[Int64] not CurrencyUnit[A].
-Maybe the Bitcoin-S developers should reimplement this part and not use Satoshis directly.
 
-Since there is no easy way to fix it and the code should stay as much as possible the original, we just remove the abstract type and set it to Int64.
-This limits the verification a bit, but as we only want to verify the addition in satoshis, that's OK.
+Maybe the Bitcoin-S developers should reimplement this part and not use Satoshis directly.
+\todo{ramon: explain. what would be the correct code?}
+
+
+Since we only want to verify the addition of satoshis, and the Satoshis class overrides A with Int64 anyway,  we just remove the abstract type and set it to Int64.
 
 After:
 \begin{lstlisting}[style=scala]
