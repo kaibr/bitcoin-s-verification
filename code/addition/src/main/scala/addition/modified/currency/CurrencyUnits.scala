@@ -1,6 +1,7 @@
 package addition.modified.currency
 
 import addition.modified.number.{BaseNumbers, Int64}
+import stainless.lang._
 
 sealed abstract class CurrencyUnit {
   def satoshis: Satoshis
@@ -10,12 +11,12 @@ sealed abstract class CurrencyUnit {
   def ==(c: CurrencyUnit): Boolean = satoshis == c.satoshis
 
   def +(c: CurrencyUnit): CurrencyUnit = {
-    require(c.satoshis == Satoshis.zero)
     Satoshis(satoshis.underlying + c.satoshis.underlying)
-  } ensuring(res => res.satoshis == this.satoshis)
+  } ensuring(res =>
+    (c.satoshis == Satoshis.zero) ==>
+      (res.satoshis == this.satoshis))
 
-  protected def underlying: Int64
-}
+  protected def underlying: Int64}
 
 sealed abstract class Satoshis extends CurrencyUnit {
   override def satoshis: Satoshis = this
