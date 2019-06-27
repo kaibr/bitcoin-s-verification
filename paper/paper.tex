@@ -895,7 +895,10 @@ We replace line 26 by
 def toBigInt: BigInt = underlying.toBigint
 \end{lstlisting}
 
-\todo{explain why equivalence or why not equivalence}
+This is an equivalent transformation: the only thing that might go
+wrong in the detour via \texttt{Long} is that the BigInt underlying
+Int64 in turn underlying Satoshis does not fit into a Long. However,
+the only constructor of Int64 ensures exactly that.
 
 \subsection{Self-Reference in Type Parameter Bound}
 
@@ -930,6 +933,8 @@ and replace T by Int64 in lines 25-27.
 
 
 \subsection{Missing Member \texttt{bigInteger} in BigInt}
+
+KAI CONTINUE HERE
 
 \todo{Ramon is .bigInteger missing in Stainless?}
 
