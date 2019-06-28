@@ -11,6 +11,7 @@ sealed abstract class CurrencyUnit {
   def ==(c: CurrencyUnit): Boolean = satoshis == c.satoshis
 
   def +(c: CurrencyUnit): CurrencyUnit = {
+    require(Int64.isSumInRange(this.underlying, c.underlying))
     Satoshis(satoshis.underlying + c.satoshis.underlying)
   } ensuring(res =>
     (c.satoshis == Satoshis.zero) ==>

@@ -14,16 +14,17 @@ sealed abstract class Number {
   /** Factory function to create the underlying T, for instance a UInt32 */
   def apply: BigInt => Int64
 
-  def +(num: Int64): Int64 = apply(checkResult(underlying + num.underlying))
+  def +(num: Int64): Int64 = {
+    require(Int64.isInRange(underlying + num.underlying))
+    apply(checkResult(underlying + num.underlying))
+  }
 
   /**
     * Checks if the given result is within the range
     * of this number type
     */
   private def checkResult(result: BigInt): BigInt = {
-    require(
-         result <= BigInt("9223372036854775807")
-      && result >= BigInt("-9223372036854775808"))
+    require(Int64.isInRange(result))
     result
   }
 }
@@ -38,7 +39,10 @@ sealed abstract class SignedNumber extends Number
   * Represents a int64_t in C
   */
 sealed abstract class Int64 extends SignedNumber {
-  override def apply: BigInt => Int64 = Int64(_)
+  override def apply: BigInt => Int64 = num => {
+    require(Int64.isInRange(num))
+    Int64(num)
+  }
 }
 
 /**
@@ -59,10 +63,15 @@ case object Int64 extends BaseNumbers[Int64] {
   lazy val min = Int64(BigInt("-9223372036854775808"))
   lazy val max = Int64(BigInt("9223372036854775807"))
 
-  def apply(bigInt: BigInt): Int64 = Int64Impl(bigInt)
+  def apply(bigInt: BigInt): Int64 = {
+    require(Int64.isInRange(bigInt))
+    Int64Impl(bigInt)
+  }
+
+  def isInRange(num: BigInt): Boolean = num >= BigInt("-9223372036854775808") && num <= BigInt("9223372036854775807")
+  def isSumInRange(num1: Int64, num2: Int64): Boolean = Int64.isInRange(num1.underlying + num2.underlying)
 }
 
 private case class Int64Impl(underlying: BigInt) extends Int64 {
-  require(underlying >= BigInt("-9223372036854775808"))
-  require(underlying <= BigInt("9223372036854775807"))
+  require(Int64.isInRange(underlying))
 }
