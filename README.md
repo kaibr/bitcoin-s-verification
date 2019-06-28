@@ -10,5 +10,5 @@ Presentation for TechDay in `presentation`.
 
 Question for TechDay in `question.md`.
 
-Execute Stainless with `./code/addition/bin/stainless.sh`.
+Execute Stainless with `./code/bin/stainless.sh <path to code>` (e.g. `./code/bin/stainless.sh code/addition/src/main/scala/reduced/`).
 
