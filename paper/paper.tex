@@ -669,6 +669,32 @@ improvements fixing problems described now.
 \todo{nur über stainless-sbt-plugin reden damit man weiss wir haben es versucht}
 
 
+\todo{
+Kai:
+
+sbt-plugin vs JAR:
+Can use either sbt-plugin or JAR
+
+More about sbt on https://www.scala-sbt.org/1.x/docs/index.html (features are also listed there)
+Installation see Stainless Doc 'Installing Stainless' section
+
+Use JAR:
+Download all library dependencies including dependencies of dependencies, pass libraries + source to JAR
+  
+Use sbt-plugin: integrate in sbt build tool with addSbtPlugin() method
+
+Why JAR:
+sbt-plugin problems (v 0.1 uses older versions (v0.2 not), no output to console see github \#484)
+otherwise use sbt-plugin because of library management and replicability (everyone uses the same Stainless version configured in sbt)
+
+Reproduce results:
+prereq: Java 8 in /usr/lib/jvm/java-8-openjdk
+1. clone repo
+2. run ./code/bin/stainless.sh <path to code>
+   eg. ./code/bin/stainless.sh code/addition/src/main/scala/addition/reduced/
+}
+
+
 
 \subsection{stainless-sbt-plugin vs JAR}
 
