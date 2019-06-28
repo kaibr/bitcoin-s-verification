@@ -661,44 +661,13 @@ the Stainless developers to improve the tool.
 \appendix
 \section{Project Setup}
 
-In this chapter we look at the practical challenges that could occur
-by using Stainless.  Since Stainless is still in development and there
-is no 1.x release there might still be breaking changes and
-improvements fixing problems described now.
+\paragraph{Using the Stainless-sbt-plugin vs Using the Stanless-JAR}
 
-\todo{nur über stainless-sbt-plugin reden damit man weiss wir haben es versucht}
-
-
-\todo{
-Kai:
-
-sbt-plugin vs JAR:
-Can use either sbt-plugin or JAR
+We can either use the sbt plugin or a JAR file to check code with Stainless.
 
 More about sbt on https://www.scala-sbt.org/1.x/docs/index.html (features are also listed there)
 Installation see Stainless Doc 'Installing Stainless' section
 
-Use JAR:
-Download all library dependencies including dependencies of dependencies, pass libraries + source to JAR
-  
-Use sbt-plugin: integrate in sbt build tool with addSbtPlugin() method
-
-Why JAR:
-sbt-plugin problems (v 0.1 uses older versions (v0.2 not), no output to console see github \#484)
-otherwise use sbt-plugin because of library management and replicability (everyone uses the same Stainless version configured in sbt)
-
-Reproduce results:
-prereq: Java 8 in /usr/lib/jvm/java-8-openjdk
-1. clone repo
-2. run ./code/bin/stainless.sh <path to code>
-   eg. ./code/bin/stainless.sh code/addition/src/main/scala/addition/reduced/
-}
-
-
-
-\subsection{stainless-sbt-plugin vs JAR}
-
-We can either use the sbt plugin or a JAR file to check code with Stainless.
 
 Invoking the JAR on our source code Stainless will verify it.  If we
 have a bigger project, this becomes really tricky, because we must
@@ -722,14 +691,38 @@ plugin does not always report errors.
 
 We use the jar for everything. 
 
+
+Use JAR:
+Download all library dependencies including dependencies of dependencies, pass libraries + source to JAR
+  
+Use sbt-plugin: integrate in sbt build tool with addSbtPlugin() method
+
+Why JAR:
+sbt-plugin problems (v 0.1 uses older versions (v0.2 not), no output to console see github \#484)
+otherwise use sbt-plugin because of library management and replicability (everyone uses the same Stainless version configured in sbt)
+
+\paragraph{Reproducing our Results.}
+
+Prerequisites:
+\begin{enumerate}
+\item Java 8 in /usr/lib/jvm/java-8-openjdk (Stainless requires and Scala recommends Java SE Development Kit 8. Newer Java versions won't work.)
+\end{enumerate}
+
+
+\begin{lstlisting}[language=bash]
+ clone repo
+ run ./code/bin/stainless.sh <path to code>
+   eg. ./code/bin/stainless.sh code/addition/src/main/scala/addition/reduced/
+\end{lstlisting}
+
+
+
 \subsection{Integration into Bitcoin-S}
 
 During this work, Stainless updated the sbt plugin to support sbt
 1.2.8 from 0.13.17 and Scala 2.12.8 from 2.11.12.  So this section
 might be out of date now.
 
-Stainless requires and Scala recommends Java SE Development Kit 8.
-Newer Java versions won't work.
 
 To use the latest version of the sbt tool you have to build it
 locally.  You can run \texttt{sbt universal:stage} in the cloned
@@ -806,17 +799,8 @@ The open
 \href{https://github.com/epfl-lara/stainless/issues/484}{issue 484 on
   GitHub} might describe exactly this error.
 
-Now we can finally run Stainless on our code.  But this leads us to
-the next findings.  We must rewrite most of the code, as described in
-the previous chapters.
 
 
-\begin{itemize}
-\item clone our repo
-\item jar vs sbt, you can use both
-\item contains a stainless jar
-\item call the script blahblah
-\end{itemize}
 
 
 \section{NumberType.scala}
