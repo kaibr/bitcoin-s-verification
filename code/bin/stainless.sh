@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 
+JAVA_VER=$(java -version 2>&1 | head -1 | cut -d'"' -f2 | sed '/^1\./s///' | cut -d'.' -f1)
+
+if [ $JAVA_VER != 8 ]; then
+  echo "You are using Java $JAVA_VER. It is recommended to use version 8."
+fi
+
 if [ "$1" == "" ]; then
   echo "Missing path parameter. Usage: stainless.sh <path to code>"
   echo "Taking default value '.'"
