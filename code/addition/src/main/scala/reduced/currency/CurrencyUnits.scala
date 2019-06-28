@@ -1,6 +1,6 @@
-package addition.reduced.currency
+package reduced.currency
 
-import addition.reduced.number.{BaseNumbers, Int64}
+import reduced.number.{BaseNumbers, Int64}
 
 sealed abstract class CurrencyUnit {
   type A

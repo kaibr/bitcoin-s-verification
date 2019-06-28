@@ -1,4 +1,4 @@
-package addition.modified.number
+package verified.number
 
 /**
   * This abstract class is meant to represent a signed and unsigned number in C

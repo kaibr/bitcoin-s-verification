@@ -1,6 +1,6 @@
-package addition.modified.currency
+package allgreen.currency
 
-import addition.modified.number.{BaseNumbers, Int64}
+import allgreen.number.{BaseNumbers, Int64}
 import stainless.lang._
 
 sealed abstract class CurrencyUnit {
