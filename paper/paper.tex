@@ -793,14 +793,19 @@ the previous chapters.
 \end{itemize}
 
 
+\section{NumberType.scala}
+\lstinputlisting[style=scala]{../code/addition/src/main/scala/addition/reduced/number/NumberType.scala}
+
+\section{CurrencyUnits.scala}
+\lstinputlisting[style=scala]{../code/addition/src/main/scala/addition/reduced/currency/CurrencyUnits.scala}
+
 
 \section{Code Transformations} 
 
 Here we see in detail how to transform the bitcoin-s code into the
 Scala fragment supported by Stainless. All subsections start with the
-code on which Stainless is called, followed by the Stainless error
-message(s) and finally a description of the changes we make to the
-code.
+Stainless error message(s) and finally a description of the changes we
+make to the code.
 
 We claim that all transformations are equivalent in the sense that if
 the addition-with-zero property holds for the transformed code, then
@@ -809,8 +814,6 @@ it also holds for the code before the transformation.
 
 \subsection{Inheriting Objects}
 
-\lstinputlisting[style=scala]{../code/addition/src/main/scala/addition/reduced/number/NumberType.scala}
-\lstinputlisting[style=scala]{../code/addition/src/main/scala/addition/reduced/currency/CurrencyUnits.scala}
 
 \begin{lstlisting}[style=stainless]
 [ Error  ] number/NumberType.scala:65:1: Objects cannot extend classes or implement traits, use a case object instead
@@ -934,623 +937,192 @@ and replace T by Int64 in lines 25-27.
 
 \subsection{Missing Member \texttt{bigInteger} in BigInt}
 
-KAI CONTINUE HERE
 
-\todo{Ramon is .bigInteger missing in Stainless?}
-
-Stainless output:
 \begin{lstlisting}[style=stainless]
 [ Error  ] number/NumberType.scala:14:22: Unknown call to bigInteger on Number.this.toBigInt (BigInt) with arguments List() of type List()
             def toLong: Long = toBigInt.bigInteger.longValueExact()
                               ^^^^^^^^^^^^^^^^^^^
 \end{lstlisting}
+\todo{stainless error emssage missing}
 
-\todo{kai This does not change semantic}
+The Scala class BigInt is essentially a wrapper around
+java.math.BigInteger. BigInt has a member bigInteger which is the
+underlying instance of the Java class. The Java class has a method
+longValueExact which returns a long only if the BigInteger fits into a
+long, otherwise throws exception. Stainless does not support Java
+classes and in particular its BigInt has no member bigInteger.
 
-Now that we do not depend on toLong anymore lets just remove it from out code.
-
-Before:
-\begin{lstlisting}[style=scala]
-sealed abstract class Satoshis extends CurrencyUnit {
-  override def satoshis: Satoshis = this
-
-  def toBigInt: BigInt = underlying.toBigInt
-
-  def toLong: Long = underlying.toLong
-
-  def ==(satoshis: Satoshis): Boolean = underlying == satoshis.underlying
-}  
-\end{lstlisting}
-
-After:
-\begin{lstlisting}[style=scala]
-sealed abstract class Satoshis extends CurrencyUnit {
-  override def satoshis: Satoshis = this
-
-  def toBigInt: BigInt = underlying.toBigInt
-
-  def ==(satoshis: Satoshis): Boolean = underlying == satoshis.underlying
-}  
-\end{lstlisting}
-
-And before:
-\begin{lstlisting}[style=scala]
-sealed abstract class Number {
-  type A = BigInt
-
-  /** The underlying scala number used to to hold the number */
-  protected def underlying: A
-
-  def toLong: Long = toBigInt.bigInteger.longValueExact()
-  def toBigInt: BigInt = underlying
-
-  /**
-    * This is used to determine the valid amount of bytes in a number
-    * for instance a UInt8 has an andMask of 0xff
-    * a UInt32 has an andMask of 0xffffffff
-    */
-  def andMask: BigInt
-
-  /** Factory function to create the underlying T, for instance a UInt32 */
-  def apply: A => Int64
-
-  def +(num: Int64): Int64 = apply(checkResult(underlying + num.underlying))
-
-  /**
-    * Checks if the given result is within the range
-    * of this number type
-    */
-  private def checkResult(result: BigInt): A = {
-    require((result & andMask) == result,
-      "Result was out of bounds, got: " + result)
-    result
-  }
-}  
-\end{lstlisting}
-
-After:
-\begin{lstlisting}[style=scala]
-sealed abstract class Number {
-  type A = BigInt
-
-  /** The underlying scala number used to to hold the number */
-  protected def underlying: A
-
-  def toBigInt: BigInt = underlying
-
-  /**
-    * This is used to determine the valid amount of bytes in a number
-    * for instance a UInt8 has an andMask of 0xff
-    * a UInt32 has an andMask of 0xffffffff
-    */
-  def andMask: BigInt
-
-  /** Factory function to create the underlying T, for instance a UInt32 */
-  def apply: A => Int64
-
-  def +(num: Int64): Int64 = apply(checkResult(underlying + num.underlying))
-
-  /**
-    * Checks if the given result is within the range
-    * of this number type
-    */
-  private def checkResult(result: BigInt): A = {
-    require((result & andMask) == result,
-      "Result was out of bounds, got: " + result)
-    result
-  }
-}
-\end{lstlisting}
+However, our code never calls toLong anymore, so we just remove it. We
+replace line 14 in NumberType.scala and line 28 in CurrencyUnits.scala
+by an empty line.
 
 
 \subsection{Type Member}
 
-Stainless output:
 \begin{lstlisting}[style=stainless]
 [Warning ] number/NumberType.scala:9:3: Could not extract tree in class: type A = BigInt (class scala.reflect.internal.Trees$TypeDef)
               type A = BigInt
               ^^^^^^^^^^^^^^^
 \end{lstlisting}
 
-\todo{kai this does not change semantic}
+Our version of Stainless does not support type members. We just
+replace all occurrence of A with BigInt, since A is never overwritten
+in an implementing class.
 
-Before:
-\begin{lstlisting}[style=scala]
-sealed abstract class Number {
-  type A = BigInt
+We remove line 9 in NumberType.scala and replace A by BigInt in lines
+12, 25, 33 and 50.
 
-  /** The underlying scala number used to to hold the number */
-  protected def underlying: A
+In the mean time Stainless has implemented support for type member
+\cite{Stainless:pull470}.  Since version 0.2 verification should
+succeed without this change.
 
-  def toBigInt: BigInt = underlying
-
-  /** Factory function to create the underlying T, for instance a UInt32 */
-  def apply: A => Int64
-
-  def +(num: Int64): Int64 = apply(checkResult(underlying + num.underlying))
-
-  /**
-    * Checks if the given result is within the range
-    * of this number type
-    */
-  private def checkResult(result: BigInt): A = {
-    require(
-          result <= BigInt("9223372036854775807")
-      && result >= BigInt("-9223372036854775808"))
-    result
-  }
-}
-
-/**
-  * Represents a signed number in our number system
-  * Instances of this is [[Int64]]
-  */
-sealed abstract class SignedNumber extends Number
-
-/**
-  * Represents a int64_t in C
-  */
-sealed abstract class Int64 extends SignedNumber {
-  override def apply: A => Int64 = Int64(_)
-}  
-\end{lstlisting}
-
-After:
-\begin{lstlisting}[style=scala]
-sealed abstract class Number {
-  /** The underlying scala number used to to hold the number */
-  protected def underlying: BigInt
-
-  def toBigInt: BigInt = underlying
-
-  /** Factory function to create the underlying T, for instance a UInt32 */
-  def apply: BigInt => Int64
-
-  def +(num: Int64): Int64 = apply(checkResult(underlying + num.underlying))
-
-  /**
-    * Checks if the given result is within the range
-    * of this number type
-    */
-  private def checkResult(result: BigInt): BigInt = {
-    require(
-         result <= BigInt("9223372036854775807")
-      && result >= BigInt("-9223372036854775808"))
-    result
-  }
-}
-
-/**
-  * Represents a signed number in our number system
-  * Instances of this is [[Int64]]
-  */
-sealed abstract class SignedNumber extends Number
-
-/**
-  * Represents a int64_t in C
-  */
-sealed abstract class Int64 extends SignedNumber {
-  override def apply: BigInt => Int64 = Int64(_)
-}
-\end{lstlisting}
-
-This is easy.
-We just replace all occurrence of A with BigInt, since A is not overwritten in an implementing class.
-This is not the exact same code, because an implementing class can not override A anymore but that's fine for our verification.
-
-This was a missing feature in Stainless that was fixed on Mai 28, 2019 with \href{https://github.com/epfl-lara/stainless/pull/470}{pull request 470} on GitHub.
-Now it should work without this change.
 
 
 \subsection{Missing Bitwise-And Method on BigInt}
-\label{sec:bound_check}
 
-Stainless output:
 \begin{lstlisting}[style=stainless]
-[ Error  ] number/NumberType.scala:33:14: Unknown call to & on result (BigInt) with arguments List(Number.this.andMask) of type List(BigInt)
+[ Error  ] number/NumberType.scala:34:14: Unknown call to & on result (BigInt) with arguments List(Number.this.andMask) of type List(BigInt)
               require((result & andMask) == result,
                       ^^^^^^^^^^^^^^^^
 \end{lstlisting}
 
-\todo{kai here we do not know if it changes semantic}
+Contrary to Scala BigInt, the Stainless BigInt class does not support
+bitwise operations, in particular not the \&-method for bitwise and.
 
-Due to the restrictions on BigInt, we can not use the \& function either.
-Before:
+The bitwise and with the andMask on line 34 is a bounds check.  It
+checks if the result parameter is in range of the specified type,
+which in our case is the hard coded Int64.
+
+So, we replace the \& mask with a check whether the result
+is in range of Long.MinValue and Long.MaxValue, because Int64 has the
+same 64-bit range as Long.  
+
+We replace lines 34-35 by the following, squeezed into two lines to
+preserve line numbers. Note that the BigInt constructor requires a
+literal:
+
 \begin{lstlisting}[style=scala]
-sealed abstract class Number {
-  type A = BigInt
-
-  /** The underlying scala number used to to hold the number */
-  protected def underlying: A
-
-  def toBigInt: BigInt = underlying
-
-  /**
-    * This is used to determine the valid amount of bytes in a number
-    * for instance a UInt8 has an andMask of 0xff
-    * a UInt32 has an andMask of 0xffffffff
-    */
-  def andMask: BigInt
-
-  /** Factory function to create the underlying T, for instance a UInt32 */
-  def apply: A => Int64
-
-  def +(num: Int64): Int64 = apply(checkResult(underlying + num.underlying))
-
-  /**
-    * Checks if the given result is within the range
-    * of this number type
-    */
-  private def checkResult(result: BigInt): A = {
-    require((result & andMask) == result,
+require(result <= BigInt("9223372036854775807")  
+  && result >= BigInt("-9223372036854775808"),
       "Result was out of bounds, got: " + result)
-    result
-  }
-}
-
-/**
-  * Represents a signed number in our number system
-  * Instances of this is [[Int64]]
-  */
-sealed abstract class SignedNumber extends Number
-
-/**
-  * Represents a int64_t in C
-  */
-sealed abstract class Int64 extends SignedNumber {
-  override def apply: A => Int64 = Int64(_)
-  override def andMask = 0xffffffffffffffffL
-}
 \end{lstlisting}
 
-After:
-\begin{lstlisting}[style=scala]
-sealed abstract class Number {
-  type A = BigInt
 
-  /** The underlying scala number used to to hold the number */
-  protected def underlying: A
+\todo{kai here we do not know if it changes semantic. ramon: oh, we don't?}
 
-  def toBigInt: BigInt = underlying
-
-  /** Factory function to create the underlying T, for instance a UInt32 */
-  def apply: A => Int64
-
-  def +(num: Int64): Int64 = apply(checkResult(underlying + num.underlying))
-
-  /**
-    * Checks if the given result is within the range
-    * of this number type
-    */
-  private def checkResult(result: BigInt): A = {
-    require(
-          result <= BigInt("9223372036854775807")
-      && result >= BigInt("-9223372036854775808"),
-      "Result was out of bounds, got: " + result)
-    result
-  }
-}
-
-/**
-  * Represents a signed number in our number system
-  * Instances of this is [[Int64]]
-  */
-sealed abstract class SignedNumber extends Number
-
-/**
-  * Represents a int64_t in C
-  */
-sealed abstract class Int64 extends SignedNumber {
-  override def apply: A => Int64 = Int64(_)
-}
-\end{lstlisting}
-
-This is a bounds check.
-It checks if the result of the addition is in range of the specified type, which is now the hard coded Int64.
-
-So, we can replace the \& mask with a bound check whether the result is in range of Long.MinValue and Long.MaxValue, because Int64 has the same 64-bit range as Long.
-Again the code gets a bit more static and it's not the exact same code anymore.
-
-Running Stainless produces again new errors.
 
 
 \subsection{Inner Class in Case Object}
 
-Stainless output:
 \begin{lstlisting}[style=stainless]
-[Warning ] currency/CurrencyUnits.scala:36:3: Could not extract tree in class: case private class SatoshisImpl extends Satoshis with Product with Serializable {
+[Warning ] number/NumberType.scala:66:3: Could not extract tree in class: case private class Int64Impl extends Int64 with Product with Serializable {
+...
+[Warning ] } (class scala.reflect.internal.Trees$ClassDef)
+              private case class Int64Impl(underlying: BigInt) extends Int64 {
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^...
+...
+[Warning ] currency/CurrencyUnits.scala:42:3: Could not extract tree in class: case private class SatoshisImpl extends Satoshis with Product with Serializable {
 ...
 [Warning ] } (class scala.reflect.internal.Trees$ClassDef)
               private case class SatoshisImpl(underlying: Int64) extends Satoshis
               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 \end{lstlisting}
 
-And:
-\begin{lstlisting}[style=stainless]
-[Warning ] number/NumberType.scala:59:3: Could not extract tree in class: case private class Int64Impl extends Int64 with Product with Serializable {
-...
-[Warning ] } (class scala.reflect.internal.Trees$ClassDef)
-              private case class Int64Impl(underlying: BigInt) extends Int64 {
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^...
-\end{lstlisting}
+Stainless does not support inner classes in a case object. Bitcoin-s
+uses this a lot to separate the class \todo{ramon: i don't understand} from its implementation.
 
-Stainless can not extract the private class inside the object.
-Bitcoin-S uses this a lot, because they separate the class from its implementation.
+This is easy to fix. We just move the inner classes out of the case objects. They do
+not interfere with any other code.
 
-\todo{kai this does not change semantic}
-
-Before:
-\begin{lstlisting}[style=scala]
-case object Satoshis extends BaseNumbers[Satoshis] {
-  val min = Satoshis(Int64.min)
-  val max = Satoshis(Int64.max)
-  val zero = Satoshis(Int64.zero)
-  val one = Satoshis(Int64.one)
-
-  def apply(int64: Int64): Satoshis = SatoshisImpl(int64)
-
-  private case class SatoshisImpl(underlying: Int64) extends Satoshis
-}
-\end{lstlisting}
-
-After:
-\begin{lstlisting}[style=scala]
-case object Satoshis extends BaseNumbers[Satoshis] {
-
-  val min = Satoshis(Int64.min)
-  val max = Satoshis(Int64.max)
-  val zero = Satoshis(Int64.zero)
-  val one = Satoshis(Int64.one)
-
-  def apply(int64: Int64): Satoshis = SatoshisImpl(int64)
-}
-
-private case class SatoshisImpl(underlying: Int64) extends Satoshis
-\end{lstlisting}
-
-And before:
-\begin{lstlisting}[style=scala]
-case object Int64 extends BaseNumbers[Int64] {
-  private case class Int64Impl(underlying: BigInt) extends Int64 {
-    require(underlying >= -9223372036854775808L,
-      "Number was too small for a int64, got: " + underlying)
-    require(underlying <= 9223372036854775807L,
-      "Number was too big for a int64, got: " + underlying)
-  }
-
-  lazy val zero = Int64(0)
-  lazy val one = Int64(1)
-
-  lazy val min = Int64(-9223372036854775808L)
-  lazy val max = Int64(9223372036854775807L)
-
-  def apply(long: Long): Int64 = Int64(BigInt(long))
-
-  def apply(bigInt: BigInt): Int64 = Int64Impl(bigInt)
-}
-\end{lstlisting}
-
-After:
-\begin{lstlisting}[style=scala]
-case object Int64 extends BaseNumbers[Int64] {
-  lazy val zero = Int64(0)
-  lazy val one = Int64(1)
-
-  lazy val min = Int64(-9223372036854775808L)
-  lazy val max = Int64(9223372036854775807L)
-
-  def apply(long: Long): Int64 = Int64(BigInt(long))
-
-  def apply(bigInt: BigInt): Int64 = Int64Impl(bigInt)
-}
-
-private case class Int64Impl(underlying: BigInt) extends Int64 {
-  require(underlying >= -9223372036854775808L,
-    "Number was too small for a int64, got: " + underlying)
-  require(underlying <= 9223372036854775807L,
-    "Number was too big for a int64, got: " + underlying)
-}
-\end{lstlisting}
-
-This is easy to fix.
-We just extract the private class out of the object.
-This is not exactly the same code, because other classes in the same file could now access the private class.
-But for our property it does not change anything.
-
-Now we get some weird warnings about require.
+We remove lines 66-71 in NumberType.scala and insert them at the end of the file.
+We remove line 42 in CurrencyUnits.scala and insert it at the end of the file.
 
 
 \subsection{Message Parameter in Require}
 
-Stainless output:
 \begin{lstlisting}[style=stainless]
-[Warning ] number/NumberType.scala:9:3: Could not extract tree in class: type A = BigInt (class scala.reflect.internal.Trees$TypeDef)
-          type A = BigInt
-          ^^^^^^^^^^^^^^^
-[Warning ] number/NumberType.scala:71:3: Could not extract tree in class: scala.this.Predef.require(Int64Impl.this.underlying.>=(math.this.BigInt.long2bigInt(-9223372036854775808L)), "Number was too small for a int64, got: ".+(Int64Impl.this.underlying)) (class scala.reflect.internal.Trees$Apply)
+[Warning ] number/NumberType.scala:67:3: Could not extract tree in class: scala.this.Predef.require(Int64Impl.this.underlying.>=(math.this.BigInt.long2bigInt(-9223372036854775808L)), "Number was too small for a int64, got: ".+(Int64Impl.this.underlying)) (class scala.reflect.internal.Trees$Apply)
           require(underlying >= -9223372036854775808L,
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^...
-[Warning ] number/NumberType.scala:73:3: Could not extract tree in class: scala.this.Predef.require(Int64Impl.this.underlying.<=(math.this.BigInt.long2bigInt(9223372036854775807L)), "Number was too big for a int64, got: ".+(Int64Impl.this.underlying)) (class scala.reflect.internal.Trees$Apply)
+[Warning ] number/NumberType.scala:69:3: Could not extract tree in class: scala.this.Predef.require(Int64Impl.this.underlying.<=(math.this.BigInt.long2bigInt(9223372036854775807L)), "Number was too big for a int64, got: ".+(Int64Impl.this.underlying)) (class scala.reflect.internal.Trees$Apply)
           require(underlying <= 9223372036854775807L,
           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^...
 [ Error  ] checkResult$0 depends on missing dependencies: require$1.
 \end{lstlisting}
 
-Seems like Stainless does not support the second string parameter of require or at least it throws a warning about it.
-We can safely remove the string parameters from the requires, since they only serve as error messages.
+Here the require(condition, message) is used as an assertion: if the
+condition is false the fail with message.  Stainless does not support
+the message parameter of require.  For the verification we can simply
+remove that parameter.
 
-\todo{kai this does not change semantic}
-
-Before:
-\begin{lstlisting}[style=scala]
-private case class Int64Impl(underlying: BigInt) extends Int64 {
-  require(underlying >= -9223372036854775808L,
-    "Number was too small for a int64, got: " + underlying)
-  require(underlying <= 9223372036854775807L,
-    "Number was too big for a int64, got: " + underlying)
-}
-\end{lstlisting}
-
-After:
-\begin{lstlisting}[style=scala]
-private case class Int64Impl(underlying: BigInt) extends Int64 {
-  require(underlying >= -9223372036854775808L)
-  require(underlying <= 9223372036854775807L)
-}
-\end{lstlisting}
-
-And before:
-\begin{lstlisting}[style=scala]
-sealed abstract class Number {
-  type A = BigInt
-
-  /** The underlying scala number used to to hold the number */
-  protected def underlying: A
-
-  def toBigInt: BigInt = underlying
-
-  /** Factory function to create the underlying T, for instance a UInt32 */
-  def apply: A => Int64
-
-  def +(num: Int64): Int64 = apply(checkResult(underlying + num.underlying))
-
-  /**
-    * Checks if the given result is within the range
-    * of this number type
-    */
-  private def checkResult(result: BigInt): A = {
-    require(
-         result <= BigInt("9223372036854775807")
-      && result >= BigInt("-9223372036854775808"),
-      "Result was out of bounds, got: " + result)
-    result
-  }
-}
-\end{lstlisting}
-
-After:
-\begin{lstlisting}[style=scala]
-sealed abstract class Number {
-  type A = BigInt
-
-  /** The underlying scala number used to to hold the number */
-  protected def underlying: A
-
-  def toBigInt: BigInt = underlying
-
-  /** Factory function to create the underlying T, for instance a UInt32 */
-  def apply: A => Int64
-
-  def +(num: Int64): Int64 = apply(checkResult(underlying + num.underlying))
-
-  /**
-    * Checks if the given result is within the range
-    * of this number type
-    */
-  private def checkResult(result: BigInt): A = {
-    require(
-          result <= BigInt("9223372036854775807")
-      && result >= BigInt("-9223372036854775808"))
-    result
-  }
-}
-\end{lstlisting}
-
-A new error appears.
 
 
 \subsection{Missing Implicit Long to BigInt Conversion}
 
-Stainless output:
 \begin{lstlisting}[style=stainless]
 [ Error  ] inv$4 depends on missing dependencies: long2bigInt$0.
-[ Error  ] apply$14 depends on missing dependencies: BigInt$0, apply$15.
 \end{lstlisting}
 
-This error is hard to understand, but we can see that there is a missing Long to BigInt conversion.
-So we search for all Long values in the code.
+This error message does not specify a line number and it is not clear
+what ``inv'' is. However, the Scala BigInt has implict conversions
+from Long and they are missing in the Stainless BigInt.
 
-\todo{kai this does not change semantic}
 
-Before:
+
+We replace the two require clauses at lines 67 and following in NumberType.scala
+
 \begin{lstlisting}[style=scala]
-private case class Int64Impl(underlying: BigInt) extends Int64 {
   require(underlying >= -9223372036854775808L)
   require(underlying <= 9223372036854775807L)
-}
 \end{lstlisting}
 
-After:
+by:
 \begin{lstlisting}[style=scala]
-private case class Int64Impl(underlying: BigInt) extends Int64 {
-  require(underlying >= BigInt("-9223372036854775808"))
-  require(underlying <= BigInt("9223372036854775807"))
-}  
+  require(underlying >= BigInt(-9223372036854775808L))
+  require(underlying <= BigInt(9223372036854775807L))
 \end{lstlisting}
 
-And before:
+We also replace lines 76 and 77
 \begin{lstlisting}[style=scala]
-case object Int64 extends BaseNumbers[Int64] {
-  lazy val zero = Int64(0)
-  lazy val one = Int64(1)
-
   lazy val min = Int64(-9223372036854775808L)
   lazy val max = Int64(9223372036854775807L)
-
-  def apply(long: Long): Int64 = Int64(BigInt(long))
-
-  def apply(bigInt: BigInt): Int64 = Int64Impl(bigInt)
-}
 \end{lstlisting}
 
-After:
+by:
 \begin{lstlisting}[style=scala]
-case object Int64 extends BaseNumbers[Int64] {
-  lazy val zero = Int64(0)
-  lazy val one = Int64(1)
-
-  lazy val min = Int64(BigInt("-9223372036854775808"))
-  lazy val max = Int64(BigInt("9223372036854775807"))
-
-  def apply(bigInt: BigInt): Int64 = Int64Impl(bigInt)
+  lazy val min = Int64(BigInt(-9223372036854775808L))
+  lazy val max = Int64(BigInt(9223372036854775807L))
 }
 \end{lstlisting}
-
-Looks like it can not compare a BigInt with a Long value.
-We can easily convert this Long value to a BigInt with a string literal parameter by passing these numbers as strings to the BigInt constructor.
-
-Finally, we get some output from Stainless about the verification in the code.
-
-\begin{lstlisting}[style=stainless]
-[  Info  ]  - Checking cache: 'adt invariant' VC for apply @33:39...
-[  Info  ]  - Checking cache: 'adt invariant' VC for apply @62:38...
-[  Info  ] Cache miss: 'adt invariant' VC for apply @62:38...
-[  Info  ] Cache hit: 'adt invariant' VC for apply @33:39...
-[  Info  ]  - Now solving 'adt invariant' VC for apply @62:38...
-[  Info  ]  - Result for 'adt invariant' VC for apply @62:38:
-[Warning ]  => INVALID
-[Warning ] Found counter-example:
-[Warning ]   bigInt: BigInt -> -9223372036854775809
-[  Info  ]  - Checking cache: 'precond. (call checkResult(thiss, underlying(thiss) + u ...)' VC for + @17:36...
-[  Info  ] Cache miss: 'precond. (call checkResult(thiss, underlying(thiss) + u ...)' VC for + @17:36...
-[  Info  ]  - Now solving 'precond. (call checkResult(thiss, underlying(thiss) + u ...)' VC for + @17:36...
-[  Info  ]  - Result for 'precond. (call checkResult(thiss, underlying(thiss) + u ...)' VC for + @17:36:
-[Warning ]  => INVALID
-[Warning ] Found counter-example:
-[Warning ]   num: Number   -> Int64Impl(9223372036854775807)
-[Warning ]   thiss: Number -> Int64Impl(1)
-\end{lstlisting}
-
-This shows that there is an invalid specification in checkResult and Stainless prints a counterexample for it.
-
-Let's ignore this for a moment and write the specification for the \nameref{property_2}.
 
 
 \subsection{Missing BigInt Constructor with Long Argument}
-\todo{Split code from above}
 
+\begin{lstlisting}[style=stainless]
+[ Error  ] apply$14 depends on missing dependencies: BigInt$0, apply$15.
+\end{lstlisting}
 
+Here again, the Scala BigInt has a constructor with a Long argument
+which is missing in the Stainless BigInt.
 
+We simply replace the Long values in a BigInt constructor call with a string
+literal.
+
+The lines from the previous transformation respectively change into
+the following:
+
+\begin{lstlisting}[style=scala]
+  require(underlying >= BigInt("-9223372036854775808"))
+  require(underlying <= BigInt("9223372036854775807"))
+\end{lstlisting}
+
+and
+
+\begin{lstlisting}[style=scala]
+  lazy val min = Int64(BigInt("-9223372036854775808"))
+  lazy val max = Int64(BigInt("9223372036854775807"))
+}
+\end{lstlisting}
 
 
 
