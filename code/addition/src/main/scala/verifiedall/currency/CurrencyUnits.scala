@@ -1,6 +1,6 @@
-package allgreen.currency
+package verifiedall.currency
 
-import allgreen.number.{BaseNumbers, Int64}
+import verifiedall.number.{BaseNumbers, Int64}
 import stainless.lang._
 
 sealed abstract class CurrencyUnit {
