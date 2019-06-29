@@ -422,25 +422,47 @@ addition-with-zero property.
 
 \section{The Addition-with-Zero Property}
 
+It is of course a crucial property we are verifying here: if zero
+satoshis were credited to your account, you would not want your
+balance to change! It is also the simplest meaningful property to
+verify that we can think of. However, the code involved in performing
+an addition of two satoshi amounts in bitcoin-s is non-trivial. The
+reason for that is a pecularity of consensus code: agreement with the
+majority is more important than correctness, whatever correctness
+might mean. The most widely used bitcoin implementation by far is the
+reference implementation Bitcoin Core, written in C++. For consensus
+code, bitcoin-s has little choice but to be in strict agreement with
+the reference implementation. To achieve that, it implements C-like
+data types in Scala and then implements functionality using those
+C-like data types. For example, the Satoshis class, which is used to
+represent an amount of satoshis, is implemented using the class Int64
+which represents the C-type \texttt{int64\_t}.
 
-In Bitcoin-S there is a class \texttt{Satoshis} representing an amount of bitcoins.
+\paragraph{Extracting the relevant Code} The relevant code for the
+addition of satoshis is in two files: \texttt{CurrencyUnits.scala} and
+\texttt{NumberType.scala}.
 
-The additions' signature looks like this:
-\begin{lstlisting}[style=scala]
-  +(c: CurrencyUnit): CurrencyUnit
-\end{lstlisting}
+\begin{figure}
+\lstinputlisting[style=scala]{../code/addition/src/main/scala/reduced-nocomments/number/NumberType.scala}
+  \caption{Extracted Code from NumberType.scala}
+  \label{fig:numbertype}
+\end{figure}
 
+\begin{figure}
+\lstinputlisting[style=scala]{../code/addition/src/main/scala/reduced-nocomments/currency/CurrencyUnits.scala}
+  \caption{Extracted Code from CurrencyUnits.scala}
+  \label{fig:currencyunits}
+\end{figure}
 
-\paragraph{Extracting the relevant Code} The relevant code is in two
-files: \texttt{CurrencyUnits.scala} and \texttt{NumberType.scala}.
-
-From those files we removed all code that is not needed for our
-verification. For example, we removed all number types except for
-Int64 (so Int32, UInt64, etc.) because we do not use them. We also
-removed the superclasses Factory and NetworkElement of CurrencyUnit
-and Number, respectively, because the inherited members are not used by
-the relevant code. Also, we removed all binary operations on Number
-that are not used, like subtraction and multiplication. 
+From those files we removed all code that is not needed for the
+verification of our property.  For example, we removed all number
+types except for Int64 (so Int32, UInt64, etc.) because they are not
+used. We also removed the superclasses Factory and NetworkElement of
+CurrencyUnit and Number, respectively, because the inherited members
+are not used. Also, we removed all binary operations on Number that
+are not used, like subtraction and multiplication. The extracted code
+is shown in Figure~\ref{fig:numbertype} and
+Figure~\ref{fig:currencyunits}.
 
 
 \paragraph{Transforming the Code.}
@@ -448,49 +470,21 @@ that are not used, like subtraction and multiplication.
 When we run Stainless on this code (without any properties to prove),
 it throws the following errors: describe errors: no support for
   abstract types, unsupported arguments for the BigInt constructor,
-  unsupported inheritance for objects.}
+  unsupported inheritance for objects.
 
 \todo{...}
 
 \paragraph{The Specification.}
 
-
-
 We can use equals (==) directly on Satoshis, because it is a case class.
-
-Before:
-\begin{lstlisting}[style=scala]
-sealed abstract class CurrencyUnit {
-  def satoshis: Satoshis
-
-  def !=(c: CurrencyUnit): Boolean = !(this == c)
-
-  def ==(c: CurrencyUnit): Boolean = satoshis == c.satoshis
-
-  def +(c: CurrencyUnit): CurrencyUnit = {
-    Satoshis(satoshis.underlying + c.satoshis.underlying)
-  }
-
-  protected def underlying: Int64
-}
-\end{lstlisting}
 
 The addition will now look like this:
 \begin{lstlisting}[style=scala]
-sealed abstract class CurrencyUnit {
-  def satoshis: Satoshis
-
-  def !=(c: CurrencyUnit): Boolean = !(this == c)
-
-  def ==(c: CurrencyUnit): Boolean = satoshis == c.satoshis
-  
-  override def +(c: CurrencyUnit): CurrencyUnit = {
-    require(c.satoshis == Satoshis.zero)
+  def +(c: CurrencyUnit): CurrencyUnit = {
     Satoshis(satoshis.underlying + c.satoshis.underlying)
-  } ensuring(res => res.satoshis == this.satoshis)
-
-  protected def underlying: Int64
-}
+  } ensuring(res =>
+    (c.satoshis == Satoshis.zero) ==>
+      (res.satoshis == this.satoshis))
 \end{lstlisting}
 
 
@@ -578,6 +572,8 @@ the build file and every developer is on the same version again.
 
 However, currently there are some drawbacks.  For example the sbt
 plugin does not always report errors.
+use sbt-plugin because of library management and replicability (everyone uses the same Stainless version configured in sbt)
+
 
 We use the jar for everything. 
 
@@ -588,11 +584,11 @@ Download all library dependencies including dependencies of dependencies, pass l
 Use sbt-plugin: integrate in sbt build tool with addSbtPlugin() method
 
 Why JAR:
-sbt-plugin problems (v 0.1 uses older versions (v0.2 not), no output to console see github \#484)
-otherwise use sbt-plugin because of library management and replicability (everyone uses the same Stainless version configured in sbt)
+
+
 no sbt because
 
--- version conflicts
+-- version conflicts, stainless 0.1 uses older sbt version than bitcoin-s (v0.2 not)
 -- no output maybe \href{https://github.com/epfl-lara/stainless/issues/484}{issue 484 on
   GitHub}
 
