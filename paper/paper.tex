@@ -84,9 +84,9 @@
 \begin{abstract}
   We try to verify properties of the bitcoin-s library, a Scala
   implementation of parts of the Bitcoin protocol. We use the
-  Stainless verifier which supports programs in subset of Scala called
-  the \emph{Pure Scala Fragment}. We first try to verify the property
-  that regular transactions do not create new money. It turns out that
+  Stainless verifier which supports programs in a subset of Scala
+  called \emph{Pure Scala}. We first try to verify the property that
+  regular transactions do not create new money. It turns out that
   there is too much code involved that lies outside of the supported
   fragment to make this feasible. However, in the process we uncover
   and fix a bug in bitcoin-s. We then turn to a much simpler (and less
@@ -123,16 +123,19 @@ cryptocurrency each day \cite{BitcoinS:website}.
 \paragraph{The Stainless Verifier.} Stainless is the successor of the
 Leon verifier
 \cite{DBLP:conf/ecoop/BlancKKS13,DBLP:conf/pldi/VoirolKK15,DBLP:conf/pldi/BlancK15}
-and is developed at EPF Lausanne
-\cite{Stainless:github}. It is intended to be
-used by programmers without training in formal verification and thus
-allows to write specifications in Scala and focusses on counterexample
-finding in addition to proving correctness.
+and is developed at EPF Lausanne \cite{Stainless:github}. It is
+intended to be used by programmers without training in formal
+verification. To facilitate that, it accepts specifications written in
+the programming language itself (Scala). Also, it focusses on
+counterexample finding in addition to proving
+correctness. Counterexamples are useful to programmers while
+correctness proofs are not -- correctness is obvious or does not hold,
+and often both at the same time.
 
-The example in Figure~\ref{fig:factorial} from the Stainless documentation
-\cite{Stainless:documentation} demonstrates this. Notice how a
-precondition is specified using the function \emph{require} and a
-postcondition using \emph{ensuring}.
+The example in Figure~\ref{fig:factorial} adapted from the Stainless
+documentation \cite{Stainless:documentation} shows how the verifier is
+used. Notice how a precondition is specified using \emph{require} and
+a postcondition using \emph{ensuring}.
 
 \begin{figure}
 \begin{lstlisting}[style=scala]
@@ -148,15 +151,15 @@ postcondition using \emph{ensuring}.
 	\caption{Factorial program with specification}
 	\label{fig:factorial}
 \end{figure}
-Our program happens not to satisfy the specification. An overflow in
-the 32-bit Int leads to a negative result for the input 17, as
-Stainless reports in Figure~\ref{fig:failed}. Changing the type from
-Int to BigInt will result in a successful verification.
+Our program does not satisfy the specification. An overflow in the
+32-bit Int leads to a negative result for the input 17, as Stainless
+reports in Figure~\ref{fig:failed}. Changing the type from Int to
+BigInt will result in a successful verification.
 
 \begin{figure}
 	\centering
 		\includegraphics[width=\textwidth]{output1.png}
-	\caption{Output of Stainless verification for calculating factorial of Int number}
+	\caption{Stainless output for the factorial program}
 	\label{fig:failed}
 \end{figure}
 
@@ -178,12 +181,12 @@ features, such as using a (mutable) variable in a local scope of a
 function and while loops. They turn out not to be relevant for the
 current work.
 
-What will turn out to be more relevant are the following Scala
-features which Stainless does not support, such as: (concrete) class
-definitions, inheritance by objects, abstract type members, variance
-annotations and private inner classes.
+What will turn out to be more relevant are the Scala features which
+Stainless does not support, such as: (concrete) class definitions,
+inheritance by objects, abstract type members, and inner classes in
+case objects.
 
-In addition, Stainless has its own library of some core data types and
+Also, Stainless has its own library of some core data types and
 functions which need to be mapped correctly to functions inside of the
 SMT solver that Stainless ultimately relies on. Those data types in
 general do not have all the methods of the Scala data types. For
@@ -192,149 +195,21 @@ while the BigInt type in Stainless does not.
 
 \paragraph{Outline and Properties to Verify.} In the next section we
 try to verify the property that a regular (non-coinbase) transaction
-cannot generate new coins. We call it the \emph{no-inflation
+can not generate new coins. We call it the \emph{no-inflation
   property}. Trying to verify it, we uncover and fix a bug in the
 bitcoin-s library. We then find that there is too much code involved
 that lies outside of the supported fragment to currently make this
-verification feasible. Instead, we turn to a simpler property to
-verify. The simplest possible property we can think of is the fact
-that adding zero satoshis to a given amount of satoshis yields the
-given amount of satoshis. We call it the \emph{addition-with-zero
-  property} and we try to verify it in Section~3. Here as well we see
-that a significant part of the code lies outside of the supported
-fragment. However, after a series of equivalent transformations we
-arrive at code that we successfully verify.
+verification feasible. So we turn to a simpler property to verify. The
+simplest possible property we can think of is the fact that adding
+zero satoshis to a given amount of satoshis yields the given amount of
+satoshis. We call it the \emph{addition-with-zero property} and we try
+to verify it in Section~3. Here as well we see that a significant part
+of the code lies outside of the supported fragment. However, after a
+series of equivalent transformations we arrive at code that we
+successfully verify.
 
 
 \section{The No-Inflation Property}
-
-A crucial function for the verification of the no-inflation property
-is the \texttt{checkTransaction} function, shown in
-Figure~\ref{fig:checktrans}. To better understand it, we first see how
-to create a transaction.
-
-\paragraph{Creating a Transaction}
-
-% The bitcoin-s library has a bitcoin
-% transaction builder class with the following constructor:
-
-% \begin{lstlisting}[style=scala]
-% def apply(
-%       destinations: Seq[TransactionOutput],
-%       utxos: BitcoinTxBuilder.UTXOMap,
-%       feeRate: FeeUnit,
-%       changeSPK: ScriptPubKey,
-%       network: BitcoinNetwork): Future[BitcoinTxBuilder] = {...}
-% \end{lstlisting}
-
-% The purpose of the return type Future is not clear to us here, since
-% the constructor always returns a completed future. This might be for
-% future purposes.
-
-To create a transaction, we first need some coins -- an unspent
-transaction output. We could load an actual unspent transaction output
-from the bitcoin network, but we create one manually in order to see
-this process. So we first create an (invalid) transaction with one
-output in Figure~\ref{fig:prevtx}.
-
-\begin{figure}
-\begin{lstlisting}[style=scala]
-  val privKey = ECPrivateKey.freshPrivateKey
-  val creditingSPK = P2PKHScriptPubKey(pubKey = privKey.publicKey)
-
-  val amount = Satoshis(Int64(10000))
-
-  val utxo = TransactionOutput(currencyUnit = amount, scriptPubKey = creditingSPK)
-
-  val prevTx = BaseTransaction(
-    version = Int32.one,
-    inputs = List.empty,
-    outputs = List(utxo),
-    lockTime = UInt32.zero
-  )
-\end{lstlisting}
-  
-  \caption{Creating a transaction output to spend}
-  \label{fig:prevtx}
-\end{figure}
-
-We first create a keypair, then a lock script with its public key,
-then the amount of satoshis, then a transaction output (utxo) for that
-amount and locked with that script. Finally we create the actual
-transaction with that output and no inputs. Of course, that is not a
-valid transaction, because it creates coins out of nothing. In
-particular, checkTransaction(prevTx) is false.
-
-Now that we have a transaction output, we create a new transaction to
-spend it.
-
-First, we need some out points.  They point to outputs of previous
-transactions.  We use the index zero, because the previous transaction
-has only one output that becomes the first index zero.  If there were
-two previous outputs, the second output would become the index 1 and
-so on.
-\begin{figure}
-\begin{lstlisting}[style=scala]
-  val outPoint = TransactionOutPoint(prevTx.txId, UInt32.zero)
-
-  val utxoSpendingInfo = BitcoinUTXOSpendingInfo(
-    outPoint = outPoint,
-    output = utxo,
-    signers = List(privKey),
-    redeemScriptOpt = None,
-    scriptWitnessOpt = None,
-    hashType = HashType.sigHashAll
-  )
-
-  val utxos = List(utxoSpendingInfo)
-
-  val destinationAmount = Satoshis(Int64(5000))
-
-  val destinationSPK = P2PKHScriptPubKey(pubKey = ECPrivateKey.freshPrivateKey.publicKey)
-
-  val destinations = List(
-    TransactionOutput(currencyUnit = destinationAmount, scriptPubKey = destinationSPK)
-  )
-
-  val feeRate = SatoshisPerByte(Satoshis.one)
-
-  val networkParams = RegTest // some static values for testing
-
-  val txBuilderF: Future[BitcoinTxBuilder] = BitcoinTxBuilder(
-    destinations = destinations, // where to send the money
-    utxos = utxos,               // unspent transaction outputs
-    feeRate = feeRate,           // fee rate per byte
-    changeSPK = creditingSPK,    // where to send the change
-    network = networkParams      // bitcoin network information
-  )
-
-  val txF: Future[Transaction] = txBuilderF.flatMap(_.sign)
-
-  val tx: Transaction = Await.result(signedTxF, 1 second)
-\end{lstlisting}
-  \caption{Creating a transaction}
-  \label{fig:tx}
-\end{figure}
-
-This utxos are the inputs of our transaction.
-Second, we need destinations to spend the bitcoins to.
-For the sake of convenience we create only one.
-We spend 5000 satoshis to the newly created random public key.
-Finally, we define the fee rate in satoshis per one byte transaction
-size as well as some bitcoin network parameters.  The bitcoin network
-parameters are not important, so we use some static values normally
-used when testing.
-
-Now lets build the transaction with those data.
-Line one to seven creates a transaction builder which is then signed
-on line ten.  We can now use our transaction object on line twelve.
-For example, after calling \emph{hex} on it, we can send the returned
-string to the bitcoin network.
-
-
-\paragraph{Validating a Transaction}
-
-Bitcoin-S offers a function called \emph{checkTransaction} located in the ScriptInterpreter object.
 
 \begin{figure}
 \begin{lstlisting}[style=scala]
@@ -369,200 +244,217 @@ def checkTransaction(transaction: Transaction): Boolean = {
 }
 \end{lstlisting}
   
-  \caption{The \texttt{checkTransaction} function in the \texttt{ScriptInterpreter} object}
+  \caption{The \texttt{checkTransaction} function}
   \label{fig:checktrans}
 \end{figure}
 
-We can pass a transaction and it returns a Boolean indicating whether
-the transaction is valid or not.  So for example when we pass the
-transaction we built before the returned value would be true, because
-it's a valid transaction.  It might not be accepted by the bitcoin
-network but for a transaction on its own it's valid.  We can not check
-context with it, because we can only pass one transaction.
 
-There are several checks in checkTransaction.
-For example, it checks if there is either no input or no output.
-In this case we get false.
+A crucial function for the verification of the no-inflation property
+is the function which validates transactions: the
+\texttt{checkTransaction} function in the ScriptInterpreter object,
+shown in Figure~\ref{fig:checktrans}. It takes a transaction and if
+some basic checks succeed returns true, otherwise false. For example,
+one of those checks is that both the list of inputs and list of
+outputs need to be non-empty.
 
-The relevant part for the bug we found:
+To better understand the validation of a transaction in bitcoin-s, it
+is useful to review how transactions are represented and created.
+
+\paragraph{Creating a Transaction.} The code in this subsection is
+adapted from the bitcoin-s documentation. To create a transaction, we
+first need some coins -- an unspent transaction output. We could load
+an actual unspent transaction output from the bitcoin network, but we
+create one manually in order to see this process. So we first create
+an (invalid) transaction with one output in Figure~\ref{fig:prevtx}.
+
+\begin{figure}
 \begin{lstlisting}[style=scala]
-  val prevOutputTxIds = transaction.inputs.map(_.previousOutput.txId)
-  val noDuplicateInputs = prevOutputTxIds.distinct.size == prevOutputTxIds.size
+  val privKey = ECPrivateKey.freshPrivateKey
+  val creditingSPK = P2PKHScriptPubKey(pubKey = privKey.publicKey)
+
+  val amount = Satoshis(Int64(10000))
+
+  val utxo = TransactionOutput(currencyUnit = amount, scriptPubKey = creditingSPK)
+
+  val prevTx = BaseTransaction(
+    version = Int32.one,
+    inputs = List.empty,
+    outputs = List(utxo),
+    lockTime = UInt32.zero
+  )
 \end{lstlisting}
+  
+  \caption{Creating a transaction output to spend}
+  \label{fig:prevtx}
+\end{figure}
 
-It gathers all transaction ids referenced by the out points.  When we
-call \emph{distinct} on the returned list, we get a list with
-duplicate removed.  If the size of the new list is the same as the
-size of the old, we know that there was no duplicate transaction id,
-because, as said, distinct removes the duplicates.
+We first create a keypair, then a lock script with its public key,
+then the amount of satoshis, then a transaction output (utxo) for that
+amount and locked with that script. Finally we create the actual
+transaction with that output and no inputs. Of course, that is not a
+valid transaction, because it creates coins out of nothing. In
+particular, checkTransaction(prevTx) returns false, simply because the
+list of inputs is empty.
 
-
-
-
-\paragraph{Trying Stainless on the entire project.}
-
-\begin{itemize}
-\item result sbt: no output
-\item result jar: 
-\end{itemize}
-
-In order to verify a project, Stainless must be integrated into it.
-We can integrate it in an sbt project adding the Stainless Plugin 
-and the required resolver to pugins.sbt. 
-Another option to use Stainless is to import its libraries in a program code 
-and verify a program from command line using the pre-packaged Stainless JAR file 
-or using the Stainless script built from source.
-Trying to integrate Stainless in Bitcoin-S caused a lot of troubles,
-mainly because of version conflicts.  For more details see chapter
-\ref{chap:appendix_arb}.
-
-
-After integrating the Stainless plugin in the Bitcoin-S sbt project, 
-there were many errors because of the different sbt versions.  
-Some errors are described in the section 4.2.
-It takes too much time to fix them all so it should be easier to extract
-the classes needed for the \texttt{checkTransaction} function.
-
-\paragraph{Putting aside the No-Inflation Property.} Naively trying
-Stainless on the entire bitcoin-s codebase results in either no output
-(with sbt) or many errors (with jar). So we extract the relevant code
-to only verify that. However, the extracted code has more than 1500
-lines and liberally uses Scala features outside of the supported
-fragment.  We tried to transform the code into the supported fragment,
-but realize that a better approach is to first verify a simpler
-property with less code involved and then turn back to the
-no-inflation property with more experience. So we turn to the
-addition-with-zero property in the next section. \todo{explain}
-
-
-\paragraph{Fixing a Bug in Bitcoin-S}
-
-We can see that there is a bug in the checkTransaction function from
-before, recognized and fixed through this work.
-
-Here is the relevant code of checkTransaction again:
+\begin{figure}
 \begin{lstlisting}[style=scala]
-  val prevOutputTxIds = transaction.inputs.map(_.previousOutput.txId)
-  val noDuplicateInputs = prevOutputTxIds.distinct.size == prevOutputTxIds.size
+  val outPoint = TransactionOutPoint(prevTx.txId, UInt32.zero)
+
+  val utxoSpendingInfo = BitcoinUTXOSpendingInfo(
+    outPoint = outPoint,
+    output = utxo,
+    signers = List(privKey),
+    redeemScriptOpt = None,
+    scriptWitnessOpt = None,
+    hashType = HashType.sigHashAll
+  )
+
+  val utxos = List(utxoSpendingInfo)
+
+  val destinationAmount = Satoshis(Int64(5000))
+
+  val destinationSPK = P2PKHScriptPubKey(pubKey = ECPrivateKey.freshPrivateKey.publicKey)
+
+  val destinations = List(
+    TransactionOutput(currencyUnit = destinationAmount, scriptPubKey = destinationSPK)
+  )
+
+  val feeRate = SatoshisPerByte(Satoshis.one)
+
+  val networkParams = RegTest // some static values for testing
+
+  val txBuilderF: Future[BitcoinTxBuilder] = BitcoinTxBuilder(
+    destinations = destinations, 
+    utxos = utxos,               
+    feeRate = feeRate,           
+    changeSPK = creditingSPK,    // where to send the change
+    network = networkParams      
+  )
+
+  val txF: Future[Transaction] = txBuilderF.flatMap(_.sign)
+
+  val tx: Transaction = Await.result(txF, 1 second)
 \end{lstlisting}
+  \caption{Creating a transaction}
+  \label{fig:tx}
+\end{figure}
 
-What happens if we have two TransactionOutPoints (previousOutputs) with a different index but referencing the same Transaction ID (txId)?
+Now that we have a transaction output, we create a transaction to
+spend it.
 
-According to the Bitcoin protocol this is possible.  A transaction can
-have multiple outputs that should be referenceable by the next
-transaction.  So this is clearly a bug.
+First, we need a so-called \emph{out point}, which points to an output
+of a previous transaction. The second parameter is the index of the
+referenced output. Here we use zero because the previous transaction
+has only one output (with index zero).
 
-What should not be possible is a transaction referencing the same
-output twice.  This bug occurred in Bitcoin Core known as
-CVE-2018–17144 which was patched on September 18,
-2018. \cite{cve201817144}
+Second, we need some information on how to spend the utxo from the
+previous transaction, in particular, how to sign the transaction to
+allow this. That is the information needed to create a transaction
+input, so essentially a transaction input.
 
-Here, Bitcoin-S did a bit too much and marked all transaction as
-invalid, if they referenced the same transaction twice.  The fix is,
-to check on TransactionOutPoint instead of TransactionOutPoint.txId,
-because TransactionOutPoint contains the txId as well as the output
-index it references.  So in pseudo code, we check on the tuple (tx,
-index) instead of (tx).  The fixed code:
-\begin{lstlisting}[style=scala]
+Third, we assemble the list of transaction inputs, in our case just one.
+
+Fourth, we set the amount of satoshis that we want to spend. The Int64
+class emulates C data types in Scala, and we will look at it more in
+the next section.
+
+Fifth, we create a lock script to send the coins to. To be supremely
+secure, we use a public key derived from a private key we immediately
+forget.
+
+Sixth, we create our list of transaction outputs.
+
+Seventh and eighth, we define the fee rate and some bitcoin network parameters.  
+
+Nineth, we create a transaction builder with those data.
+
+Tenth, we tell the transaction builder to start signing the transaction.
+
+Finally, we get the actual signed transaction. We could serialize it
+and send it to the Bitcoin network. We can also pass it to the
+checkTransaction function, which will return true.
+
+\paragraph{A Bug in the checkTransaction function.} Note lines 16 and
+17 of the checkTransaction function in Figure~\ref{fig:checktrans}.
+
+The value prevOutputTxIds gathers all transaction IDs referenced by
+the inputs of the current transaction.  When we call \emph{distinct}
+on the returned list, we get the list with duplicates removed.  If the
+size of the new list is the same as the size of the old, we know that
+there is no duplicate transaction ID.
+
+However, this code prevents a transaction with two inputs spending two
+different outputs of a previous transaction. The check is too strict:
+checkTransaction returns false for valid transactions.
+
+The fix is simple: we perform the duplicate check on the
+TransactionOutPoints instead of on their transaction IDs.  A
+TransactionOutPoint contains the txId as well as the output index it
+references.
+
+Specifically, we replace lines 16-17 as follows:
+\begin{lstlisting}[style=scala, firstnumber=16]
   val prevOutputs = transaction.inputs.map(_.previousOutput)
   val noDuplicateInputs = prevOutputs.distinct.size == prevOutputs.size
 \end{lstlisting}
 
-Since TransactionOutPoint is a case class and Scala has a built in ==
-for case classes there is no need to implement TransactionOutPoint.==.
+Note that TransactionOutPoint is a case class and thus has a built in
+== method.
 
-This was fixed in
-\href{https://github.com/bitcoin-s/bitcoin-s/pull/435}{pull request
-  number 435} on GitHub at April 23, 2019, through this work along
-with a unit test to prevent this bug from appearing again in the
-future.
+We submitted the fix together with a unit test to prevent this bug
+from appearing again in the future in a pull request
+\cite{BitcoinS:pull435}, which has already been merged.
+
+
+\paragraph{An Attempt at Verification.} Naively trying Stainless on
+the entire bitcoin-s codebase results in many errors -- as was to be
+expected. We tried to extract only the relevant code and to verify
+that. However, even the extracted code has more than 1500 lines and
+liberally uses Scala features outside of the supported fragment.  We
+tried to transform the code into the supported fragment, but quickly
+realized that that a better approach is to first verify a simpler
+property with less code involved and later come back to the
+no-inflation property with more experience. So we now turn to the
+addition-with-zero property.
+
+
 
 
 \section{The Addition-with-Zero Property}
 
-\label{chap:verify_add}
 
 In Bitcoin-S there is a class \texttt{Satoshis} representing an amount of bitcoins.
-We look at the verification of the addition of Satoshis with zero Satoshis.
-This operation should result in the same amount of Satoshis.
-Let's call it the \nameref{property_2}.
-
-Using Stainless, we see the successful verification of this property.
-But the process of the verification with the tool requires many
-changes in the code, so that Stainless can accept it.  We look at all
-needed modifications in chapter \ref{chap:verify_add}.
-
-
-
-After realizing that it would consume too much time to rewrite the
-Bitcoin-S code and even the extracted part with checkTransaction, the
-smallest unit in Bitcoin-S-Core that is worthwhile to verify was
-extracted.  This could be the addition of two CurrencyUnits.  To make
-it even easier, the addition of CurrencyUnits with zero.
-CurrencyUnits is an abstract class in Bitcoin-S, representing
-currencies like Satoshis.
-
-\paragraph{Extracting the relevant Code}
-
-The relevant code is in two files: \texttt{CurrencyUnits.scala} and \texttt{NumberType.scala}.
-
-reference: code/addition/src/main/scala/addition/original
-
-From those files we removed all code that is not needed for our
-verification. For example, we removed all number types except for
-Int64 (so Int32, UInt64, etc.) because we do not use them. We also
-removed the superclasses Factory and NetworkElement of CurrencyUnit
-and Number, respectively because the inherited members are not used by
-the relevant code. Also, we removed all binary operations on Number that are not used.
-
-
-  - removed extending Factory, NetworkElement and BasicArithmetic. This includes some hex/byte conversion eg fromHex, hex, bytes, fromBytes, ... Just interfaces never referenced
-    \href{https://bitcoin-s.org/docs/core/core-intro\#the-basics}{description in section \#the-basics (cannot add link with hashtag)}
-    \href{https://github.com/bitcoin-s/bitcoin-s/blob/master/core/src/main/scala/org/bitcoins/core/protocol/NetworkElement.scala}{NetworkElement class}
-    \href{https://github.com/bitcoin-s/bitcoin-s/blob/master/core/src/main/scala/org/bitcoins/core/util/Factory.scala}{Factory class}
-
-  - removed Bitcoins class
-
-  - removed subtraction and multiplication, binary operations <<, >>, etc, comparision operator <=, >=, etc but not == and !=
-
-  - removed toBigDecimal
-
-  - removed object CurrencyUnits containing some variables to transform satoshis to btc (not used)
-
-  The code we use for the following sections is in reduced folder.
-
-  
-Here we can see the extracted code needed for the addition of CurrencyUnits:
-\lstinputlisting[style=scala]{../code/addition/src/main/scala/addition/reduced/number/NumberType.scala}
-\lstinputlisting[style=scala]{../code/addition/src/main/scala/addition/reduced/currency/CurrencyUnits.scala}
 
 The additions' signature looks like this:
 \begin{lstlisting}[style=scala]
   +(c: CurrencyUnit): CurrencyUnit
 \end{lstlisting}
 
-When we run Stainless on this code (without any properties to prove),
-it throws the following errors: \todo{describe errors: no support for
-  abstract types, unsupported arguments for the BigInt constructor,
-  unsupported inheritance for objects.}
+
+\paragraph{Extracting the relevant Code} The relevant code is in two
+files: \texttt{CurrencyUnits.scala} and \texttt{NumberType.scala}.
+
+From those files we removed all code that is not needed for our
+verification. For example, we removed all number types except for
+Int64 (so Int32, UInt64, etc.) because we do not use them. We also
+removed the superclasses Factory and NetworkElement of CurrencyUnit
+and Number, respectively, because the inherited members are not used by
+the relevant code. Also, we removed all binary operations on Number
+that are not used, like subtraction and multiplication. 
+
 
 \paragraph{Transforming the Code.}
 
-\todo{kai todo}
+When we run Stainless on this code (without any properties to prove),
+it throws the following errors: describe errors: no support for
+  abstract types, unsupported arguments for the BigInt constructor,
+  unsupported inheritance for objects.}
 
+\todo{...}
 
 \paragraph{The Specification.}
 
-As specified, our verification must only support addition with zero.
-So we restrict the parameter to be zero in the precondition.
-\begin{lstlisting}[style=scala]
-  require(c.satoshis == Satoshis.zero)
-\end{lstlisting}
 
-We ensure the result is the same value as \emph{this} in the postcondition.
-\begin{lstlisting}[style=scala]
-  ensuring(res => res.satoshis == this.satoshis)
-\end{lstlisting}
 
 We can use equals (==) directly on Satoshis, because it is a case class.
 
@@ -601,8 +493,6 @@ sealed abstract class CurrencyUnit {
 }
 \end{lstlisting}
 
-That's all we need to verify our addition.
-
 
 
 \paragraph{Result}
@@ -614,9 +504,7 @@ Finally, everything is green and correctly verified.
 	\caption{Output of Stainless verification for addition with 0 of Bitcoin-S-Cores CurrencyUnit}
 \end{figure}
 
-The verified code.
-\lstinputlisting[style=scala]{../code/addition/src/main/scala/addition/modified/number/NumberType.scala}
-\lstinputlisting[style=scala]{../code/addition/src/main/scala/addition/modified/currency/CurrencyUnits.scala}
+
 
 
 
@@ -658,10 +546,12 @@ the Stainless developers to improve the tool.
 \bibliography{bibliography}
 
 
+\clearpage
 \appendix
+
 \section{Project Setup}
 
-\paragraph{Using the Stainless-sbt-plugin vs Using the Stanless-JAR}
+\paragraph{Using the Stainless-sbt-plugin vs Using the Stainless-JAR}
 
 We can either use the sbt plugin or a JAR file to check code with Stainless.
 
@@ -700,6 +590,12 @@ Use sbt-plugin: integrate in sbt build tool with addSbtPlugin() method
 Why JAR:
 sbt-plugin problems (v 0.1 uses older versions (v0.2 not), no output to console see github \#484)
 otherwise use sbt-plugin because of library management and replicability (everyone uses the same Stainless version configured in sbt)
+no sbt because
+
+-- version conflicts
+-- no output maybe \href{https://github.com/epfl-lara/stainless/issues/484}{issue 484 on
+  GitHub}
+
 
 \paragraph{Reproducing our Results.}
 
@@ -717,100 +613,18 @@ Prerequisites:
 
 
 
-\subsection{Integration into Bitcoin-S}
+\section{Extracted Code}
+\label{sec:extracted}
 
-During this work, Stainless updated the sbt plugin to support sbt
-1.2.8 from 0.13.17 and Scala 2.12.8 from 2.11.12.  So this section
-might be out of date now.
+\subsection{NumberType.scala}
+\lstinputlisting[style=scala]{../code/addition/src/main/scala/reduced/number/NumberType.scala}
 
-
-To use the latest version of the sbt tool you have to build it
-locally.  You can run \texttt{sbt universal:stage} in the cloned
-Stainless git repository.  This generates
-\emph{frontends/scalac/target/universal/stage/bin/stainless-scalac}.
-
-Bitcoin-S-Core uses sbt 1.2.8 and Scala 2.12.8, while Stainless sbt
-plugin is on sbt 0.13.17 and Scala 2.11.12.
-
-Sbt introduced new features in the 1.x release used by Bitcoin-S.
-Most of them can be written the sbt 0.13.17 way.
-
-The bigger problem is, due to the different Scala and sbt versions,
-the following error after trying to go in a sbt shell:
-\begin{verbatim}
-  [warn] There may be incompatibilities among your library dependencies; run 'evicted'
-         to see detailed eviction warnings.
-  [error] java.lang.NoClassDefFoundError: sbt/SourcePosition
-  ...
-  Project loading failed: (r)etry, (q)uit, (l)ast, or (i)gnore?
-\end{verbatim}
-
-Downgrading Bitcoin-S sbt version to 0.13.17 fixes the error but then
-it can not load some libraries only compiled for newer versions.  So
-this would take too much time to fix and changes the Bitcoin-S code
-inadvertently.
-
-The next approach is to use the stainless cli instead of sbt.  Running
-stainless on all source files does not work, because dependencies are
-missing.  The parameter \emph{-classpath} can resolve it but the value
-of this parameter must be the paths to all the dependencies separated
-by a ':'.  Finally, \emph{core} depends on \emph{secp256k1jni},
-another package of Bitcoin-S written in Java.  So this needs to be in
-the source files to.
-
-The final command looks like this in \emph{core} folder of Bitcoin-S:
-\begin{lstlisting}[language=bash]
-  $ stainless
-    -classpath ".:$(find ~/.ivy2/ -type f -name *.jar | tr '\n' ':')"
-    $(find . -type f -name *.scala | tr '\n' ' ')
-    $(find ../secp256k1jni -type f -name *.java | tr '\n' ' ')
-\end{lstlisting}
-
-\emph{.ivy2} is the dependency cache of sbt.  The \emph{tr} replaces
-the first char with the second so a newline with either ':' or ' '.
-
-With this command, Stainless throws the next error:
-\begin{verbatim}
-  [Internal] Error: object scala.reflect.macros.internal.macroImpl in compiler mirror
-             not found.. Trace:
-  [Internal] - scala.reflect.internal.MissingRequirementError$.signal
-             (MissingRequirementError.scala:17)
-  ...
-  [Internal] object scala.reflect.macros.internal.macroImpl in compiler mirror not found.
-  [Internal] Please inform the authors of Inox about this message
-\end{verbatim}
-
-So we can not know how many errors will face us.  Let's go another
-way, because the errors may take too much time and it might lead to a
-next error.  We extract the code needed to verify a transaction mainly
-the class Transaction and ScriptInterpreter with many other classes
-they're depending on.
-
-After this extraction Stainless was successfully integrated with both
-sbt and JAR.
-
-Running \texttt{sbt compile} in the project with Stainless ended
-without error.  But it also ended with no output.  So we are not able
-to change the code so Stainless would accept it since we do not know
-what to change.
-
-So the sbt plugin does not always complain where the JAR file did.
-The open
-\href{https://github.com/epfl-lara/stainless/issues/484}{issue 484 on
-  GitHub} might describe exactly this error.
-
-
-
-
-
-\section{NumberType.scala}
-\lstinputlisting[style=scala]{../code/addition/src/main/scala/addition/reduced/number/NumberType.scala}
-
-\section{CurrencyUnits.scala}
-\lstinputlisting[style=scala]{../code/addition/src/main/scala/addition/reduced/currency/CurrencyUnits.scala}
+\subsection{CurrencyUnits.scala}
+\lstinputlisting[style=scala]{../code/addition/src/main/scala/reduced/currency/CurrencyUnits.scala}
 
 
 \section{Code Transformations} 
+\label{sec:transform}
 
 Here we see in detail how to transform the bitcoin-s code into the
 Scala fragment supported by Stainless. All subsections start with the
@@ -883,20 +697,6 @@ line 18 we replace A by Int64.
 As described before, the types in the Stainless library are more
 restricted than their Scala library counterparts. In particular, the
 Stainless BigInt constructor is restricted to literal arguments.
-
-
-After:
-\begin{lstlisting}[style=scala]
-sealed abstract class Satoshis extends CurrencyUnit {
-  override def satoshis: Satoshis = this
-
-  def toBigInt: BigInt = underlying.toBigInt
-
-  def toLong: Long = underlying.toLong
-
-  def ==(satoshis: Satoshis): Boolean = underlying == satoshis.underlying
-}
-\end{lstlisting}
 
 
 Here we can simply use toBigInt on the field \texttt{underlying}
@@ -1133,6 +933,18 @@ and
   lazy val max = Int64(BigInt("9223372036854775807"))
 }
 \end{lstlisting}
+
+
+\section{Verified Code}
+\label{sec:verified}
+
+\subsection{NumberType.scala}
+\lstinputlisting[style=scala]{../code/addition/src/main/scala/verified/number/NumberType.scala}
+
+\subsection{CurrencyUnits.scala}
+\lstinputlisting[style=scala]{../code/addition/src/main/scala/verified/currency/CurrencyUnits.scala}
+
+
 
 
 
