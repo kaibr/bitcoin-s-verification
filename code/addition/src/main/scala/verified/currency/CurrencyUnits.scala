@@ -1,7 +1,9 @@
 package verified.currency
 
 import verified.number.{BaseNumbers, Int64}
+
 import stainless.lang._
+
 
 sealed abstract class CurrencyUnit {
   def satoshis: Satoshis
