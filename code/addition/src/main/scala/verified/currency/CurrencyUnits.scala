@@ -14,11 +14,11 @@ sealed abstract class CurrencyUnit {
 
   def +(c: CurrencyUnit): CurrencyUnit = {
     Satoshis(satoshis.underlying + c.satoshis.underlying)
-  } ensuring(res =>
-    (c.satoshis == Satoshis.zero) ==>
-      (res.satoshis == this.satoshis))
+  } ensuring (res =>
+    (c == Satoshis.zero) ==> (res == this))
 
-  protected def underlying: Int64}
+  protected def underlying: Int64
+}
 
 sealed abstract class Satoshis extends CurrencyUnit {
   override def satoshis: Satoshis = this

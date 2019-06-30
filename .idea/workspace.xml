@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="fc209ac7-e367-4f51-bb56-2d5a58fbeffe" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/code/addition/src/main/scala/scala.iml" beforeDir="false" afterPath="$PROJECT_DIR$/code/addition/src/main/scala/scala.iml" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -33,8 +33,26 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/code/addition/src/main/scala/verified/currency/CurrencyUnits.scala">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="600">
-              <caret line="40" selection-start-line="40" selection-end-line="40" />
+            <state relative-caret-position="255">
+              <caret line="17" column="6" lean-forward="true" selection-start-line="17" selection-start-column="6" selection-end-line="17" selection-end-column="6" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/code/addition/src/main/scala/verifiedall/currency/CurrencyUnits.scala">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="30">
+              <caret line="2" column="18" selection-start-line="2" selection-start-column="18" selection-end-line="2" selection-end-column="18" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/code/bin/stainless.sh">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="330">
+              <caret line="22" lean-forward="true" selection-start-line="22" selection-end-line="22" />
             </state>
           </provider>
         </entry>
@@ -49,6 +67,7 @@
       <list>
         <option value="$PROJECT_DIR$/code/addition/src/main/scala/verifiedall/number/NumberType.scala" />
         <option value="$PROJECT_DIR$/code/addition/src/main/scala/verifiedall/currency/CurrencyUnits.scala" />
+        <option value="$PROJECT_DIR$/code/bin/stainless.sh" />
         <option value="$PROJECT_DIR$/code/addition/src/main/scala/verified/currency/CurrencyUnits.scala" />
       </list>
     </option>
@@ -89,6 +108,17 @@
             </path>
             <path>
               <item name="bitcoin-s-verification" type="b2602c69:ProjectViewProjectNode" />
+              <item name="scala" type="462c0819:PsiDirectoryNode" />
+              <item name="verified" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="bitcoin-s-verification" type="b2602c69:ProjectViewProjectNode" />
+              <item name="scala" type="462c0819:PsiDirectoryNode" />
+              <item name="verified" type="462c0819:PsiDirectoryNode" />
+              <item name="currency" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="bitcoin-s-verification" type="b2602c69:ProjectViewProjectNode" />
               <item name="External Libraries" type="cb654da1:ExternalLibrariesNode" />
             </path>
           </expand>
@@ -110,7 +140,7 @@
     <property name="last_opened_file_path" value="$PROJECT_DIR$/code/stainless" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
-    <property name="project.structure.last.edited" value="Libraries" />
+    <property name="project.structure.last.edited" value="Problems" />
     <property name="project.structure.proportion" value="0.15" />
     <property name="project.structure.side.proportion" value="0.2" />
     <property name="settings.editor.selected.configurable" value="sbt.project.settings.configurable" />
@@ -261,6 +291,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="710" y="0" width="1856" height="1408" extended-state="0" />
+    <editor active="true" />
     <layout>
       <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.36135858" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
@@ -308,13 +339,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="75">
           <caret line="5" column="26" selection-start-line="5" selection-start-column="26" selection-end-line="5" selection-end-column="26" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/code/addition/src/main/scala/verifiedall/currency/CurrencyUnits.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="30">
-          <caret line="2" column="18" selection-start-line="2" selection-start-column="18" selection-end-line="2" selection-end-column="18" />
         </state>
       </provider>
     </entry>
@@ -389,10 +413,24 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/code/addition/src/main/scala/verifiedall/currency/CurrencyUnits.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="30">
+          <caret line="2" column="18" selection-start-line="2" selection-start-column="18" selection-end-line="2" selection-end-column="18" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/code/bin/stainless.sh">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="330">
+          <caret line="22" lean-forward="true" selection-start-line="22" selection-end-line="22" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/code/addition/src/main/scala/verified/currency/CurrencyUnits.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="600">
-          <caret line="40" selection-start-line="40" selection-end-line="40" />
+        <state relative-caret-position="255">
+          <caret line="17" column="6" lean-forward="true" selection-start-line="17" selection-start-column="6" selection-end-line="17" selection-end-column="6" />
         </state>
       </provider>
     </entry>
@@ -449,7 +487,7 @@
       </state>
       <state key="ModuleStructureConfigurable.UI">
         <settings>
-          <last-edited>stainless</last-edited>
+          <last-edited>scala</last-edited>
           <splitter-proportions>
             <option name="proportions">
               <list>
