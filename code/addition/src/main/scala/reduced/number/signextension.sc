@@ -34,5 +34,5 @@ outofrange & andmask
 
 // second operand is shorter, so perform sign extension (prepend 1-bit)
 // so now second operand is 65 1-bits
-// result of the biwise conjuntion is simply the first operand
+// result of the bitwise conjunction is simply the first operand
 
