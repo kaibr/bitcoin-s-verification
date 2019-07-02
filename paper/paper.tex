@@ -443,13 +443,13 @@ addition of satoshis is in two files: \texttt{CurrencyUnits.scala} and
 \texttt{NumberType.scala}.
 
 \begin{figure}
-\lstinputlisting[style=scala]{../code/addition/src/main/scala/reduced-nocomments/number/NumberType.scala}
+\lstinputlisting[style=scala]{../code/addition/src/main/scala/reduced/number/NumberType.scala}
   \caption{Extracted Code from NumberType.scala}
   \label{fig:numbertype}
 \end{figure}
 
 \begin{figure}
-\lstinputlisting[style=scala]{../code/addition/src/main/scala/reduced-nocomments/currency/CurrencyUnits.scala}
+\lstinputlisting[style=scala]{../code/addition/src/main/scala/reduced/currency/CurrencyUnits.scala}
   \caption{Extracted Code from CurrencyUnits.scala}
   \label{fig:currencyunits}
 \end{figure}
@@ -898,7 +898,6 @@ by:
 \begin{lstlisting}[style=scala]
   lazy val min = Int64(BigInt(-9223372036854775808L))
   lazy val max = Int64(BigInt(9223372036854775807L))
-}
 \end{lstlisting}
 
 
