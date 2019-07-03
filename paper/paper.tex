@@ -27,8 +27,8 @@
   urlcolor   = blue
 }
 
-
-
+% latin modern, no more bitmap fonts in pdf
+\usepackage{lmodern}
 %\usepackage{newtxtext}
 %\usepackage{newtxmath}
 \usepackage[zerostyle=b,scaled=.88]{newtxtt}
@@ -88,13 +88,14 @@
   called \emph{Pure Scala}. We first try to verify the property that
   regular transactions do not create new money. It turns out that
   there is too much code involved that lies outside of the supported
-  fragment to make this feasible. However, in the process we uncover
-  and fix a bug in bitcoin-s. We then turn to a much simpler (and less
-  interesting) property: that adding zero satoshis to a given amount
-  of satoshis yields the given amount of satoshis. Here as well a
-  significant part of the relevant code lies outside of the supported
-  fragment. However, after a series of equivalent transformations we
-  arrive at code that we successfully verify.
+  fragment to make this feasible. However, in the process we find and
+  fix a bug in bitcoin-s. We then turn to a much simpler property:
+  that adding zero satoshis to a given amount of satoshis yields the
+  given amount of satoshis. Here as well a significant part of the
+  relevant code lies outside of the supported fragment. We perform a
+  series of equivalent transformations on it until we arrive at code that we
+  successfully verify. In that process we find and fix a second bug in
+  bitcoin-s.
 
 \keywords{Bitcoin  \and Scala \and Bitcoin-S \and Stainless.}
 \end{abstract}
@@ -114,7 +115,7 @@ properties of the bitcoin-s library with the Stainless verifier.
 \paragraph{The Bitcoin-S Library.} The bitcoin-s library is an
 implementation of parts of the Bitcoin protocol in Scala
 \cite{BitcoinS:website,BitcoinS:github}. In particular, it allows to
-serialize, deserialize, sign and validate transactions. The library
+serialize, deserialize, sign and validate Bitcoin transactions. The library
 uses immutable data structures and algebraic data types but is not
 written with formal verification in mind. According to the website,
 the library is used in production, handling significant amounts of
@@ -151,7 +152,7 @@ a postcondition using \emph{ensuring}.
 	\caption{Factorial program with specification}
 	\label{fig:factorial}
 \end{figure}
-Our program does not satisfy the specification. An overflow in the
+Our function does not satisfy the specification. An overflow in the
 32-bit Int leads to a negative result for the input 17, as Stainless
 reports in Figure~\ref{fig:failed}. Changing the type from Int to
 BigInt will result in a successful verification.
@@ -204,9 +205,10 @@ simplest possible property we can think of is the fact that adding
 zero satoshis to a given amount of satoshis yields the given amount of
 satoshis. We call it the \emph{addition-with-zero property} and we try
 to verify it in Section~3. Here as well we see that a significant part
-of the code lies outside of the supported fragment. However, after a
-series of equivalent transformations we arrive at code that we
-successfully verify.
+of the code lies outside of the supported fragment. We perform a
+  series of equivalent transformations on it until we arrive at code that we
+  successfully verify. In that process we find and fix a second bug in
+  bitcoin-s.
 
 
 \section{The No-Inflation Property}
@@ -374,7 +376,7 @@ Finally, we get the actual signed transaction. We could serialize it
 and send it to the Bitcoin network. We can also pass it to the
 checkTransaction function, which will return true.
 
-\paragraph{A Bug in the checkTransaction function.} Note lines 16 and
+\paragraph{A Bug in the checkTransaction Function.} Note lines 16 and
 17 of the checkTransaction function in Figure~\ref{fig:checktrans}.
 
 The value prevOutputTxIds gathers all transaction IDs referenced by
@@ -438,7 +440,7 @@ C-like data types. For example, the Satoshis class, which is used to
 represent an amount of satoshis, is implemented using the class Int64
 which represents the C-type \texttt{int64\_t}.
 
-\paragraph{Extracting the relevant Code} The relevant code for the
+\paragraph{Extracting the Relevant Code} The relevant code for the
 addition of satoshis is in two files: \texttt{CurrencyUnits.scala} and
 \texttt{NumberType.scala}.
 
@@ -463,6 +465,8 @@ are not used. Also, we removed all binary operations on Number that
 are not used, like subtraction and multiplication. The extracted code
 is shown in Figure~\ref{fig:numbertype} and
 Figure~\ref{fig:currencyunits}.
+
+\paragraph{A Bug in the checkTransaction Function.}
 
 
 \paragraph{Transforming the Code.}
@@ -543,80 +547,17 @@ the Stainless developers to improve the tool.
 \clearpage
 \appendix
 
-\section{Project Setup}
-
-\paragraph{Using the Stainless-sbt-plugin vs Using the Stainless-JAR}
-
-We can either use the sbt plugin or a JAR file to check code with Stainless.
-
-More about sbt on https://www.scala-sbt.org/1.x/docs/index.html (features are also listed there)
-Installation see Stainless Doc 'Installing Stainless' section
-
-
-Invoking the JAR on our source code Stainless will verify it.  If we
-have a bigger project, this becomes really tricky, because we must
-pass all files needed including the dependencies.  This is in contrast
-to the sbt plugin, where we can integrate Stainless in our compilation
-process.  When we call compile, Stainless verifies the code and stops
-the compilation if the verification fails.
-
-Having a static version configured in the sbt build file, every
-developer has the same Stainless features available.  This should
-prevent incompatibility with new or deprecated features when we use
-different plugins.
-
-So the sbt plugin has clear advantages over the JAR file since its
-integrated directly.  We do not have to download it manually and find
-the right version and if we bump the version we can just edit it in
-the build file and every developer is on the same version again.
-
-However, currently there are some drawbacks.  For example the sbt
-plugin does not always report errors.
-use sbt-plugin because of library management and replicability (everyone uses the same Stainless version configured in sbt)
-
-
-We use the jar for everything. 
-
-
-Use JAR:
-Download all library dependencies including dependencies of dependencies, pass libraries + source to JAR
-  
-Use sbt-plugin: integrate in sbt build tool with addSbtPlugin() method
-
-Why JAR:
-
-
-no sbt because
-
--- version conflicts, stainless 0.1 uses older sbt version than bitcoin-s (v0.2 not)
--- no output maybe \href{https://github.com/epfl-lara/stainless/issues/484}{issue 484 on
-  GitHub}
-
-
-\paragraph{Reproducing our Results.}
-
-Prerequisites:
-\begin{enumerate}
-\item Java 8 in /usr/lib/jvm/java-8-openjdk (Stainless requires and Scala recommends Java SE Development Kit 8. Newer Java versions won't work.)
-\end{enumerate}
-
-
-\begin{lstlisting}[language=bash]
- clone repo
- run ./code/bin/stainless.sh <path to code>
-   eg. ./code/bin/stainless.sh code/addition/src/main/scala/addition/reduced/
-\end{lstlisting}
 
 
 
-\section{Extracted Code}
-\label{sec:extracted}
+% \section{Extracted Code}
+% \label{sec:extracted}
 
-\subsection{NumberType.scala}
-\lstinputlisting[style=scala]{../code/addition/src/main/scala/reduced/number/NumberType.scala}
+% \subsection{NumberType.scala}
+% \lstinputlisting[style=scala]{../code/addition/src/main/scala/reduced/number/NumberType.scala}
 
-\subsection{CurrencyUnits.scala}
-\lstinputlisting[style=scala]{../code/addition/src/main/scala/reduced/currency/CurrencyUnits.scala}
+% \subsection{CurrencyUnits.scala}
+% \lstinputlisting[style=scala]{../code/addition/src/main/scala/reduced/currency/CurrencyUnits.scala}
 
 
 \section{Code Transformations} 
@@ -930,14 +871,14 @@ and
 \end{lstlisting}
 
 
-\section{Verified Code}
-\label{sec:verified}
+% \section{Verified Code}
+% \label{sec:verified}
 
-\subsection{NumberType.scala}
-\lstinputlisting[style=scala]{../code/addition/src/main/scala/verified/number/NumberType.scala}
+% \subsection{NumberType.scala}
+% \lstinputlisting[style=scala]{../code/addition/src/main/scala/verified/number/NumberType.scala}
 
-\subsection{CurrencyUnits.scala}
-\lstinputlisting[style=scala]{../code/addition/src/main/scala/verified/currency/CurrencyUnits.scala}
+% \subsection{CurrencyUnits.scala}
+% \lstinputlisting[style=scala]{../code/addition/src/main/scala/verified/currency/CurrencyUnits.scala}
 
 
 

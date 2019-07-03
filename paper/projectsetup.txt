@@ -1,0 +1,63 @@
+\section{Project Setup}
+
+\paragraph{Using the Stainless-sbt-plugin vs Using the Stainless-JAR}
+
+We can either use the sbt plugin or a JAR file to check code with Stainless.
+
+More about sbt on https://www.scala-sbt.org/1.x/docs/index.html (features are also listed there)
+Installation see Stainless Doc 'Installing Stainless' section
+
+
+Invoking the JAR on our source code Stainless will verify it.  If we
+have a bigger project, this becomes really tricky, because we must
+pass all files needed including the dependencies.  This is in contrast
+to the sbt plugin, where we can integrate Stainless in our compilation
+process.  When we call compile, Stainless verifies the code and stops
+the compilation if the verification fails.
+
+Having a static version configured in the sbt build file, every
+developer has the same Stainless features available.  This should
+prevent incompatibility with new or deprecated features when we use
+different plugins.
+
+So the sbt plugin has clear advantages over the JAR file since its
+integrated directly.  We do not have to download it manually and find
+the right version and if we bump the version we can just edit it in
+the build file and every developer is on the same version again.
+
+However, currently there are some drawbacks.  For example the sbt
+plugin does not always report errors.
+use sbt-plugin because of library management and replicability (everyone uses the same Stainless version configured in sbt)
+
+
+We use the jar for everything. 
+
+
+Use JAR:
+Download all library dependencies including dependencies of dependencies, pass libraries + source to JAR
+  
+Use sbt-plugin: integrate in sbt build tool with addSbtPlugin() method
+
+Why JAR:
+
+
+no sbt because
+
+-- version conflicts, stainless 0.1 uses older sbt version than bitcoin-s (v0.2 not)
+-- no output maybe \href{https://github.com/epfl-lara/stainless/issues/484}{issue 484 on
+  GitHub}
+
+
+\paragraph{Reproducing our Results.}
+
+Prerequisites:
+\begin{enumerate}
+\item Java 8 in /usr/lib/jvm/java-8-openjdk (Stainless requires and Scala recommends Java SE Development Kit 8. Newer Java versions won't work.)
+\end{enumerate}
+
+
+\begin{lstlisting}[language=bash]
+ clone repo
+ run ./code/bin/stainless.sh <path to code>
+   eg. ./code/bin/stainless.sh code/addition/src/main/scala/addition/reduced/
+\end{lstlisting}
