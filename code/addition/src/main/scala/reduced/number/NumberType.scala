@@ -25,9 +25,6 @@ sealed abstract class Int64 extends SignedNumber[Int64] {
 
 trait BaseNumbers[T] {
   def zero: T
-  def one: T
-  def min: T
-  def max: T
 }
 
 object Int64 extends BaseNumbers[Int64] {
@@ -39,9 +36,6 @@ object Int64 extends BaseNumbers[Int64] {
   }
 
   lazy val zero = Int64(0)
-  lazy val one = Int64(1)
-  lazy val min = Int64(-9223372036854775808L)
-  lazy val max = Int64(9223372036854775807L)
 
   def apply(long: Long): Int64 = Int64(BigInt(long))
   def apply(bigInt: BigInt): Int64 = Int64Impl(bigInt)
