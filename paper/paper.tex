@@ -182,16 +182,16 @@ features, such as using a (mutable) variable in a local scope of a
 function and while loops. They turn out not to be relevant for the
 current work.
 
-What will turn out to be more relevant are the Scala features which
-Stainless does not support, such as: (concrete) class definitions,
-inheritance by objects, abstract type members, and inner classes in
-case objects.
+What will turn out to be more relevant for us are the Scala features
+which Stainless does not support, such as: (concrete) class
+definitions, inheritance by objects, abstract type members, and inner
+classes in case objects.
 
 Also, Stainless has its own library of some core data types and
 functions which need to be mapped correctly to functions inside of the
 SMT solver that Stainless ultimately relies on. Those data types in
 general do not have all the methods of the Scala data types. For
-example, the BigInt type in Scala has a methods for bitwise operations
+example, the BigInt type in Scala has methods for bitwise operations
 while the BigInt type in Stainless does not.
 
 \paragraph{Outline and Properties to Verify.} In the next section we
@@ -478,18 +478,18 @@ it throws the following errors: describe errors: no support for
 
 \todo{...}
 
+why fix the preconditions:
+\begin{itemize}
+\item all green: new errors stand out more
+\item at runtime, errors are caught earlier, which is preferrable
+\end{itemize}
+
 \paragraph{The Specification.}
 
 We can use equals (==) directly on Satoshis, because it is a case class.
 
 The addition will now look like this:
-\begin{lstlisting}[style=scala]
-  def +(c: CurrencyUnit): CurrencyUnit = {
-    Satoshis(satoshis.underlying + c.satoshis.underlying)
-  } ensuring(res =>
-    (c.satoshis == Satoshis.zero) ==>
-      (res.satoshis == this.satoshis))
-\end{lstlisting}
+\lstinputlisting[style=scala, firstline=15, lastline=18, firstnumber=15]{../code/addition/src/main/scala/verified/currency/CurrencyUnits.scala}
 
 
 
