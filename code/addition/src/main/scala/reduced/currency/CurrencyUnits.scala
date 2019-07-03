@@ -5,7 +5,6 @@ import reduced.number.{BaseNumbers, Int64}
 sealed abstract class CurrencyUnit {
   type A
   def satoshis: Satoshis
-  def !=(c: CurrencyUnit): Boolean = !(this == c)
   def ==(c: CurrencyUnit): Boolean = satoshis == c.satoshis
   def +(c: CurrencyUnit): CurrencyUnit = {
     Satoshis(satoshis.underlying + c.satoshis.underlying)
@@ -22,10 +21,7 @@ sealed abstract class Satoshis extends CurrencyUnit {
 }
 
 object Satoshis extends BaseNumbers[Satoshis] {
-  val min = Satoshis(Int64.min)
-  val max = Satoshis(Int64.max)
   val zero = Satoshis(Int64.zero)
-  val one = Satoshis(Int64.one)
 
   def apply(int64: Int64): Satoshis = SatoshisImpl(int64)
 
