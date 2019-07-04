@@ -1,4 +1,4 @@
-package reduced.number
+package extracted.number
 
 sealed abstract class Number[T <: Number[T]] {
   type A = BigInt
@@ -36,7 +36,6 @@ object Int64 extends BaseNumbers[Int64] {
   }
 
   lazy val zero = Int64(0)
-
   def apply(long: Long): Int64 = Int64(BigInt(long))
   def apply(bigInt: BigInt): Int64 = Int64Impl(bigInt)
 }
