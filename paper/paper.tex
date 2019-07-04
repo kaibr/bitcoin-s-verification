@@ -84,7 +84,7 @@
 \begin{abstract}
   We try to verify some properties of the bitcoin-s library, a Scala
   implementation of parts of the Bitcoin protocol. We use the
-  Stainless verifier which supports programs in a subset of Scala
+  Stainless verifier which supports programs in a fragment of Scala
   called \emph{Pure Scala}.  Since bitcoin-s is not written in this
   fragment, we extract the relevant code from it and perform a series
   of equivalent transformations until we arrive at code that we
@@ -438,7 +438,7 @@ because it is not needed for the verification of our property.  For
 example, we removed all number types except for Int64 (so Int32,
 UInt64, etc.) because they are not used. We also removed the
 superclasses Factory and NetworkElement of CurrencyUnit and Number,
-respectively, because the inherited members are not used. Also, we
+respectively, because the inherited members are not used. We further
 removed all binary operations on Number that are not used, like
 subtraction and multiplication. The extracted code is shown in
 Figure~\ref{fig:numbertype} and Figure~\ref{fig:currencyunits}.
@@ -574,23 +574,35 @@ Stainless, as the output in Figure~\ref{fig:result} shows.
 
 \section{Conclusion and Future Work}
 
-We have show
--- bugs (already fixed)
--- suggestions for bitcoin-s
+We are happy to see some friendly green verifier output. However,
+apart from the bugs we found, the main conclusion from this work is
+that we had to non-trivially transform even a very small portion of
+the code in order to verify it. At the moment, it is unrealistic to
+routinely formally verify properties as part of the bitcoin-s
+development process. However, Stainless development has already
+progressed (e.g.\ type members are supported in recent versions) and
+continues to do so (e.g. self-referential type bounds are on the
+roadmap). Some missing features that we identified are presumably very
+easy to support, like the message parameter in the require
+function. Some other features presumably require more substantial
+work, like bitwise operations on integer types.
 
-Because of the limitations of the verication tool, we could only
-verify a rewritten version of the original Bitcoin-S code.
+On the other hand, bitcoin-s uses features that might not be supported
+even by future Stainless versions, such as (concrete, non-case)
+classes \todo{is that even true? where?} or calls to Java code. Here
+the bitcoin-s code can hopefully be adapted to accomodate formal
+verification.
 
-So code should be written specically with formal verication in mind,
-
-Also, we found that trying to verify code reveals bugs as shown in
-section \ref{sec:bugfix}.  Finally, our work led to some feedback to
-the Stainless developers to improve the tool.
+From our results we conclude that formal verification of bitcoin
+libraries in general and bitcoin-s in particular is a worthwile
+endeavour. We are looking forward to verifying more substantial parts
+of the code in future work.
 
 \bibliographystyle{splncs04}
 
 \bibliography{bibliography}
 
+\todo{reference to verified code}
 
 \clearpage
 \appendix
