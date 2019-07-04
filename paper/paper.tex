@@ -82,22 +82,16 @@
 \maketitle             
 
 \begin{abstract}
-  We try to verify properties of the bitcoin-s library, a Scala
+  We try to verify some properties of the bitcoin-s library, a Scala
   implementation of parts of the Bitcoin protocol. We use the
   Stainless verifier which supports programs in a subset of Scala
-  called \emph{Pure Scala}. We first try to verify the property that
-  regular transactions do not create new money. It turns out that
-  there is too much code involved that lies outside of the supported
-  fragment to make this feasible. However, in the process we find and
-  fix a bug in bitcoin-s. We then turn to a much simpler property:
-  that adding zero satoshis to a given amount of satoshis yields the
-  given amount of satoshis. Here as well a significant part of the
-  relevant code lies outside of the supported fragment. We perform a
-  series of equivalent transformations on it until we arrive at code that we
-  successfully verify. In that process we find and fix a second bug in
+  called \emph{Pure Scala}.  Since bitcoin-s is not written in this
+  fragment, we extract the relevant code from it and perform a series
+  of equivalent transformations until we arrive at code that we
+  successfully verify. In that process we find and fix two bugs in
   bitcoin-s.
 
-\keywords{Bitcoin  \and Scala \and Bitcoin-S \and Stainless.}
+\keywords{Bitcoin  \and Scala \and bitcoin-s \and Stainless.}
 \end{abstract}
 
 
@@ -176,7 +170,6 @@ case classes and case objects, objects for grouping classes and
 functions, boolean expressions with short-circuit interpretation,
 generics with invariant type parameters, default values of function
 parameters, pattern matching, local and anonymous classes and more.
-  
 In addition to Pure Scala Stainless also supports some imperative
 features, such as using a (mutable) variable in a local scope of a
 function and while loops. They turn out not to be relevant for the
@@ -188,11 +181,11 @@ definitions, inheritance by objects, abstract type members, and inner
 classes in case objects.
 
 Also, Stainless has its own library of some core data types and
-functions which need to be mapped correctly to functions inside of the
-SMT solver that Stainless ultimately relies on. Those data types in
-general do not have all the methods of the Scala data types. For
-example, the BigInt type in Scala has methods for bitwise operations
-while the BigInt type in Stainless does not.
+functions which are mapped to corresponding data types and functions
+inside of the SMT solver that Stainless ultimately relies on. Those
+data types in general do not have all the methods of the Scala data
+types. For example, the BigInt type in Scala has methods for bitwise
+operations while the BigInt type in Stainless does not.
 
 \paragraph{Outline and Properties to Verify.} In the next section we
 try to verify the property that a regular (non-coinbase) transaction
@@ -215,34 +208,36 @@ of the code lies outside of the supported fragment. We perform a
 
 \begin{figure}
 \begin{lstlisting}[style=scala]
-/**
-  * Checks the validity of a transaction in accordance to bitcoin core's CheckTransaction function
-  * https://github.com/bitcoin/bitcoin/blob/f7a21dae5dbf71d5bc00485215e84e6f2b309d0a/src/main.cpp#L939.
-  */
 def checkTransaction(transaction: Transaction): Boolean = {
   val inputOutputsNotZero =
     !(transaction.inputs.isEmpty || transaction.outputs.isEmpty)
-  val txNotLargerThanBlock = transaction.bytes.size < Consensus.maxBlockSize
-  val outputsSpendValidAmountsOfMoney = !transaction.outputs.exists(o =>
-    o.value < CurrencyUnits.zero || o.value > Consensus.maxMoney)
+  val txNotLargerThanBlock = 
+    transaction.bytes.size < Consensus.maxBlockSize
+  val outputsSpendValidAmountsOfMoney = 
+    !transaction.outputs.exists(o =>
+      o.value < CurrencyUnits.zero || o.value > Consensus.maxMoney)
 
   val outputValues = transaction.outputs.map(_.value)
   val totalSpentByOutputs: CurrencyUnit =
     outputValues.fold(CurrencyUnits.zero)(_ + _)
-  val allOutputsValidMoneyRange = validMoneyRange(totalSpentByOutputs)
+  val allOutputsValidMoneyRange = 
+    validMoneyRange(totalSpentByOutputs)
   val prevOutputTxIds = transaction.inputs.map(_.previousOutput.txId)
-  val noDuplicateInputs = prevOutputTxIds.distinct.size == prevOutputTxIds.size
+  val noDuplicateInputs = 
+    prevOutputTxIds.distinct.size == prevOutputTxIds.size
 
   val isValidScriptSigForCoinbaseTx = transaction.isCoinbase match {
     case true =>
       transaction.inputs.head.scriptSignature.asmBytes.size >= 2 &&
         transaction.inputs.head.scriptSignature.asmBytes.size <= 100
     case false =>
-      //since this is not a coinbase tx we cannot have any empty previous outs inside of inputs
-      !transaction.inputs.exists(_.previousOutput == EmptyTransactionOutPoint)
+      !transaction.inputs.exists(
+        _.previousOutput == EmptyTransactionOutPoint)
   }
-  inputOutputsNotZero && txNotLargerThanBlock && outputsSpendValidAmountsOfMoney && noDuplicateInputs &&
-  allOutputsValidMoneyRange && noDuplicateInputs && isValidScriptSigForCoinbaseTx
+  inputOutputsNotZero && txNotLargerThanBlock && 
+  outputsSpendValidAmountsOfMoney && noDuplicateInputs &&
+  allOutputsValidMoneyRange && noDuplicateInputs && 
+  isValidScriptSigForCoinbaseTx
 }
 \end{lstlisting}
   
@@ -252,12 +247,11 @@ def checkTransaction(transaction: Transaction): Boolean = {
 
 
 A crucial function for the verification of the no-inflation property
-is the function which validates transactions: the
-\texttt{checkTransaction} function in the ScriptInterpreter object,
-shown in Figure~\ref{fig:checktrans}. It takes a transaction and if
-some basic checks succeed returns true, otherwise false. For example,
-one of those checks is that both the list of inputs and list of
-outputs need to be non-empty.
+is the \texttt{checkTransaction} function shown in
+Figure~\ref{fig:checktrans}. Given a transaction it returns true if
+some basic checks succeed, otherwise false. For example, one of those
+checks is that both the list of inputs and list of outputs need to be
+non-empty.
 
 To better understand the validation of a transaction in bitcoin-s, it
 is useful to review how transactions are represented and created.
@@ -292,11 +286,11 @@ an (invalid) transaction with one output in Figure~\ref{fig:prevtx}.
 
 We first create a keypair, then a lock script with its public key,
 then the amount of satoshis, then a transaction output (utxo) for that
-amount and locked with that script. Finally we create the actual
-transaction with that output and no inputs. Of course, that is not a
-valid transaction, because it creates coins out of nothing. In
-particular, checkTransaction(prevTx) returns false, simply because the
-list of inputs is empty.
+amount and locked with that script. Finally we create a transaction
+with that output and no inputs. Of course, that is not a valid
+transaction, because it creates coins out of nothing. In particular,
+\texttt{checkTransaction(prevTx)} returns false, simply because the list of
+inputs is empty.
 
 \begin{figure}
 \begin{lstlisting}[style=scala]
@@ -342,82 +336,67 @@ list of inputs is empty.
 \end{figure}
 
 Now that we have a transaction output, we create a transaction to
-spend it.
+spend it in Figure~\ref{fig:tx}. First, we need a reference to an
+output of a previous transaction, here called
+\texttt{outPoint}. Second, we add some information on how to spend
+that output, in particular, how to sign the transaction to allow
+this. Now we assemble the list of unspent transaction outputs (utxos),
+in our case just one.
 
-First, we need a so-called \emph{out point}, which points to an output
-of a previous transaction. The second parameter is the index of the
-referenced output. Here we use zero because the previous transaction
-has only one output (with index zero).
+We then set the amount of satoshis that we want to spend. The Int64
+class aims to emulate a C data type in Scala, and we will look at it
+more closely in the next section.
 
-Second, we need some information on how to spend the utxo from the
-previous transaction, in particular, how to sign the transaction to
-allow this. That is the information needed to create a transaction
-input, so essentially a transaction input.
+We then create a lock script (\texttt{destinationSPK}) to receive the
+coins, create our list of transaction outputs (\texttt{destinations}),
+define the fee rate and set some bitcoin network parameters.
 
-Third, we assemble the list of transaction inputs, in our case just one.
-
-Fourth, we set the amount of satoshis that we want to spend. The Int64
-class emulates C data types in Scala, and we will look at it more in
-the next section.
-
-Fifth, we create a lock script to send the coins to. To be supremely
-secure, we use a public key derived from a private key we immediately
-forget.
-
-Sixth, we create our list of transaction outputs.
-
-Seventh and eighth, we define the fee rate and some bitcoin network parameters.  
-
-Nineth, we create a transaction builder with those data.
-
-Tenth, we tell the transaction builder to start signing the transaction.
+Now we create a transaction builder with those data and we tell it to
+start signing the transaction in line 34.
 
 Finally, we get the actual signed transaction. We could serialize it
 and send it to the Bitcoin network. We can also pass it to the
 checkTransaction function, which will return true.
 
-\paragraph{A Bug in the checkTransaction Function.} Note lines 16 and
-17 of the checkTransaction function in Figure~\ref{fig:checktrans}.
-
-The value prevOutputTxIds gathers all transaction IDs referenced by
-the inputs of the current transaction.  When we call \emph{distinct}
-on the returned list, we get the list with duplicates removed.  If the
-size of the new list is the same as the size of the old, we know that
-there is no duplicate transaction ID.
-
-However, this code prevents a transaction with two inputs spending two
-different outputs of a previous transaction. The check is too strict:
-checkTransaction returns false for valid transactions.
+\paragraph{A Bug in the checkTransaction Function.} Note lines 15-17
+of the checkTransaction function in Figure~\ref{fig:checktrans}. Here,
+value prevOutputTxIds gathers a list of all transaction indentifiers
+referenced by the inputs of the current transaction. If the size of
+this list is the same as the size of this list with duplicates
+removed, we know that no transaction has been referenced twice. This
+prevents a transaction from spending two different outputs of the same
+previous transaction. The check is too strict: checkTransaction
+returns false for valid transactions.
 
 The fix is simple: we perform the duplicate check on the
-TransactionOutPoints instead of on their transaction IDs.  A
+TransactionOutPoints instead of on their transaction identifiers.  A
 TransactionOutPoint contains the txId as well as the output index it
-references.
+references. Note that TransactionOutPoint is a case class and thus has
+a built in == method.
 
-Specifically, we replace lines 16-17 as follows:
-\begin{lstlisting}[style=scala, firstnumber=16]
+Specifically, we replace lines 15-17 as follows:
+\begin{lstlisting}[style=scala, firstnumber=15]
   val prevOutputs = transaction.inputs.map(_.previousOutput)
-  val noDuplicateInputs = prevOutputs.distinct.size == prevOutputs.size
+  val noDuplicateInputs = 
+    prevOutputs.distinct.size == prevOutputs.size
 \end{lstlisting}
 
-Note that TransactionOutPoint is a case class and thus has a built in
-== method.
 
-We submitted the fix together with a unit test to prevent this bug
-from appearing again in the future in a pull request
-\cite{BitcoinS:pull435}, which has already been merged.
+We submitted this fix together with a corresponding unit test to the
+bitcoin-s project in a pull request, which has been merged
+\cite{BitcoinS:pull435}.
 
 
 \paragraph{An Attempt at Verification.} Naively trying Stainless on
 the entire bitcoin-s codebase results in many errors -- as was to be
-expected. We tried to extract only the relevant code and to verify
-that. However, even the extracted code has more than 1500 lines and
-liberally uses Scala features outside of the supported fragment.  We
-tried to transform the code into the supported fragment, but quickly
-realized that that a better approach is to first verify a simpler
-property with less code involved and later come back to the
-no-inflation property with more experience. So we now turn to the
-addition-with-zero property.
+expected. We tried to extract only the code relevant to the
+no-inflation-property and to verify that. However, even the extracted
+code has more than 1500 lines and liberally uses Scala features
+outside of the supported fragment.  We tried to transform the code
+into the supported fragment, but quickly realized that a better
+approach is to first verify a simpler property with less code involved
+and later come back to the no-inflation property with more
+experience. So we now turn to the addition-with-zero property.
 
 
 
@@ -428,7 +407,7 @@ It is of course a crucial property we are verifying here: if zero
 satoshis were credited to your account, you would not want your
 balance to change! It is also the simplest meaningful property to
 verify that we can think of. However, the code involved in performing
-an addition of two satoshi amounts in bitcoin-s is non-trivial. The
+the addition of two satoshi amounts in bitcoin-s is non-trivial. The
 reason for that is a pecularity of consensus code: agreement with the
 majority is more important than correctness, whatever correctness
 might mean. The most widely used bitcoin implementation by far is the
@@ -436,9 +415,9 @@ reference implementation Bitcoin Core, written in C++. For consensus
 code, bitcoin-s has little choice but to be in strict agreement with
 the reference implementation. To achieve that, it implements C-like
 data types in Scala and then implements functionality using those
-C-like data types. For example, the Satoshis class, which is used to
-represent an amount of satoshis, is implemented using the class Int64
-which represents the C-type \texttt{int64\_t}.
+C-like data types. For example, the Satoshis class, which represents
+an amount of satoshis, is implemented using the class Int64 which
+aims to represent the C-type \texttt{int64\_t}.
 
 \begin{figure}
 \lstinputlisting[style=scala]{../code/addition/src/main/scala/extracted/number/NumberType.scala}
@@ -453,620 +432,168 @@ which represents the C-type \texttt{int64\_t}.
 \end{figure}
 
 \paragraph{Extracting the Relevant Code} The relevant code for the
-addition of satoshis is in two files: \texttt{CurrencyUnits.scala} and
-\texttt{NumberType.scala}. From those files we removed the majority of
-the code because it is not needed for the verification of our
-property.  For example, we removed all number types except for Int64
-(so Int32, UInt64, etc.) because they are not used. We also removed
-the superclasses Factory and NetworkElement of CurrencyUnit and
-Number, respectively, because the inherited members are not
-used. Also, we removed all binary operations on Number that are not
-used, like subtraction and multiplication. The extracted code is shown
-in Figure~\ref{fig:numbertype} and Figure~\ref{fig:currencyunits}.
+addition of satoshis is in two files: CurrencyUnits.scala and
+NumberType.scala. From those files we removed the majority of the code
+because it is not needed for the verification of our property.  For
+example, we removed all number types except for Int64 (so Int32,
+UInt64, etc.) because they are not used. We also removed the
+superclasses Factory and NetworkElement of CurrencyUnit and Number,
+respectively, because the inherited members are not used. Also, we
+removed all binary operations on Number that are not used, like
+subtraction and multiplication. The extracted code is shown in
+Figure~\ref{fig:numbertype} and Figure~\ref{fig:currencyunits}.
 
-\paragraph{A Bug in the checkTransaction Function.} 
+\paragraph{A Bug in the checkResult Function.} Note the checkResult
+function on line 12 and the value andMask on line 23 of
+NumberType.scala. The function is intended to catch overflows by
+performing a bitwise conjunction of its argument with andMask and
+comparing the result with the argument. However, because of the way
+Java BigIntegers are represented \cite{wikipedia:twocomp} and because
+bitwise operations implicitly perform a sign extension
+\cite{java:bigint} on the shorter operand, the function does not
+actually catch overflows.
+
+While this is a potentially serious bug, it turns out that checkResult
+is only ever called inside a constructor call for a number type (like
+Int64) which contains the intended range check, see lines 32-35. The
+checkResult function thus can, and should, be removed entirely. The
+bitcoin-s developers have acknowledged the bug and we submitted a pull
+request to fix it \cite{BitcoinS:pull565}.
 
 
-\paragraph{Transforming the Code.} Here we see how to transform the
-bitcoin-s code into the Scala fragment supported by Stainless.  All
-transformations are equivalent in the sense that if the
+\paragraph{Transforming the Code.} We now turn to the list of Scala
+features used by the extracted code which are not supported by
+Stainless and how to transform the code into the supported fragment.
+All transformations are equivalent in the sense that if the
 addition-with-zero property holds for the transformed code, then it
-also holds for the code before the transformation. Here is the list of
-features used by the extracted code but unsupported by Stainless, and
-how to transform the code:
+also holds for the code before the transformation.
 
+\paragraph{Inheriting Objects.} In both files we have objects
+extending the BaseNumbers trait, on lines 30 and 23 respectively,
+which Stainless does not support. We simply turn those onjects into
+case objects. That transformation is equivalent. Case objects have
+various additional properties (for example, being serializable) but
+none of our code depends on the absence of any of that.
 
-\begin{enumerate}
-\item Inheriting Objects. Here, we can just turn the objects into case
-  objects by literally just changing the word \texttt{object} into
-  \texttt{case object} on lines 65 and 33 in the two respective files.
+\paragraph{Abstract Type Members.} In CurrencyUnits.scala on line 6
+there is an abstract type that is not supported. Note that we can not
+simply replace it by a (supported) type parameter since the
+CurrencyUnit class uses one of its implementing classes:
+Satoshis. Since the Satoshis class overrides A with Int64 anyway, we
+just remove the abstract type declaration and replace A by Int64
+everywhere.
 
-That transformation is equivalent. Case objects have some additional
-properties (in particular, being serializable) and they inherit from
-\texttt{Product} instead of \texttt{AnyRef}, but none of our code
-depends on any of that.
+\paragraph{Non-Literal BigInt Constructor Argument.} In
+CurrencyUnits.scala on line 18 the BigInt constructor is called with a
+non-literal argument. As described before, the types in the Stainless
+library are more restricted than their Scala library counterparts. In
+particular, the Stainless BigInt constructor is restricted to literal
+arguments. So we simply replace \texttt{toLong} by
+\texttt{underlying.toBigInt}: instead of converting the underlying
+Int64 (which in turn has an underlying BigInt) to Long and then back
+to BigInt we simply directly return the BigInt. This is an equivalent
+transformation: the only thing that might go wrong in the detour via
+\texttt{Long} is that the underlying BigInt does not fit into a
+Long. However, the only constructor of Int64Impl ensures exactly that
+and all functions producing Int64 do so via this constructor.
 
+\paragraph{Self-Reference in Type Parameter Bound.} In
+NumberTypes.scala on lines 3 and 19 are classes a type parameter and a
+type boundary that contains that typarameter itself. Stainless does
+not currently support such self-referential type boundaries. We opened
+an issue \cite{Stainless:issue519} on the Stainless repository and the
+developers have targeted version 0.4 to support self-referential type
+boundaries. Since our code only uses Number with type parameter T
+instantiated to Int64, we just remove the type parameter declaration
+and replace all its occurrences it by Int64.
 
-\item Abstract Type Members.
-
-
-Note that we can not simply replace the unsupported abstract type
-member by a (supported) type parameter. The problem is that the
-CurrencyUnit class uses one of its implementing classes: Satoshis.
-
-Satoshis would have to instantiate a potential type parameter with
-type Int64, so it would extend CurrencyUnit[Int64]. But that is too
-specific, because the return type of the \texttt{+}-method would then then be
-CurrencyUnit[Int64] not CurrencyUnit[A].
-
-Since we only want to verify the addition of satoshis, and the
-Satoshis class overrides A with Int64 anyway, we just remove the
-abstract type and set it to Int64.
-
-We remove line 6 and line 22 from CurrencyUnits.scala (to maintain
-line numbers we actually replace them with empty lines for now) and in
-line 18 we replace A by Int64.
-
-
-\item{Non-Literal BigInt Constructor Argument}
-
-
-As described before, the types in the Stainless library are more
-restricted than their Scala library counterparts. In particular, the
-Stainless BigInt constructor is restricted to literal arguments.
-
-
-Here we can simply use toBigInt on the field \texttt{underlying}
-directly.  So, instead of converting the underlying to Long and back
-to BigInt we convert underlying directly to BigInt.
-
-We replace line 26 by
-\begin{lstlisting}[style=scala]
-def toBigInt: BigInt = underlying.toBigint
-\end{lstlisting}
-
-This is an equivalent transformation: the only thing that might go
-wrong in the detour via \texttt{Long} is that the BigInt underlying
-Int64 in turn underlying Satoshis does not fit into a Long. However,
-the only constructor of Int64 ensures exactly that.
-
-\item{Self-Reference in Type Parameter Bound}
-
-Stainless does not currently support a class with a type parameter
-with a type boundary that contains the type parameter itself. We opened an
-issue \cite{Stainless:issue519} on the Stainless repository and the
-Stainless developers have targeted Stainless version 0.4 to support
-such self-referential type boundaries.
-
-For now, since our code only uses Number with type parameter T
-instantiated to Int64, we just remove the type parameter and replace
-it by Int64. We respectively replace lines 8, 44 and 49 by
-\begin{lstlisting}[style=scala]
-sealed abstract class Number {
-\end{lstlisting}
-
-\begin{lstlisting}[style=scala]
-sealed abstract class SignedNumber extends Number
-\end{lstlisting}
-
-\begin{lstlisting}[style=scala]
-sealed abstract class Int64 extends SignedNumber {
-\end{lstlisting}
-
-and replace T by Int64 in lines 25-27.
-
-
-\item{Missing Member \texttt{bigInteger} in BigInt}
-
-
-
-The Scala class BigInt is essentially a wrapper around
+\paragraph{Missing Member \texttt{bigInteger} in BigInt.} In NumberType
+on line 6 there is a reference to \texttt{bigInteger}. The Scala
+BigInt class is essentially a wrapper around
 java.math.BigInteger. BigInt has a member bigInteger which is the
 underlying instance of the Java class. The Java class has a method
 longValueExact which returns a long only if the BigInteger fits into a
 long, otherwise throws exception. Stainless does not support Java
-classes and in particular its BigInt has no member bigInteger.
+classes and in particular its BigInt has no member
+bigInteger. However, our code never calls toLong anymore, so we just
+remove it.
 
-However, our code never calls toLong anymore, so we just remove it. We
-replace line 14 in NumberType.scala and line 28 in CurrencyUnits.scala
-by an empty line.
-
-
-\item{Type Member}
-
-
-Our version of Stainless does not support type members. We just
-replace all occurrence of A with BigInt, since A is never overwritten
-in an implementing class.
-
-We remove line 9 in NumberType.scala and replace A by BigInt in lines
-12, 25, 33 and 50.
-
-In the mean time Stainless has implemented support for type member
-\cite{Stainless:pull470}.  Since version 0.2 verification should
-succeed without this change.
+\paragraph{Type Members.} In NumberType.scala there is a type member
+on line 4. Our version of Stainless (0.1) does not support type
+members. We just remove the declaration and replace all occurrences of
+A with BigInt, since A is never overwritten in an implementing class.
+Note that in the mean time Stainless has implemented support for type
+members \cite{Stainless:pull470}.  Since version 0.2 verification
+should succeed without this change.
 
 
+\paragraph{Missing Bitwise-And Method on BigInt.} Contrary to Scala
+BigInt, the Stainless BigInt class does not support bitwise
+operations, in particular not the \&-method used in NumberType.scala
+on line 13. However, as described above, the checkResult function is
+both broken and redundant, so we remove it and all calls to it.
 
-\item{Missing Bitwise-And Method on BigInt}
+\paragraph{Inner Class in Case Object.} We have inner classes in
+NumberType.scala on line 31 and in CurrencyUnits.scala on line
+26. Stainless does not support inner classes in a case object. We just
+move the inner classes out of the case objects. They do not interfere
+with any other code.
 
-Contrary to Scala BigInt, the Stainless BigInt class does not support
-bitwise operations, in particular not the \&-method for bitwise and.
+\paragraph{Message Parameter in Require.} The calls of the require
+function on lines 32 and 34 in CurrencyUnits.scala have a second
+parameter: the error message. Stainless does not support the message
+parameter. We simply remove it.
 
-The bitwise and with the andMask on line 34 is a bounds check.  It
-checks if the result parameter is in range of the specified type,
-which in our case is the hard coded Int64.
-
-So, we replace the \& mask with a check whether the result
-is in range of Long.MinValue and Long.MaxValue, because Int64 has the
-same 64-bit range as Long.  
-
-We replace lines 34-35 by the following, squeezed into two lines to
-preserve line numbers. Note that the BigInt constructor requires a
-literal:
-
-\begin{lstlisting}[style=scala]
-require(result <= BigInt("9223372036854775807")  
-  && result >= BigInt("-9223372036854775808"),
-      "Result was out of bounds, got: " + result)
-\end{lstlisting}
-
-
-
-
-\item{Inner Class in Case Object}
-
-Stainless does not support inner classes in a case object. Bitcoin-s
-uses this a lot to separate the class from its implementation.
-
-This is easy to fix. We just move the inner classes out of the case objects. They do
-not interfere with any other code.
-
-We remove lines 66-71 in NumberType.scala and insert them at the end of the file.
-We remove line 42 in CurrencyUnits.scala and insert it at the end of the file.
+\paragraph{Missing Implicit Long to BigInt Conversion.} The Scala
+BigInt class has implict conversions from Long which NumberType.scala
+uses on lines 32 and 34 and they are missing in the Stainless
+BigInt. Since a BigInt constructor with a Long argument is also
+missing, we replace the Long literals by an explicit call to the
+BigInt constructor with a literal string argument,
+e.g. \texttt{BigInt("-9223...5808")}.
 
 
-\item{Message Parameter in Require}
+\paragraph{The Specification.} Now that all our code has been
+transformed into the supported fragment, we can finally write our
+specification, shown in Figure~\ref{fig:spec}, and verify it with
+Stainless, as the output in Figure~\ref{fig:result} shows.
 
-Here the require(condition, message) is used as an assertion: if the
-condition is false the fail with message.  Stainless does not support
-the message parameter of require.  For the verification we can simply
-remove that parameter.
+\begin{figure}
+\lstinputlisting[style=scala, firstline=9, lastline=12, firstnumber=9]{../code/addition/src/main/scala/verified/currency/CurrencyUnits.scala}
+\caption{Addition function with specification}
+\label{fig:spec}
+\end{figure}
 
-
-
-\item{Missing Implicit Long to BigInt Conversion}
-
-This error message does not specify a line number and it is not clear
-what ``inv'' is. However, the Scala BigInt has implict conversions
-from Long and they are missing in the Stainless BigInt.
-
-
-
-We replace the two require clauses at lines 67 and following in NumberType.scala
-
-\begin{lstlisting}[style=scala]
-  require(underlying >= -9223372036854775808L)
-  require(underlying <= 9223372036854775807L)
-\end{lstlisting}
-
-by:
-\begin{lstlisting}[style=scala]
-  require(underlying >= BigInt(-9223372036854775808L))
-  require(underlying <= BigInt(9223372036854775807L))
-\end{lstlisting}
-
-We also replace lines 76 and 77
-\begin{lstlisting}[style=scala]
-  lazy val min = Int64(-9223372036854775808L)
-  lazy val max = Int64(9223372036854775807L)
-\end{lstlisting}
-
-by:
-\begin{lstlisting}[style=scala]
-  lazy val min = Int64(BigInt(-9223372036854775808L))
-  lazy val max = Int64(BigInt(9223372036854775807L))
-\end{lstlisting}
-
-
-\item{Missing BigInt Constructor with Long Argument}
-
-Here again, the Scala BigInt has a constructor with a Long argument
-which is missing in the Stainless BigInt.
-
-We simply replace the Long values in a BigInt constructor call with a string
-literal.
-
-The lines from the previous transformation respectively change into
-the following:
-
-\begin{lstlisting}[style=scala]
-  require(underlying >= BigInt("-9223372036854775808"))
-  require(underlying <= BigInt("9223372036854775807"))
-\end{lstlisting}
-
-and
-
-\begin{lstlisting}[style=scala]
-  lazy val min = Int64(BigInt("-9223372036854775808"))
-  lazy val max = Int64(BigInt("9223372036854775807"))
-}
-\end{lstlisting}
-\end{enumerate}
-
-
-\paragraph{The Specification.}
-
-We can use equals (==) directly on Satoshis, because it is a case class.
-
-The addition will now look like this:
-\lstinputlisting[style=scala, firstline=15, lastline=18, firstnumber=15]{../code/addition/src/main/scala/verified/currency/CurrencyUnits.scala}
-
-
-
-\paragraph{Result}
-
-Finally, everything is green and correctly verified. 
 \begin{figure}
 	\centering
 		\includegraphics[width=\textwidth]{result_output}
 	\caption{Stainless output for the transformed code}
+  \label{fig:result}
 \end{figure}
 
 
+\section{Conclusion and Future Work}
 
-
-
-
-
-
-
-\section{Conclusion}
-\label{chap:conclusion}
+We have show
+-- bugs (already fixed)
+-- suggestions for bitcoin-s
 
 Because of the limitations of the verication tool, we could only
-verify a rewritten version of the original Bitcoin-S code.  So we can
-not guarantee the correctness of the addition of Satoshis with zero in
-Bitcoin-S.  Not all changes we made were as trivial as the replacement
-of objects with case objects.  For these non-trivial changes, as seen
-for example the bound check in section \ref{sec:bound_check}, we
-cannot say whether they are equivalent to the original implementation
-or not.
+verify a rewritten version of the original Bitcoin-S code.
 
 So code should be written specically with formal verication in mind,
-in order to successfully verify it.  Otherwise, it needs a lot of
-changes in the software because verification is mathematical and the
-current software is written mostly in object-oriented style.  Software
-written in the functional paradigm would be much easier to reason
-about.
-
-Thus, either Stainless must find ways to translate more of built-in
-object-oriented patterns of Scala to their verification tool or
-developers must invest more in functional programming.
 
 Also, we found that trying to verify code reveals bugs as shown in
 section \ref{sec:bugfix}.  Finally, our work led to some feedback to
 the Stainless developers to improve the tool.
 
-\todo{conclusions: what's future work? how to
-  change bitcoin-s? how to extend stainless?}
-
 \bibliographystyle{splncs04}
+
 \bibliography{bibliography}
 
 
 \clearpage
 \appendix
-
-
-
-
-\section{Code Transformations} 
-\label{sec:transform}
-
-Here we see in detail how to transform the bitcoin-s code into the
-Scala fragment supported by Stainless. All subsections start with the
-Stainless error message(s) and finally a description of the changes we
-make to the code.
-
-We claim that all transformations are equivalent in the sense that if
-the addition-with-zero property holds for the transformed code, then
-it also holds for the code before the transformation.
-
-
-\subsection{Inheriting Objects}
-
-
-\begin{lstlisting}[style=stainless]
-[ Error  ] number/NumberType.scala:65:1: Objects cannot extend classes or implement traits, use a case object instead
-          object Int64 extends BaseNumbers[Int64] {
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^...
-[ Error  ] currency/CurrencyUnits.scala:33:1: Objects cannot extend classes or implement traits, use a case object instead
-          object Satoshis extends BaseNumbers[Satoshis] {
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^...
-\end{lstlisting}
-
-Here, we can just turn the objects into case objects by literally just
-changing the word \texttt{object} into \texttt{case object} on lines
-65 and 33 in the two respective files.
-
-That transformation is equivalent. Case objects have some additional
-properties (in particular, being serializable) and they inherit from
-\texttt{Product} instead of \texttt{AnyRef}, but none of our code
-depends on any of that.
-
-
-\subsection{Abstract Type Members}
-
-
-\begin{lstlisting}[style=stainless]
-[ Error  ] currency/CurrencyUnits.scala:6:3: Stainless doesn't support abstract type members
-            type A
-            ^^^^^^
-\end{lstlisting}
-
-Note that we can not simply replace the unsupported abstract type
-member by a (supported) type parameter. The problem is that the
-CurrencyUnit class uses one of its implementing classes: Satoshis.
-
-Satoshis would have to instantiate a potential type parameter with
-type Int64, so it would extend CurrencyUnit[Int64]. But that is too
-specific, because the return type of the \texttt{+}-method would then then be
-CurrencyUnit[Int64] not CurrencyUnit[A].
-
-Since we only want to verify the addition of satoshis, and the
-Satoshis class overrides A with Int64 anyway, we just remove the
-abstract type and set it to Int64.
-
-We remove line 6 and line 22 from CurrencyUnits.scala (to maintain
-line numbers we actually replace them with empty lines for now) and in
-line 18 we replace A by Int64.
-
-
-\subsection{Non-Literal BigInt Constructor Argument}
-
-
-\begin{lstlisting}[style=stainless]
-[ Error  ] currency/CurrencyUnits.scala:26:33: Only literal arguments are allowed for BigInt.
-            def toBigInt: BigInt = BigInt(toLong)
-                                          ^^^^^^
-\end{lstlisting}
-
-As described before, the types in the Stainless library are more
-restricted than their Scala library counterparts. In particular, the
-Stainless BigInt constructor is restricted to literal arguments.
-
-
-Here we can simply use toBigInt on the field \texttt{underlying}
-directly.  So, instead of converting the underlying to Long and back
-to BigInt we convert underlying directly to BigInt.
-
-We replace line 26 by
-\begin{lstlisting}[style=scala]
-def toBigInt: BigInt = underlying.toBigint
-\end{lstlisting}
-
-This is an equivalent transformation: the only thing that might go
-wrong in the detour via \texttt{Long} is that the BigInt underlying
-Int64 in turn underlying Satoshis does not fit into a Long. However,
-the only constructor of Int64 ensures exactly that.
-
-\subsection{Self-Reference in Type Parameter Bound}
-
-\begin{lstlisting}[style=stainless]
-[ Error  ] number/NumberType.scala:8:30: Unknown type parameter type T
-          sealed abstract class Number[T <: Number[T]] {
-                                        ^^^^^^^^^^^^^^
-\end{lstlisting}
-
-Stainless does not currently support a class with a type parameter
-with a type boundary that contains the type parameter itself. We opened an
-issue \cite{Stainless:issue519} on the Stainless repository and the
-Stainless developers have targeted Stainless version 0.4 to support
-such self-referential type boundaries.
-
-For now, since our code only uses Number with type parameter T
-instantiated to Int64, we just remove the type parameter and replace
-it by Int64. We respectively replace lines 8, 44 and 49 by
-\begin{lstlisting}[style=scala]
-sealed abstract class Number {
-\end{lstlisting}
-
-\begin{lstlisting}[style=scala]
-sealed abstract class SignedNumber extends Number
-\end{lstlisting}
-
-\begin{lstlisting}[style=scala]
-sealed abstract class Int64 extends SignedNumber {
-\end{lstlisting}
-
-and replace T by Int64 in lines 25-27.
-
-
-\subsection{Missing Member \texttt{bigInteger} in BigInt}
-
-
-\begin{lstlisting}[style=stainless]
-[ Error  ] number/NumberType.scala:14:22: Unknown call to bigInteger on Number.this.toBigInt (BigInt) with arguments List() of type List()
-            def toLong: Long = toBigInt.bigInteger.longValueExact()
-                              ^^^^^^^^^^^^^^^^^^^
-\end{lstlisting}
-
-The Scala class BigInt is essentially a wrapper around
-java.math.BigInteger. BigInt has a member bigInteger which is the
-underlying instance of the Java class. The Java class has a method
-longValueExact which returns a long only if the BigInteger fits into a
-long, otherwise throws exception. Stainless does not support Java
-classes and in particular its BigInt has no member bigInteger.
-
-However, our code never calls toLong anymore, so we just remove it. We
-replace line 14 in NumberType.scala and line 28 in CurrencyUnits.scala
-by an empty line.
-
-
-\subsection{Type Member}
-
-\begin{lstlisting}[style=stainless]
-[Warning ] number/NumberType.scala:9:3: Could not extract tree in class: type A = BigInt (class scala.reflect.internal.Trees$TypeDef)
-              type A = BigInt
-              ^^^^^^^^^^^^^^^
-\end{lstlisting}
-
-Our version of Stainless does not support type members. We just
-replace all occurrence of A with BigInt, since A is never overwritten
-in an implementing class.
-
-We remove line 9 in NumberType.scala and replace A by BigInt in lines
-12, 25, 33 and 50.
-
-In the mean time Stainless has implemented support for type member
-\cite{Stainless:pull470}.  Since version 0.2 verification should
-succeed without this change.
-
-
-
-\subsection{Missing Bitwise-And Method on BigInt}
-
-\begin{lstlisting}[style=stainless]
-[ Error  ] number/NumberType.scala:34:14: Unknown call to & on result (BigInt) with arguments List(Number.this.andMask) of type List(BigInt)
-              require((result & andMask) == result,
-                      ^^^^^^^^^^^^^^^^
-\end{lstlisting}
-
-Contrary to Scala BigInt, the Stainless BigInt class does not support
-bitwise operations, in particular not the \&-method for bitwise and.
-
-The bitwise and with the andMask on line 34 is a bounds check.  It
-checks if the result parameter is in range of the specified type,
-which in our case is the hard coded Int64.
-
-So, we replace the \& mask with a check whether the result
-is in range of Long.MinValue and Long.MaxValue, because Int64 has the
-same 64-bit range as Long.  
-
-We replace lines 34-35 by the following, squeezed into two lines to
-preserve line numbers. Note that the BigInt constructor requires a
-literal:
-
-\begin{lstlisting}[style=scala]
-require(result <= BigInt("9223372036854775807")  
-  && result >= BigInt("-9223372036854775808"),
-      "Result was out of bounds, got: " + result)
-\end{lstlisting}
-
-
-
-
-\subsection{Inner Class in Case Object}
-
-\begin{lstlisting}[style=stainless]
-[Warning ] number/NumberType.scala:66:3: Could not extract tree in class: case private class Int64Impl extends Int64 with Product with Serializable {
-...
-[Warning ] } (class scala.reflect.internal.Trees$ClassDef)
-              private case class Int64Impl(underlying: BigInt) extends Int64 {
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^...
-...
-[Warning ] currency/CurrencyUnits.scala:42:3: Could not extract tree in class: case private class SatoshisImpl extends Satoshis with Product with Serializable {
-...
-[Warning ] } (class scala.reflect.internal.Trees$ClassDef)
-              private case class SatoshisImpl(underlying: Int64) extends Satoshis
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-\end{lstlisting}
-
-Stainless does not support inner classes in a case object. Bitcoin-s
-uses this a lot to separate the class from its implementation.
-
-This is easy to fix. We just move the inner classes out of the case objects. They do
-not interfere with any other code.
-
-We remove lines 66-71 in NumberType.scala and insert them at the end of the file.
-We remove line 42 in CurrencyUnits.scala and insert it at the end of the file.
-
-
-\subsection{Message Parameter in Require}
-
-\begin{lstlisting}[style=stainless]
-[Warning ] number/NumberType.scala:67:3: Could not extract tree in class: scala.this.Predef.require(Int64Impl.this.underlying.>=(math.this.BigInt.long2bigInt(-9223372036854775808L)), "Number was too small for a int64, got: ".+(Int64Impl.this.underlying)) (class scala.reflect.internal.Trees$Apply)
-          require(underlying >= -9223372036854775808L,
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^...
-[Warning ] number/NumberType.scala:69:3: Could not extract tree in class: scala.this.Predef.require(Int64Impl.this.underlying.<=(math.this.BigInt.long2bigInt(9223372036854775807L)), "Number was too big for a int64, got: ".+(Int64Impl.this.underlying)) (class scala.reflect.internal.Trees$Apply)
-          require(underlying <= 9223372036854775807L,
-          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^...
-[ Error  ] checkResult$0 depends on missing dependencies: require$1.
-\end{lstlisting}
-
-Here the require(condition, message) is used as an assertion: if the
-condition is false the fail with message.  Stainless does not support
-the message parameter of require.  For the verification we can simply
-remove that parameter.
-
-
-
-\subsection{Missing Implicit Long to BigInt Conversion}
-
-\begin{lstlisting}[style=stainless]
-[ Error  ] inv$4 depends on missing dependencies: long2bigInt$0.
-\end{lstlisting}
-
-This error message does not specify a line number and it is not clear
-what ``inv'' is. However, the Scala BigInt has implict conversions
-from Long and they are missing in the Stainless BigInt.
-
-
-
-We replace the two require clauses at lines 67 and following in NumberType.scala
-
-\begin{lstlisting}[style=scala]
-  require(underlying >= -9223372036854775808L)
-  require(underlying <= 9223372036854775807L)
-\end{lstlisting}
-
-by:
-\begin{lstlisting}[style=scala]
-  require(underlying >= BigInt(-9223372036854775808L))
-  require(underlying <= BigInt(9223372036854775807L))
-\end{lstlisting}
-
-We also replace lines 76 and 77
-\begin{lstlisting}[style=scala]
-  lazy val min = Int64(-9223372036854775808L)
-  lazy val max = Int64(9223372036854775807L)
-\end{lstlisting}
-
-by:
-\begin{lstlisting}[style=scala]
-  lazy val min = Int64(BigInt(-9223372036854775808L))
-  lazy val max = Int64(BigInt(9223372036854775807L))
-\end{lstlisting}
-
-
-\subsection{Missing BigInt Constructor with Long Argument}
-
-\begin{lstlisting}[style=stainless]
-[ Error  ] apply$14 depends on missing dependencies: BigInt$0, apply$15.
-\end{lstlisting}
-
-Here again, the Scala BigInt has a constructor with a Long argument
-which is missing in the Stainless BigInt.
-
-We simply replace the Long values in a BigInt constructor call with a string
-literal.
-
-The lines from the previous transformation respectively change into
-the following:
-
-\begin{lstlisting}[style=scala]
-  require(underlying >= BigInt("-9223372036854775808"))
-  require(underlying <= BigInt("9223372036854775807"))
-\end{lstlisting}
-
-and
-
-\begin{lstlisting}[style=scala]
-  lazy val min = Int64(BigInt("-9223372036854775808"))
-  lazy val max = Int64(BigInt("9223372036854775807"))
-}
-\end{lstlisting}
 
 
 
