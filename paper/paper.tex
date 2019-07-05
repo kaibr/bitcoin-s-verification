@@ -85,13 +85,13 @@
   We try to verify some properties of the bitcoin-s library, a Scala
   implementation of parts of the Bitcoin protocol. We use the
   Stainless verifier which supports programs in a fragment of Scala
-  called \emph{Pure Scala}.  Since bitcoin-s is not written in this
+  called \emph{Pure Scala}. Since bitcoin-s is not written in this
   fragment, we extract the relevant code from it and perform a series
   of equivalent transformations until we arrive at code that we
   successfully verify. In that process we find and fix two bugs in
   bitcoin-s.
 
-\keywords{Bitcoin  \and Scala \and bitcoin-s \and Stainless.}
+\keywords{Bitcoin \and Scala \and bitcoin-s \and Stainless.}
 \end{abstract}
 
 
@@ -392,7 +392,7 @@ the entire bitcoin-s codebase results in many errors -- as was to be
 expected. We tried to extract only the code relevant to the
 no-inflation-property and to verify that. However, even the extracted
 code has more than 1500 lines and liberally uses Scala features
-outside of the supported fragment.  We tried to transform the code
+outside of the supported fragment. We tried to transform the code
 into the supported fragment, but quickly realized that a better
 approach is to first verify a simpler property with less code involved
 and later come back to the no-inflation property with more
@@ -434,7 +434,7 @@ aims to represent the C-type \texttt{int64\_t}.
 \paragraph{Extracting the Relevant Code} The relevant code for the
 addition of satoshis is in two files: CurrencyUnits.scala and
 NumberType.scala. From those files we removed the majority of the code
-because it is not needed for the verification of our property.  For
+because it is not needed for the verification of our property. For
 example, we removed all number types except for Int64 (so Int32,
 UInt64, etc.) because they are not used. We also removed the
 superclasses Factory and NetworkElement of CurrencyUnit and Number,
@@ -523,7 +523,7 @@ on line 4. Our version of Stainless (0.1) does not support type
 members. We just remove the declaration and replace all occurrences of
 A with BigInt, since A is never overwritten in an implementing class.
 Note that in the meantime Stainless has implemented support for type
-members \cite{Stainless:pull470}.  Since version 0.2 verification
+members \cite{Stainless:pull470}. Since version 0.2 verification
 should succeed without this change.
 
 
