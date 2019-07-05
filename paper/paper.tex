@@ -148,8 +148,8 @@ a postcondition using \emph{ensuring}.
 \end{figure}
 Our function does not satisfy the specification. An overflow in the
 32-bit Int leads to a negative result for the input 17, as Stainless
-reports in Figure~\ref{fig:failed}. Changing the type from Int to
-BigInt will result in a successful verification.
+reports in Figure~\ref{fig:failed}. Changing the type Int to BigInt
+will result in a successful verification.
 
 \begin{figure}
 	\centering
@@ -176,7 +176,7 @@ function and while loops. They turn out not to be relevant for the
 current work.
 
 What will turn out to be more relevant for us are the Scala features
-which Stainless does not support, such as: (concrete) class
+which Stainless does not support, such as: arbitrary class
 definitions, inheritance by objects, abstract type members, and inner
 classes in case objects.
 
@@ -339,15 +339,15 @@ Now that we have a transaction output, we create a transaction to
 spend it in Figure~\ref{fig:tx}. First, we need a reference to an
 output of a previous transaction, here called
 \texttt{outPoint}. Second, we add some information on how to spend
-that output, in particular, how to sign the transaction to allow
-this. Now we assemble the list of unspent transaction outputs (utxos),
-in our case just one.
+that output, in particular, how to sign the transaction. Now we
+assemble the list of unspent transaction outputs (utxos), in our case
+just one.
 
 We then set the amount of satoshis that we want to spend. The Int64
 class aims to emulate a C data type in Scala, and we will look at it
 more closely in the next section.
 
-We then create a lock script (\texttt{destinationSPK}) to receive the
+We then create a lock script (\textit{destinationSPK}) to receive the
 coins, create our list of transaction outputs (\texttt{destinations}),
 define the fee rate and set some bitcoin network parameters.
 
@@ -360,7 +360,7 @@ checkTransaction function, which will return true.
 
 \paragraph{A Bug in the checkTransaction Function.} Note lines 15-17
 of the checkTransaction function in Figure~\ref{fig:checktrans}. Here,
-value prevOutputTxIds gathers a list of all transaction indentifiers
+the value prevOutputTxIds gathers a list of all transaction identifiers
 referenced by the inputs of the current transaction. If the size of
 this list is the same as the size of this list with duplicates
 removed, we know that no transaction has been referenced twice. This
@@ -369,10 +369,10 @@ previous transaction. The check is too strict: checkTransaction
 returns false for valid transactions.
 
 The fix is simple: we perform the duplicate check on the
-TransactionOutPoints instead of on their transaction identifiers.  A
-TransactionOutPoint contains the txId as well as the output index it
-references. Note that TransactionOutPoint is a case class and thus has
-a built in == method.
+TransactionOutPoint instances instead of on their transaction
+identifiers. Note that TransactionOutPoint is a case class and thus
+its notion of equality is just what we need: equality of of both the
+txId and the output index.
 
 Specifically, we replace lines 15-17 as follows:
 \begin{lstlisting}[style=scala, firstnumber=15]
@@ -408,7 +408,7 @@ satoshis were credited to your account, you would not want your
 balance to change! It is also the simplest meaningful property to
 verify that we can think of. However, the code involved in performing
 the addition of two satoshi amounts in bitcoin-s is non-trivial. The
-reason for that is a pecularity of consensus code: agreement with the
+reason for that is a peculiarity of consensus code: agreement with the
 majority is more important than correctness, whatever correctness
 might mean. The most widely used bitcoin implementation by far is the
 reference implementation Bitcoin Core, written in C++. For consensus
@@ -470,10 +470,10 @@ also holds for the code before the transformation.
 
 \paragraph{Inheriting Objects.} In both files we have objects
 extending the BaseNumbers trait, on lines 30 and 23 respectively,
-which Stainless does not support. We simply turn those onjects into
+which Stainless does not support. We simply turn those objects into
 case objects. That transformation is equivalent. Case objects have
 various additional properties (for example, being serializable) but
-none of our code depends on the absence of any of that.
+none of our code depends on the absence of those.
 
 \paragraph{Abstract Type Members.} In CurrencyUnits.scala on line 6
 there is an abstract type that is not supported. Note that we can not
@@ -498,31 +498,31 @@ Long. However, the only constructor of Int64Impl ensures exactly that
 and all functions producing Int64 do so via this constructor.
 
 \paragraph{Self-Reference in Type Parameter Bound.} In
-NumberTypes.scala on lines 3 and 19 are classes a type parameter and a
-type boundary that contains that typarameter itself. Stainless does
-not currently support such self-referential type boundaries. We opened
-an issue \cite{Stainless:issue519} on the Stainless repository and the
-developers have targeted version 0.4 to support self-referential type
-boundaries. Since our code only uses Number with type parameter T
-instantiated to Int64, we just remove the type parameter declaration
-and replace all its occurrences it by Int64.
+NumberTypes.scala both on lines 3 and 19 is a class with a type
+parameter and a type boundary that contains that type parameter
+itself. Stainless does not currently support such self-referential
+type boundaries. We opened an issue \cite{Stainless:issue519} on the
+Stainless repository and the developers have targeted version 0.4 to
+support self-referential type boundaries. Since our code only uses
+Number with type parameter T instantiated to Int64, we just remove the
+type parameter declaration and replace all its occurrences by Int64.
 
-\paragraph{Missing Member \texttt{bigInteger} in BigInt.} In NumberType
-on line 6 there is a reference to \texttt{bigInteger}. The Scala
-BigInt class is essentially a wrapper around
+\paragraph{Missing Member \texttt{bigInteger} in BigInt.} In
+NumberType on line 6 there is a reference to \texttt{bigInteger}. The
+Scala BigInt class is essentially a wrapper around
 java.math.BigInteger. BigInt has a member bigInteger which is the
 underlying instance of the Java class. The Java class has a method
 longValueExact which returns a long only if the BigInteger fits into a
 long, otherwise throws exception. Stainless does not support Java
 classes and in particular its BigInt has no member
-bigInteger. However, our code never calls toLong anymore, so we just
+bigInteger. However, our code does not call toLong anymore, so we just
 remove it.
 
 \paragraph{Type Members.} In NumberType.scala there is a type member
 on line 4. Our version of Stainless (0.1) does not support type
 members. We just remove the declaration and replace all occurrences of
 A with BigInt, since A is never overwritten in an implementing class.
-Note that in the mean time Stainless has implemented support for type
+Note that in the meantime Stainless has implemented support for type
 members \cite{Stainless:pull470}.  Since version 0.2 verification
 should succeed without this change.
 
@@ -589,12 +589,12 @@ work, like bitwise operations on integer types.
 
 On the other hand, bitcoin-s uses features that might not be supported
 even by future Stainless versions, such as (concrete, non-case)
-classes \todo{is that even true? where?} or calls to Java code. Here
-the bitcoin-s code can hopefully be adapted to accomodate formal
+classes \todo{NOT TRUE, no classes found} or calls to Java code. Here
+the bitcoin-s code can hopefully be adapted to accommodate formal
 verification.
 
 From our results we conclude that formal verification of bitcoin
-libraries in general and bitcoin-s in particular is a worthwile
+libraries in general and bitcoin-s in particular is a worthwhile
 endeavour. We are looking forward to verifying more substantial parts
 of the code in future work.
 
@@ -602,7 +602,12 @@ of the code in future work.
 
 \bibliography{bibliography}
 
-\todo{reference to verified code}
+\todo{reference to verified code} \todo{say which version of stainless
+  we used, which version of bitcoin-s:
+  91633375a37a170ba260ff4b443582aca4aa0c77 }
+
+\todo{code in text: italic or courier?}
+
 
 \clearpage
 \appendix
