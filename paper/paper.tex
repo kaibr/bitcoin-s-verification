@@ -109,11 +109,12 @@ properties of the bitcoin-s library with the Stainless verifier.
 \paragraph{The Bitcoin-S Library.} The bitcoin-s library is an
 implementation of parts of the Bitcoin protocol in Scala
 \cite{BitcoinS:website,BitcoinS:github}. In particular, it allows to
-serialize, deserialize, sign and validate Bitcoin transactions. The library
-uses immutable data structures and algebraic data types but is not
-written with formal verification in mind. According to the website,
-the library is used in production, handling significant amounts of
-cryptocurrency each day \cite{BitcoinS:website}.
+serialize, deserialize, sign and validate Bitcoin transactions. The
+library uses immutable data structures and algebraic data types but is
+not specifically written with formal verification in mind. According
+to the website, the library is used in production, handling
+significant amounts of cryptocurrency each day
+\cite{BitcoinS:website}.
 
 \paragraph{The Stainless Verifier.} Stainless is the successor of the
 Leon verifier
@@ -588,8 +589,7 @@ function. Some other features presumably require more substantial
 work, like bitwise operations on integer types.
 
 On the other hand, bitcoin-s uses features that might not be supported
-even by future Stainless versions, such as (concrete, non-case)
-classes \todo{NOT TRUE, no classes found} or calls to Java code. Here
+even by future Stainless versions, such as calls to Java code. Here
 the bitcoin-s code can hopefully be adapted to accommodate formal
 verification.
 
@@ -602,7 +602,9 @@ of the code in future work.
 
 \bibliography{bibliography}
 
-\todo{reference to verified code} \todo{say which version of stainless
+\todo{reference to verified code}
+
+\todo{say which version of stainless
   we used, which version of bitcoin-s:
   91633375a37a170ba260ff4b443582aca4aa0c77 }
 
