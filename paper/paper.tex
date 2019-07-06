@@ -68,7 +68,6 @@
  
 \newcommand{\todo}[1]{{\par \color{red}#1}}
 
-
 \begin{document}
 
 \title{Towards Verifying the Bitcoin-S Library}
@@ -82,7 +81,7 @@
 \maketitle             
 
 \begin{abstract}
-  We try to verify some properties of the bitcoin-s library, a Scala
+  We try to verify properties of the bitcoin-s library, a Scala
   implementation of parts of the Bitcoin protocol. We use the
   Stainless verifier which supports programs in a fragment of Scala
   called \emph{Pure Scala}. Since bitcoin-s is not written in this
@@ -117,10 +116,9 @@ significant amounts of cryptocurrency each day
 \cite{BitcoinS:website}.
 
 \paragraph{The Stainless Verifier.} Stainless is the successor of the
-Leon verifier
-\cite{DBLP:conf/ecoop/BlancKKS13,DBLP:conf/pldi/VoirolKK15,DBLP:conf/pldi/BlancK15}
-and is developed at EPF Lausanne \cite{Stainless:github}. It is
-intended to be used by programmers without training in formal
+Leon verifier and is developed at EPF Lausanne
+\cite{DBLP:conf/ecoop/BlancKKS13,DBLP:conf/pldi/VoirolKK15,DBLP:conf/pldi/BlancK15}. It
+is intended to be used by programmers without training in formal
 verification. To facilitate that, it accepts specifications written in
 the programming language itself (Scala). Also, it focusses on
 counterexample finding in addition to proving
@@ -130,8 +128,13 @@ and often both at the same time.
 
 The example in Figure~\ref{fig:factorial} adapted from the Stainless
 documentation \cite{Stainless:documentation} shows how the verifier is
-used. Notice how a precondition is specified using \emph{require} and
-a postcondition using \emph{ensuring}.
+used. Note how a precondition is specified using \texttt{require} and
+a postcondition using \texttt{ensuring}. Our function does not satisfy
+the specification. An overflow in the 32-bit integer type leads to a
+negative result for the input 17, as Stainless reports in
+Figure~\ref{fig:failed}. Changing the type \texttt{Int} to
+\texttt{BigInt} will result in a successful verification.
+
 
 \begin{figure}
 \begin{lstlisting}[style=scala]
@@ -147,10 +150,6 @@ a postcondition using \emph{ensuring}.
 	\caption{Factorial function with specification}
 	\label{fig:factorial}
 \end{figure}
-Our function does not satisfy the specification. An overflow in the
-32-bit Int leads to a negative result for the input 17, as Stainless
-reports in Figure~\ref{fig:failed}. Changing the type Int to BigInt
-will result in a successful verification.
 
 \begin{figure}
 	\centering
@@ -161,32 +160,24 @@ will result in a successful verification.
 
 
 \paragraph{The Pure Scala Fragment.} The Scala fragment supported by
-Stainless is described in the Stainless documentation
-\cite{Stainless:documentation} in the section
-\href{https://epfl-lara.github.io/stainless/purescala.html}{Pure
-  Scala}.
-
-It comprises algebraic data types in the form of abstract classes,
-case classes and case objects, objects for grouping classes and
-functions, boolean expressions with short-circuit interpretation,
-generics with invariant type parameters, default values of function
-parameters, pattern matching, local and anonymous classes and more.
-In addition to Pure Scala Stainless also supports some imperative
-features, such as using a (mutable) variable in a local scope of a
-function and while loops. They turn out not to be relevant for the
-current work.
+Stainless comprises algebraic data types in the form of abstract
+classes, case classes and case objects, objects for grouping classes
+and functions, boolean expressions with short-circuit interpretation,
+generics with invariant type parameters, pattern matching, local and
+anonymous classes and more.  In addition to Pure Scala Stainless also
+supports some imperative features, such as using a (mutable) variable
+in a local scope of a function and while loops. They turn out not to
+be relevant for our current work.
 
 What will turn out to be more relevant for us are the Scala features
-which Stainless does not support, such as: arbitrary class
-definitions, inheritance by objects, abstract type members, and inner
-classes in case objects.
-
-Also, Stainless has its own library of some core data types and
-functions which are mapped to corresponding data types and functions
-inside of the SMT solver that Stainless ultimately relies on. Those
-data types in general do not have all the methods of the Scala data
-types. For example, the BigInt type in Scala has methods for bitwise
-operations while the BigInt type in Stainless does not.
+which Stainless does not support, such as: inheritance by objects,
+abstract type members, and inner classes in case objects. Also,
+Stainless has its own library of some core data types and functions
+which are mapped to corresponding data types and functions inside of
+the SMT solver that Stainless ultimately relies on. Those data types
+in general do not have all the methods of the Scala data types. For
+example, the \texttt{BigInt} type in Scala has methods for bitwise
+operations while the \texttt{BigInt} type in Stainless does not.
 
 \paragraph{Outline and Properties to Verify.} In the next section we
 try to verify the property that a regular (non-coinbase) transaction
@@ -206,6 +197,23 @@ of the code lies outside of the supported fragment. We perform a
 
 
 \section{The No-Inflation Property}
+
+
+The \texttt{checkTransaction} function shown in
+Figure~\ref{fig:checktrans} is crucial for the verification of the
+no-inflation property. Given a transaction it returns true if some
+basic checks succeed, otherwise false. For example, one of those
+checks is that both the list of inputs and list of outputs need to be
+non-empty.
+
+To better understand the validation of a transaction in bitcoin-s, it
+is useful to review how transactions are represented and created.
+
+\paragraph{Creating a Transaction.} To create a transaction, we first
+need some coins -- an unspent transaction output. We could load an
+actual unspent transaction output from the bitcoin network, but we
+create one manually in order to see this process. So we first create
+an (invalid) transaction with one output in Figure~\ref{fig:prevtx}.
 
 \begin{figure}
 \begin{lstlisting}[style=scala]
@@ -247,23 +255,6 @@ def checkTransaction(transaction: Transaction): Boolean = {
 \end{figure}
 
 
-A crucial function for the verification of the no-inflation property
-is the \texttt{checkTransaction} function shown in
-Figure~\ref{fig:checktrans}. Given a transaction it returns true if
-some basic checks succeed, otherwise false. For example, one of those
-checks is that both the list of inputs and list of outputs need to be
-non-empty.
-
-To better understand the validation of a transaction in bitcoin-s, it
-is useful to review how transactions are represented and created.
-
-\paragraph{Creating a Transaction.} The code in this subsection is
-adapted from the bitcoin-s documentation. To create a transaction, we
-first need some coins -- an unspent transaction output. We could load
-an actual unspent transaction output from the bitcoin network, but we
-create one manually in order to see this process. So we first create
-an (invalid) transaction with one output in Figure~\ref{fig:prevtx}.
-
 \begin{figure}
 \begin{lstlisting}[style=scala]
   val privKey = ECPrivateKey.freshPrivateKey
@@ -286,12 +277,12 @@ an (invalid) transaction with one output in Figure~\ref{fig:prevtx}.
 \end{figure}
 
 We first create a keypair, then a lock script with its public key,
-then the amount of satoshis, then a transaction output (utxo) for that
-amount and locked with that script. Finally we create a transaction
-with that output and no inputs. Of course, that is not a valid
-transaction, because it creates coins out of nothing. In particular,
-\texttt{checkTransaction(prevTx)} returns false, simply because the list of
-inputs is empty.
+then the amount of satoshis, then a transaction output (\texttt{utxo})
+for that amount and locked with that script. Finally we create a
+transaction with that output and no inputs. Of course, that is not a
+valid transaction, because it creates coins out of nothing. In
+particular, \texttt{checkTransaction(prevTx)} returns false, simply
+because the list of inputs is empty.
 
 \begin{figure}
 \begin{lstlisting}[style=scala]
@@ -341,14 +332,14 @@ spend it in Figure~\ref{fig:tx}. First, we need a reference to an
 output of a previous transaction, here called
 \texttt{outPoint}. Second, we add some information on how to spend
 that output, in particular, how to sign the transaction. Now we
-assemble the list of unspent transaction outputs (utxos), in our case
+assemble the list of unspent transaction outputs (\texttt{utxos}), in our case
 just one.
 
-We then set the amount of satoshis that we want to spend. The Int64
+We then set the amount of satoshis that we want to spend. The \texttt{Int64}
 class aims to emulate a C data type in Scala, and we will look at it
 more closely in the next section.
 
-We then create a lock script (\textit{destinationSPK}) to receive the
+We then create a lock script (\texttt{destinationSPK}) to receive the
 coins, create our list of transaction outputs (\texttt{destinations}),
 define the fee rate and set some bitcoin network parameters.
 
@@ -360,20 +351,20 @@ and send it to the Bitcoin network. We can also pass it to the
 checkTransaction function, which will return true.
 
 \paragraph{A Bug in the checkTransaction Function.} Note lines 15-17
-of the checkTransaction function in Figure~\ref{fig:checktrans}. Here,
-the value prevOutputTxIds gathers a list of all transaction identifiers
+in Figure~\ref{fig:checktrans}. Here, the value
+\texttt{prevOutputTxIds} gathers a list of all transaction identifiers
 referenced by the inputs of the current transaction. If the size of
 this list is the same as the size of this list with duplicates
 removed, we know that no transaction has been referenced twice. This
 prevents a transaction from spending two different outputs of the same
-previous transaction. The check is too strict: checkTransaction
-returns false for valid transactions.
+previous transaction. The check is too strict:
+\texttt{checkTransaction} returns false for valid transactions.
 
 The fix is simple: we perform the duplicate check on the
-TransactionOutPoint instances instead of on their transaction
-identifiers. Note that TransactionOutPoint is a case class and thus
-its notion of equality is just what we need: equality of of both the
-txId and the output index.
+\texttt{TransactionOutPoint} instances instead of on their transaction
+identifiers. Note that \texttt{TransactionOutPoint} is a case class
+and thus its notion of equality is just what we need: equality of of
+both the transaction identifier and the output index.
 
 Specifically, we replace lines 15-17 as follows:
 \begin{lstlisting}[style=scala, firstnumber=15]
@@ -393,11 +384,11 @@ the entire bitcoin-s codebase results in many errors -- as was to be
 expected. We tried to extract only the code relevant to the
 no-inflation-property and to verify that. However, even the extracted
 code has more than 1500 lines and liberally uses Scala features
-outside of the supported fragment. We tried to transform the code
-into the supported fragment, but quickly realized that a better
-approach is to first verify a simpler property with less code involved
-and later come back to the no-inflation property with more
-experience. So we now turn to the addition-with-zero property.
+outside of the supported fragment. We tried to transform the code into
+the supported fragment, but quickly realized that a better approach is
+to first verify a simpler property depending on less code and later
+come back to the no-inflation property with more experience. So we now
+turn to the addition-with-zero property.
 
 
 
@@ -417,8 +408,8 @@ code, bitcoin-s has little choice but to be in strict agreement with
 the reference implementation. To achieve that, it implements C-like
 data types in Scala and then implements functionality using those
 C-like data types. For example, the Satoshis class, which represents
-an amount of satoshis, is implemented using the class Int64 which
-aims to represent the C-type \texttt{int64\_t}.
+an amount of satoshis, is implemented using the class \texttt{Int64} which
+aims to represent the C-type \texttt{int64\_t}. 
 
 \begin{figure}
 \lstinputlisting[style=scala]{../code/addition/src/main/scala/extracted/number/NumberType.scala}
@@ -436,52 +427,59 @@ aims to represent the C-type \texttt{int64\_t}.
 addition of satoshis is in two files: CurrencyUnits.scala and
 NumberType.scala. From those files we removed the majority of the code
 because it is not needed for the verification of our property. For
-example, we removed all number types except for Int64 (so Int32,
-UInt64, etc.) because they are not used. We also removed the
-superclasses Factory and NetworkElement of CurrencyUnit and Number,
+example, we removed all number types except for \texttt{Int64} (so
+\texttt{Int32}, \texttt{UInt64}, etc.) because they are not used. We
+also removed the superclasses \texttt{Factory} and
+\texttt{NetworkElement} of \texttt{CurrencyUnit} and \texttt{Number},
 respectively, because the inherited members are not used. We further
-removed all binary operations on Number that are not used, like
-subtraction and multiplication. The extracted code is shown in
+removed all binary operations on \texttt{Number} that are not used,
+like subtraction and multiplication. The extracted code is shown in
 Figure~\ref{fig:numbertype} and Figure~\ref{fig:currencyunits}.
 
-\paragraph{A Bug in the checkResult Function.} Note the checkResult
-function on line 12 and the value andMask on line 23 of
-NumberType.scala. The function is intended to catch overflows by
-performing a bitwise conjunction of its argument with andMask and
-comparing the result with the argument. However, because of the way
-Java BigIntegers are represented \cite{wikipedia:twocomp} and because
-bitwise operations implicitly perform a sign extension
-\cite{java:bigint} on the shorter operand, the function does not
-actually catch overflows.
+\paragraph{A Bug in the checkResult Function.} Note the
+\texttt{checkResult} function on line 12 and the value
+\texttt{andMask} on line 23 of NumberType.scala. The function is
+intended to catch overflows by performing a bitwise conjunction of its
+argument with \texttt{andMask} and comparing the result with the
+argument. However, because of the way Java BigIntegers are represented
+\cite{wikipedia:twocomp} and because bitwise operations implicitly
+perform a sign extension \cite{java:bigint} on the shorter operand,
+the function does not actually catch overflows.
 
-While this is a potentially serious bug, it turns out that checkResult
-is only ever called inside a constructor call for a number type (like
-Int64) which contains the intended range check, see lines 32-35. The
-checkResult function thus can, and should, be removed entirely. The
-bitcoin-s developers have acknowledged the bug and we submitted a pull
-request to fix it \cite{BitcoinS:pull565}.
+While this is a potentially serious bug, it turns out that
+\texttt{checkResult} is only ever called inside a constructor call for
+a number type which contains the intended range check, see lines
+32-35. The \texttt{checkResult} function thus can, and should, be
+removed entirely. The bitcoin-s developers have acknowledged the bug
+and we submitted a pull request to fix it \cite{BitcoinS:pull565}.
 
+% For further development, this raises the question: if the goal of the
+% \texttt{Int64} type is to emulate \texttt{int64\_t} then why does it
+% prevent overflows? To achieve strict agreement with Bitcoin Core, a
+% better approach might be to remove overflow checking from the data
+% type and to add it in exactly those places where it happens in Bitcoin
+% Core.
 
 \paragraph{Transforming the Code.} We now turn to the list of Scala
 features used by the extracted code which are not supported by
 Stainless and how to transform the code into the supported fragment.
-All transformations are equivalent in the sense that if the
+All transformations are \emph{equivalent} in the sense that if the
 addition-with-zero property holds for the transformed code, then it
 also holds for the code before the transformation.
 
 \paragraph{Inheriting Objects.} In both files we have objects
 extending the BaseNumbers trait, on lines 30 and 23 respectively,
 which Stainless does not support. We simply turn those objects into
-case objects. That transformation is equivalent. Case objects have
+case objects. That transformation is equivalent: case objects have
 various additional properties (for example, being serializable) but
 none of our code depends on the absence of those.
 
 \paragraph{Abstract Type Members.} In CurrencyUnits.scala on line 6
 there is an abstract type that is not supported. Note that we can not
-simply replace it by a (supported) type parameter since the
+simply replace it with a (supported) type parameter since the
 CurrencyUnit class uses one of its implementing classes:
-Satoshis. Since the Satoshis class overrides A with Int64 anyway, we
-just remove the abstract type declaration and replace A by Int64
+Satoshis. Since the Satoshis class overrides \texttt{A} with \texttt{Int64} anyway, we
+just remove the abstract type declaration and replace \texttt{A} by \texttt{Int64}
 everywhere.
 
 \paragraph{Non-Literal BigInt Constructor Argument.} In
@@ -491,12 +489,14 @@ library are more restricted than their Scala library counterparts. In
 particular, the Stainless BigInt constructor is restricted to literal
 arguments. So we simply replace \texttt{toLong} by
 \texttt{underlying.toBigInt}: instead of converting the underlying
-Int64 (which in turn has an underlying BigInt) to Long and then back
-to BigInt we simply directly return the BigInt. This is an equivalent
-transformation: the only thing that might go wrong in the detour via
-\texttt{Long} is that the underlying BigInt does not fit into a
-Long. However, the only constructor of Int64Impl ensures exactly that
-and all functions producing Int64 do so via this constructor.
+\texttt{Int64} (which in turn has an underlying \texttt{BigInt}) to
+\texttt{Long} and then back to \texttt{BigInt} we simply directly
+return the \texttt{BigInt}. This is an equivalent transformation: the
+only thing that might go wrong in the detour via \texttt{Long} is that
+the underlying \texttt{BigInt} does not fit into a
+\texttt{Long}. However, the only constructor of \texttt{Int64Impl}
+ensures exactly that and all functions producing \texttt{Int64} do so
+via this constructor.
 
 \paragraph{Self-Reference in Type Parameter Bound.} In
 NumberTypes.scala both on lines 3 and 19 is a class with a type
@@ -505,33 +505,34 @@ itself. Stainless does not currently support such self-referential
 type boundaries. We opened an issue \cite{Stainless:issue519} on the
 Stainless repository and the developers have targeted version 0.4 to
 support self-referential type boundaries. Since our code only uses
-Number with type parameter T instantiated to Int64, we just remove the
-type parameter declaration and replace all its occurrences by Int64.
+Number with type parameter \texttt{T} instantiated to \texttt{Int64}, we just remove the
+type parameter declaration and replace all its occurrences by \texttt{Int64}.
 
 \paragraph{Missing Member \texttt{bigInteger} in BigInt.} In
 NumberType on line 6 there is a reference to \texttt{bigInteger}. The
-Scala BigInt class is essentially a wrapper around
-java.math.BigInteger. BigInt has a member bigInteger which is the
-underlying instance of the Java class. The Java class has a method
-longValueExact which returns a long only if the BigInteger fits into a
-long, otherwise throws exception. Stainless does not support Java
-classes and in particular its BigInt has no member
-bigInteger. However, our code does not call toLong anymore, so we just
-remove it.
+Scala \texttt{BigInt} class is essentially a wrapper around
+\texttt{java.math.BigInteger}. \texttt{BigInt} has a member
+\texttt{bigInteger} which is the underlying instance of the Java
+class. The Java class has a method \texttt{longValueExact} which
+returns a \texttt{long} only if the \texttt{BigInteger} fits into a
+\texttt{long}, otherwise throws exception. Stainless does not support
+Java classes and in particular its \texttt{BigInt} has no member
+\texttt{bigInteger}. However, our code does not call \texttt{toLong}
+anymore, so we just remove it.
 
 \paragraph{Type Members.} In NumberType.scala there is a type member
 on line 4. Our version of Stainless (0.1) does not support type
 members. We just remove the declaration and replace all occurrences of
-A with BigInt, since A is never overwritten in an implementing class.
+\texttt{A} with \texttt{BigInt}, since \texttt{A} is never overwritten in an implementing class.
 Note that in the meantime Stainless has implemented support for type
 members \cite{Stainless:pull470}. Since version 0.2 verification
 should succeed without this change.
 
 
 \paragraph{Missing Bitwise-And Method on BigInt.} Contrary to Scala
-BigInt, the Stainless BigInt class does not support bitwise
+\texttt{BigInt}, the Stainless \texttt{BigInt} class does not support bitwise
 operations, in particular not the \&-method used in NumberType.scala
-on line 13. However, as described above, the checkResult function is
+on line 13. However, as described above, the \texttt{checkResult} function is
 both broken and redundant, so we remove it and all calls to it.
 
 \paragraph{Inner Class in Case Object.} We have inner classes in
@@ -546,11 +547,12 @@ parameter: the error message. Stainless does not support the message
 parameter. We simply remove it.
 
 \paragraph{Missing Implicit Long to BigInt Conversion.} The Scala
-BigInt class has implict conversions from Long which NumberType.scala
-uses on lines 32 and 34 and they are missing in the Stainless
-BigInt. Since a BigInt constructor with a Long argument is also
-missing, we replace the Long literals by an explicit call to the
-BigInt constructor with a literal string argument,
+\texttt{BigInt} class has implict conversions from \texttt{Long} which
+NumberType.scala uses on lines 32 and 34. They are missing in the
+Stainless \texttt{BigInt}. A \texttt{BigInt} constructor with a
+\texttt{Long} argument is also missing. We thus replace the
+\texttt{Long} literals by an explicit call to the \texttt{BigInt}
+constructor with a literal string argument,
 e.g. \texttt{BigInt("-9223...5808")}.
 
 
@@ -558,6 +560,9 @@ e.g. \texttt{BigInt("-9223...5808")}.
 transformed into the supported fragment, we can finally write our
 specification, shown in Figure~\ref{fig:spec}, and verify it with
 Stainless, as the output in Figure~\ref{fig:result} shows.
+
+The original bitcoin-s code we started from, the extracted code, and
+the finally verified code are available in our GitHub repository \cite{verification:github}.
 
 \begin{figure}
 \lstinputlisting[style=scala, firstline=9, lastline=12, firstnumber=9]{../code/addition/src/main/scala/verified/currency/CurrencyUnits.scala}
@@ -601,15 +606,6 @@ of the code in future work.
 \bibliographystyle{splncs04}
 
 \bibliography{bibliography}
-
-\todo{reference to verified code}
-
-\todo{say which version of stainless
-  we used, which version of bitcoin-s:
-  91633375a37a170ba260ff4b443582aca4aa0c77 }
-
-\todo{code in text: italic or courier?}
-
 
 \clearpage
 \appendix
