@@ -6,17 +6,6 @@
 \usepackage[utf8]{inputenc}
 
 
-\usecolortheme{beaver}
-\addtobeamertemplate{footnote}{}{\vspace{4ex}}
-\setbeamerfont{footnote}{size=\scriptsize}
-
-\newcommand\blfootnote[1]{%
-  \begingroup
-  \renewcommand\thefootnote{}\footnote{#1}%
-  \addtocounter{footnote}{-1}%
-  \endgroup
-}
-
 \AtBeginSection
 {
   \begin{frame}
@@ -25,17 +14,24 @@
   \end{frame}
 }
 
+\usepackage{mycolors}
+\usecolortheme[named=kaisred]{structure}
+\useinnertheme{circles}
+\setbeamercolor{frametitle}{fg=kaisred,  bg=kaisgray}
+\setbeamercolor{block title example}{bg=white, fg=structure}%
+
+
 \setbeamertemplate{itemize items}{\textbullet}
-\setbeamertemplate{footline}[text line]{%
-  \parbox{\linewidth}{\vspace*{-8pt}
-    \insertshorttitle\hfill\insertshortauthor\hfill\insertframenumber
-  }
-}
-\setbeamertemplate{navigation symbols}{}
+% \setbeamertemplate{footline}[text line]{%
+%   \parbox{\linewidth}{\vspace*{-8pt}
+%     \insertshorttitle\hfill\insertshortauthor\hfill\insertframenumber
+%   }
+% }
+ \setbeamertemplate{navigation symbols}{}
 
 
 
-\graphicspath{{./images/}{../paper/images/}}
+\graphicspath{{./images/}{../images/}}
 
 \definecolor{dkgreen}{rgb}{0,0.6,0}
 \definecolor{gray}{rgb}{0.5,0.5,0.5}
@@ -127,6 +123,7 @@
 \begin{frame}[fragile]
 \frametitle{Stainless: Example}
 \begin{block}{Stainless output for the factorial function}
+  \medskip
 	\centering
 		\includegraphics[width=\textwidth]{output1.png}
   \end{block}
@@ -134,21 +131,20 @@
 
 \begin{frame}
 \frametitle{Stainless}
+\begin{block}{Pure Scala}
 \begin{itemize}
-  \item Pure Scala
-  \item Pre- and Postcondition
-  \item Outcome: valid, invalid, unknown
+  \item Stainless works on a subset of Scala called \emph{Pure Scala}
+  \item It's essentially algebraic datatypes (case classes) and pure functions
+  \item Some things that it does not include:
+    \begin{itemize}
+    \item inheritance by objects
+    \item abstract type members
+    \item inner classes
+      in case objects
 \end{itemize}
-\end{frame}
 
-
-\begin{frame}
-\frametitle{Properties}
-\begin{itemize}
-  \item Bitcoin-S
-  \item No-Inflation Property
-  \item Addition-with-Zero Property
 \end{itemize}
+\end{block}
 \end{frame}
 
 
@@ -224,7 +220,7 @@ sealed abstract class Number {
 
 
 \begin{frame}[fragile]
-\frametitle{Formal Specification}
+\frametitle{Specification and Stainless Output}
 \begin{lstlisting}[style=scala]
 def +(c: CurrencyUnit): CurrencyUnit = {
   require(c.satoshis == Satoshis.zero)
@@ -233,13 +229,10 @@ def +(c: CurrencyUnit): CurrencyUnit = {
   )
 } ensuring(res => res.satoshis == this.satoshis)
 \end{lstlisting}
-\end{frame}
 
+\bigskip\bigskip
 
-\begin{frame}
-\frametitle{Output of Stainless}
-\centering
-\includegraphics[width=\textwidth,height=0.8\textheight,keepaspectratio]{assets/final_verify_output.png}
+\includegraphics[width=\textwidth]{result_output}
 \end{frame}
 
 
@@ -248,8 +241,13 @@ def +(c: CurrencyUnit): CurrencyUnit = {
 
 
 \begin{frame}
-\frametitle{Found Bug in Bitcoin-S}
-\includegraphics[width=\textwidth,height=0.8\textheight,keepaspectratio]{assets/bitcoin-s-pr.png}
+\frametitle{Bug 1: Function checkTransaction is too restrictive}
+\includegraphics[width=\textwidth]{bug1.png}
+\end{frame}
+
+\begin{frame}
+\frametitle{Bug 2: Function checkResult is buggy (and redundant)}
+\includegraphics[width=.85\textwidth]{bug2.png}
 \end{frame}
 
 
