@@ -4,7 +4,7 @@
 \usepackage[T1]{fontenc}
 \usepackage{lmodern}
 \usepackage[utf8]{inputenc}
-\input{solidity-highlighting.tex}
+
 
 \usecolortheme{beaver}
 \addtobeamertemplate{footnote}{}{\vspace{4ex}}
@@ -33,13 +33,44 @@
 }
 \setbeamertemplate{navigation symbols}{}
 
+
+
+\graphicspath{{./images/}{../paper/images/}}
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+
+\lstdefinestyle{scala}{
+  language=scala,
+  basicstyle=\scriptsize\ttfamily, 
+  breaklines=true,
+  keywordstyle=\color{blue},
+  commentstyle=\color{dkgreen},
+  numbers=left,
+  %frame=single, % Border around box
+  %numbersep=-7pt,
+  numberstyle=\color{gray},
+  stringstyle=\color{mauve}
+}
+
+\lstdefinestyle{stainless}{
+  numbers=none,
+  breaklines=true,
+  breakautoindent=true,
+  breakindent=63pt,
+  basicstyle=\footnotesize\ttfamily
+}
+
+
 \begin{document}
 
-\title{Experiments in Formal Verification of Scala Code}
-% \subtitle{The Decentralized Autonomous Organization}
-\author{Ramon Boss, Anna Doukmak}
+\title{Towards Verifying the Bitcoin-S Library}
 
-\date{2019-06-14}
+\author{Ramon Boss, Kai Brünnler, Anna Doukmak}
+
+%\date{2019-06-14}
 
 \frame{\titlepage}
 
@@ -50,10 +81,56 @@
 \end{frame}
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Formal Verification}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Bitcoin-S}
 
+\begin{frame}[fragile]
+  \frametitle{Bitcoin-S}
+\begin{lstlisting}[style=scala]
+  val privKey = ECPrivateKey.freshPrivateKey
+  val creditingSPK = P2PKHScriptPubKey(pubKey = privKey.publicKey)
+
+  val amount = Satoshis(Int64(10000))
+
+  val utxo = TransactionOutput(currencyUnit = amount, scriptPubKey = creditingSPK)
+
+  val tx = BaseTransaction(
+    version = Int32.one,
+    inputs = List.empty,
+    outputs = List(utxo),
+    lockTime = UInt32.zero
+  )
+\end{lstlisting}
+\end{frame}
+
+
+
+
+\section{Stainless}
+
+
+\begin{frame}[fragile]
+\frametitle{Stainless: Example}
+\begin{lstlisting}[style=scala]
+  def factorial(n: Int): Int = {
+      require(n >= 0)
+      if (n == 0) {
+        1
+      } else {
+        n * factorial(n - 1)
+      }
+  } ensuring(res => res >= 0)
+\end{lstlisting}
+\end{frame}
+
+
+
+\begin{frame}[fragile]
+\frametitle{Stainless: Example}
+\begin{block}{Stainless output for the factorial function}
+	\centering
+		\includegraphics[width=\textwidth]{output1.png}
+  \end{block}
+\end{frame}
 
 \begin{frame}
 \frametitle{Stainless}
@@ -65,90 +142,6 @@
 \end{frame}
 
 
-\begin{frame}[fragile]
-\frametitle{Example: max}
-\begin{lstlisting}[language=Scala]
-def max(x: Int, y: Int): Int = {
-  val d = x - y
-  if (d > 0) x
-  else y
-}
-\end{lstlisting}
-\blfootnote{\url{https://epfl-lara.github.io/stainless/tutorial.html\#warm-up-max}}
-\end{frame}
-
-
-\begin{frame}[fragile]
-\frametitle{Example: max}
-\begin{lstlisting}[language=Scala]
-def max(x: Int, y: Int): Int = {
-  val d = x - y
-  if (d > 0) x
-  else y
-} ensuring (res =>
-  x <= res && y <= res && (res == x || res == y))
-\end{lstlisting}
-\blfootnote{\url{https://epfl-lara.github.io/stainless/tutorial.html\#warm-up-max}}
-\end{frame}
-
-
-\begin{frame}[fragile]
-\frametitle{Example: max}
-{\small\begin{verbatim}
-  [...     ]
-  [  Info  ]  - Result for 'postcondition' VC for max @2:3:
-  [Warning ]  => INVALID
-  [Warning ] Found counter-example:
-  [Warning ]   x: Int -> -2147483648
-  [Warning ]   y: Int -> 2147483647
-  [...     ]
-\end{verbatim}}
-% \begin{verbatim}
-%   [Warning ] The Z3 native interface is not available. Falling back onto smt-z3.
-% [  Info  ]  - Checking cache: 'postcondition' VC for max @2:3...
-% [  Info  ]  - Checking cache: 'postcondition' VC for max @2:3...
-% [  Info  ] Cache miss: 'postcondition' VC for max @2:3...
-% [  Info  ] Cache miss: 'postcondition' VC for max @2:3...
-% [  Info  ]  - Now solving 'postcondition' VC for max @2:3...
-% [  Info  ]  - Now solving 'postcondition' VC for max @2:3...
-% [  Info  ]  - Result for 'postcondition' VC for max @2:3:
-% [Warning ]  => INVALID
-% [Warning ] Found counter-example:
-% [Warning ]   x: Int -> 1
-% [Warning ]   y: Int -> -2147483648
-% [  Info  ]  - Result for 'postcondition' VC for max @2:3:
-% [Warning ]  => INVALID
-% [Warning ] Found counter-example:
-% [Warning ]   x: Int -> -2147483648
-% [Warning ]   y: Int -> 2147483647
-% [  Info  ]   ┌───────────────────┐
-% [  Info  ] ╔═╡ stainless summary ╞══════════════════════════════════════════════════════════════════════╗
-% [  Info  ] ║ └───────────────────┘                                                                      ║
-% [  Info  ] ║ max    postcondition          invalid      U:smt-z3       Test.scala:2:3          0.908    ║
-% [  Info  ] ║ max    postcondition          invalid      U:smt-z3       Test.scala:2:3          0.906    ║
-% [  Info  ] ╟┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄╢
-% [  Info  ] ║ total: 2    valid: 0    (0 from cache) invalid: 2    unknown: 0    time:   1.814           ║
-% [  Info  ] ╚════════════════════════════════════════════════════════════════════════════════════════════╝
-% [  Info  ] Shutting down executor service.
-
-% \end{verbatim}
-\end{frame}
-
-\begin{frame}[fragile]
-  \frametitle{Example: max}
-  \begin{lstlisting}[language=Scala]
-  def max(x: Int, y: Int): Int = {
-    require(0 <= x && 0 <= y)
-    val d = x - y
-    if (d > 0) x
-    else y
-  } ensuring (res =>
-    x <= res && y <= res && (res == x || res == y))
-  \end{lstlisting}
-  \blfootnote{\url{https://epfl-lara.github.io/stainless/tutorial.html\#warm-up-max}}
-  \end{frame}
-  
-
 \begin{frame}
 \frametitle{Properties}
 \begin{itemize}
@@ -159,15 +152,14 @@ def max(x: Int, y: Int): Int = {
 \end{frame}
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Problems Verifying Bitcoin-S}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Rewriting Bitcoin-S for Stainless}
+
 
 
 \begin{frame}[fragile]
-\frametitle{Turning Object into Case Object}
+\frametitle{Inheriting Objects}
 This:
-\begin{lstlisting}[language=Scala]
+\begin{lstlisting}[style=scala]
 object Satoshis extends BaseNumbers[Satoshis] {
   val zero = Satoshis(Int64.zero)
   val one = Satoshis(Int64.one)
@@ -175,7 +167,7 @@ object Satoshis extends BaseNumbers[Satoshis] {
 \end{lstlisting}
 
 Becomes this:
-\begin{lstlisting}[language=Scala]
+\begin{lstlisting}[style=scala]
 case object Satoshis extends BaseNumbers[Satoshis] {
   val zero = Satoshis(Int64.zero)
   val one = Satoshis(Int64.one)
@@ -185,9 +177,9 @@ case object Satoshis extends BaseNumbers[Satoshis] {
 
 
 \begin{frame}[fragile]
-\frametitle{Getting Rid of Abstract Type Member}
+\frametitle{Abstract Type Members}
 This:
-\begin{lstlisting}[language=Scala]
+\begin{lstlisting}[style=scala]
 sealed abstract class CurrencyUnit {
   type A
 
@@ -200,7 +192,7 @@ sealed abstract class Satoshis extends CurrencyUnit {
 \end{lstlisting}
 
 Becomes this:
-\begin{lstlisting}[language=Scala]
+\begin{lstlisting}[style=scala]
 sealed abstract class CurrencyUnit {
   protected def underlying: Int64
 }
@@ -211,9 +203,9 @@ sealed abstract class Satoshis extends CurrencyUnit
 
 
 \begin{frame}[fragile]
-\frametitle{BigInt \&-Function to Bound Check}
+\frametitle{Missing Bitwise \&-Function on BigInt}
 This:
-\begin{lstlisting}[language=Scala]
+\begin{lstlisting}[style=scala]
 sealed abstract class Number {
   def andMask: BigInt
   def checkResult(result: BigInt): BigInt = {
@@ -223,15 +215,9 @@ sealed abstract class Number {
 }  
 \end{lstlisting}
 Becomes this:
-\begin{lstlisting}[language=Scala]
+\begin{lstlisting}[style=scala]
 sealed abstract class Number {
-  def checkResult(result: BigInt): BigInt = {
-    require(
-      result <= BigInt("9223372036854775807") &&
-      result >= BigInt("-9223372036854775808")
-    )
-    result
-  }
+  // removed redundant checkResult function
 }
 \end{lstlisting}
 \end{frame}
@@ -239,7 +225,7 @@ sealed abstract class Number {
 
 \begin{frame}[fragile]
 \frametitle{Formal Specification}
-\begin{lstlisting}[language=Scala]
+\begin{lstlisting}[style=scala]
 def +(c: CurrencyUnit): CurrencyUnit = {
   require(c.satoshis == Satoshis.zero)
   Satoshis(
@@ -257,19 +243,9 @@ def +(c: CurrencyUnit): CurrencyUnit = {
 \end{frame}
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{Conclusion}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\begin{frame}
-\frametitle{Conclusion}
-\begin{itemize}
-  \item Write verifiable code
-  \item We verified not original Bitcoin-S code
-  \item Provided feedback to Stainless developers
-  \item Found a bug in Bitcoin-S
-\end{itemize}
-\end{frame}
+\section{Bugs We Found}
+
 
 \begin{frame}
 \frametitle{Found Bug in Bitcoin-S}
