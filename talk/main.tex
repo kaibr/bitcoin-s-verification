@@ -65,7 +65,7 @@
 \title{Towards Verifying the Bitcoin-S Library}
 
 \author{Ramon Boss, Kai Brünnler, Anna Doukmak}
-
+\institute{Bern University of Applied Sciences}
 %\date{2019-06-14}
 
 \frame{\titlepage}
@@ -83,11 +83,16 @@
   \frametitle{Bitcoin-S}
 \begin{lstlisting}[style=scala]
   val privKey = ECPrivateKey.freshPrivateKey
-  val creditingSPK = P2PKHScriptPubKey(pubKey = privKey.publicKey)
+  val spk = P2PKHScriptPubKey(
+    pubKey = privKey.publicKey
+  )
 
   val amount = Satoshis(Int64(10000))
 
-  val utxo = TransactionOutput(currencyUnit = amount, scriptPubKey = creditingSPK)
+  val utxo = TransactionOutput(
+    currencyUnit = amount, 
+    scriptPubKey = spk
+  )
 
   val tx = BaseTransaction(
     version = Int32.one,
@@ -141,6 +146,7 @@
     \item abstract type members
     \item inner classes
       in case objects
+    \item ...
 \end{itemize}
 
 \end{itemize}
@@ -250,5 +256,17 @@ def +(c: CurrencyUnit): CurrencyUnit = {
 \includegraphics[width=.85\textwidth]{bug2.png}
 \end{frame}
 
+\begin{frame}
+\frametitle{Conclusion}
+\begin{block}{Lessons learned}
+  \begin{itemize}
+  \item Even verifying very simple properties requires significantly rewriting existing Scala code
+  \item This is true even for purely functional code
+  \item We can't really verify existing code -- really we verify a re-implementation of it
+  \item But attempting to verify has been very useful for finding bugs
+  \end{itemize}
+\end{block}
+
+\end{frame}
 
 \end{document}
