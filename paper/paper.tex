@@ -33,8 +33,9 @@
 %\usepackage{newtxmath}
 \usepackage[zerostyle=b,scaled=.88]{newtxtt}
 
-% nicer bold
-\renewcommand{\bfdefault}{b}%
+% The default bold(bx) is too wide
+% Choose a nicer narrower bold
+\DeclareFontSeriesDefault[rm]{bf}{b}
 
 
 % make paragraph headings bold instead of italics

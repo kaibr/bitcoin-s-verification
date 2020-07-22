@@ -39,14 +39,16 @@
 \ccsdesc[500]{Theory of computation~Logic and verification}
 
 
-\keywords{Bitcoin, Scala, Bitcoin-S, Stainless} %TODO mandatory; please add comma-separated list of keywords
+\keywords{Bitcoin, Scala, Bitcoin-S, Stainless}
+% mandatory; please add comma-separated list of keywords
 
 %\category{} %optional, e.g. invited paper
 
 \relatedversion{A full version of the paper is available at
   \url{https://github.com/kaibr/bitcoin-s-verification/blob/master/paper/paper.pdf}.}
 
-%\supplement{}%optional, e.g. related research data, source code, ... hosted on a repository like zenodo, figshare, GitHub, ...
+% \supplement{}
+% optional, e.g. related research data, source code, ... hosted on a repository like zenodo, figshare, GitHub, ...
 
 %\funding{(Optional) general funding statement
 % \dots}%optional, to capture a funding statement, which applies to all authors. Please enter author specific funding statements as fifth argument of the \author macro.
@@ -101,6 +103,13 @@
   basicstyle=\footnotesize\ttfamily
 }
 
+% make paragraph headings bold instead of italics
+\renewcommand{\paragraph}{\textbf}%
+
+% The default bold(bx) is too wide
+% Choose a nicer narrower bold
+\DeclareFontSeriesDefault[rm]{bf}{b}
+
 
 \begin{document}
 
@@ -111,10 +120,9 @@
   implementation of parts of the Bitcoin protocol. We use the
   Stainless verifier which supports programs in a fragment of Scala
   called \emph{Pure Scala}. Since Bitcoin-S is not written in this
-  fragment, we extract the relevant code from it and perform a series
-  of equivalent transformations until we arrive at code that we
-  successfully verify. In that process we find and fix two bugs in
-  Bitcoin-S.
+  fragment, we extract the relevant code from it and rewrite it until
+  we arrive at code that we successfully verify. In that process we
+  find and fix two bugs in Bitcoin-S.
 \end{abstract}
 
 \section{Introduction}
@@ -125,9 +133,11 @@ serious bugs occur. The most recent example is the bug found in
 September 2018 \cite{cve201817144} which essentially allowed to
 arbitrarily create new coins. Such software is thus a worthwhile
 target for formal verification. In this work, we set out to verify
-properties of the bitcoin-s library with the Stainless verifier.
+properties of the Bitcoin-S library with the Stainless verifier. So
+this is a case study in applying the Stainless verifier to existing
+real-world code.
 
-\paragraph{The Bitcoin-S Library.} The bitcoin-s library is an
+\paragraph{The Bitcoin-S Library.} The Bitcoin-S library is an
 implementation of parts of the Bitcoin protocol in Scala
 \cite{BitcoinS:website,BitcoinS:github}. In particular, it allows to
 serialize, deserialize, sign and validate Bitcoin transactions. The
@@ -139,14 +149,12 @@ significant amounts of cryptocurrency each day
 
 \paragraph{The Stainless Verifier.} Stainless is the successor of the
 Leon verifier and is developed at EPF Lausanne
-\cite{DBLP:conf/ecoop/BlancKKS13,DBLP:conf/pldi/VoirolKK15,DBLP:conf/pldi/BlancK15}. It
-is intended to be used by programmers without training in formal
-verification. To facilitate that, it accepts specifications written in
-the programming language itself (Scala). Also, it focusses on
-counterexample finding in addition to proving
-correctness. Counterexamples are useful to programmers while
-correctness proofs are not -- correctness is obvious or does not hold,
-and often both at the same time.
+\cite{DBLP:conf/ecoop/BlancKKS13,DBLP:conf/pldi/VoirolKK15,DBLP:conf/pldi/BlancK15}.
+A distinguishing feature of Stainless is that it accepts
+specifications written in the programming language itself
+(Scala). Also, it focusses on counterexample finding in addition to
+proving correctness. Counterexamples are immediately useful to
+programmers, which can not be said about correctness proofs.
 
 The example in Figure~\ref{fig:factorial} adapted from the Stainless
 documentation \cite{Stainless:documentation} shows how the verifier is
@@ -205,17 +213,16 @@ operations while the \texttt{BigInt} type in Stainless does not.
 try to verify the property that a regular (non-coinbase) transaction
 can not generate new coins. We call it the \emph{no-inflation
   property}. Trying to verify it, we uncover and fix a bug in the
-bitcoin-s library. We then find that there is too much code involved
+Bitcoin-S library. We then find that there is too much code involved
 that lies outside of the supported fragment to currently make this
 verification feasible. So we turn to a simpler property to verify. The
 simplest possible property we can think of is the fact that adding
 zero satoshis to a given amount of satoshis yields the given amount of
 satoshis. We call it the \emph{addition-with-zero property} and we try
 to verify it in Section~3. Here as well we see that a significant part
-of the code lies outside of the supported fragment. We perform a
-  series of equivalent transformations on it until we arrive at code that we
-  successfully verify. In that process we find and fix a second bug in
-  bitcoin-s.
+of the code lies outside of the supported fragment. We rewrite it
+until we arrive at code that we successfully verify. In that process
+we find and fix a second bug in Bitcoin-S.
 
 
 \section{The No-Inflation Property}
@@ -228,14 +235,6 @@ basic checks succeed, otherwise false. For example, one of those
 checks is that both the list of inputs and list of outputs need to be
 non-empty.
 
-To better understand the validation of a transaction in bitcoin-s, it
-is useful to review how transactions are represented and created.
-
-\paragraph{Creating a Transaction.} To create a transaction, we first
-need some coins -- an unspent transaction output. We could load an
-actual unspent transaction output from the bitcoin network, but we
-create one manually in order to see this process. So we first create
-an (invalid) transaction with one output in Figure~\ref{fig:prevtx}.
 
 \begin{figure}
 \begin{lstlisting}[style=scala]
@@ -277,101 +276,6 @@ def checkTransaction(transaction: Transaction): Boolean = {
 \end{figure}
 
 
-\begin{figure}
-\begin{lstlisting}[style=scala]
-  val privKey = ECPrivateKey.freshPrivateKey
-  val creditingSPK = P2PKHScriptPubKey(pubKey = privKey.publicKey)
-
-  val amount = Satoshis(Int64(10000))
-
-  val utxo = TransactionOutput(currencyUnit = amount, scriptPubKey = creditingSPK)
-
-  val prevTx = BaseTransaction(
-    version = Int32.one,
-    inputs = List.empty,
-    outputs = List(utxo),
-    lockTime = UInt32.zero
-  )
-\end{lstlisting}
-  
-  \caption{Creating a transaction output to spend}
-  \label{fig:prevtx}
-\end{figure}
-
-We first create a keypair, then a lock script with its public key,
-then the amount of satoshis, then a transaction output (\texttt{utxo})
-for that amount and locked with that script. Finally we create a
-transaction with that output and no inputs. Of course, that is not a
-valid transaction, because it creates coins out of nothing. In
-particular, \texttt{checkTransaction(prevTx)} returns false, simply
-because the list of inputs is empty.
-
-\begin{figure}
-\begin{lstlisting}[style=scala]
-  val outPoint = TransactionOutPoint(prevTx.txId, UInt32.zero)
-
-  val utxoSpendingInfo = BitcoinUTXOSpendingInfo(
-    outPoint = outPoint,
-    output = utxo,
-    signers = List(privKey),
-    redeemScriptOpt = None,
-    scriptWitnessOpt = None,
-    hashType = HashType.sigHashAll
-  )
-
-  val utxos = List(utxoSpendingInfo)
-
-  val destinationAmount = Satoshis(Int64(5000))
-
-  val destinationSPK = P2PKHScriptPubKey(pubKey = ECPrivateKey.freshPrivateKey.publicKey)
-
-  val destinations = List(
-    TransactionOutput(currencyUnit = destinationAmount, scriptPubKey = destinationSPK)
-  )
-
-  val feeRate = SatoshisPerByte(Satoshis.one)
-
-  val networkParams = RegTest // some static values for testing
-
-  val txBuilderF: Future[BitcoinTxBuilder] = BitcoinTxBuilder(
-    destinations = destinations, 
-    utxos = utxos,               
-    feeRate = feeRate,           
-    changeSPK = creditingSPK,    // where to send the change
-    network = networkParams      
-  )
-
-  val txF: Future[Transaction] = txBuilderF.flatMap(_.sign)
-
-  val tx: Transaction = Await.result(txF, 1 second)
-\end{lstlisting}
-  \caption{Creating a transaction}
-  \label{fig:tx}
-\end{figure}
-
-Now that we have a transaction output, we create a transaction to
-spend it in Figure~\ref{fig:tx}. First, we need a reference to an
-output of a previous transaction, here called
-\texttt{outPoint}. Second, we add some information on how to spend
-that output, in particular, how to sign the transaction. Now we
-assemble the list of unspent transaction outputs (\texttt{utxos}), in our case
-just one.
-
-We then set the amount of satoshis that we want to spend. The \texttt{Int64}
-class aims to emulate a C data type in Scala, and we will look at it
-more closely in the next section.
-
-We then create a lock script (\texttt{destinationSPK}) to receive the
-coins, create our list of transaction outputs (\texttt{destinations}),
-define the fee rate and set some bitcoin network parameters.
-
-Now we create a transaction builder with those data and we tell it to
-start signing the transaction in line 34.
-
-Finally, we get the actual signed transaction. We could serialize it
-and send it to the Bitcoin network. We can also pass it to the
-checkTransaction function, which will return true.
-
 \paragraph{A Bug in the checkTransaction Function.} Note lines 15-17
 in Figure~\ref{fig:checktrans}. Here, the value
 \texttt{prevOutputTxIds} gathers a list of all transaction identifiers
@@ -397,12 +301,12 @@ Specifically, we replace lines 15-17 as follows:
 
 
 We submitted this fix together with a corresponding unit test to the
-bitcoin-s project in a pull request, which has been merged
+Bitcoin-S project in a pull request, which has been merged
 \cite{BitcoinS:pull435}.
 
 
 \paragraph{An Attempt at Verification.} Naively trying Stainless on
-the entire bitcoin-s codebase results in many errors -- as was to be
+the entire Bitcoin-S codebase results in many errors -- as was to be
 expected. We tried to extract only the code relevant to the
 no-inflation-property and to verify that. However, even the extracted
 code has more than 1500 lines and liberally uses Scala features
@@ -421,17 +325,17 @@ It is of course a crucial property we are verifying here: if zero
 satoshis were credited to your account, you would not want your
 balance to change! It is also the simplest meaningful property to
 verify that we can think of. However, the code involved in performing
-the addition of two satoshi amounts in bitcoin-s is non-trivial. The
+the addition of two satoshi amounts in Bitcoin-S is non-trivial. The
 reason for that is a peculiarity of consensus code: agreement with the
-majority is more important than correctness, whatever correctness
-might mean. The most widely used bitcoin implementation by far is the
-reference implementation Bitcoin Core, written in C++. For consensus
-code, bitcoin-s has little choice but to be in strict agreement with
-the reference implementation. To achieve that, it implements C-like
-data types in Scala and then implements functionality using those
-C-like data types. For example, the Satoshis class, which represents
-an amount of satoshis, is implemented using the class \texttt{Int64} which
-aims to represent the C-type \texttt{int64\_t}. 
+majority is the only relevant notion of correctness. The most widely
+used bitcoin implementation by far is the reference implementation
+Bitcoin Core, written in C++. For consensus code, Bitcoin-S has thus
+little choice but to be in strict agreement with the reference
+implementation. To achieve that, it implements C-like data types in
+Scala and then implements functionality using those C-like data
+types. For example, the Satoshis class, which represents an amount of
+satoshis, is implemented using the class \texttt{Int64} which aims to
+represent the C-type \texttt{int64\_t}.
 
 \begin{figure}
 \lstinputlisting[style=scala]{../code/addition/src/main/scala/extracted/number/NumberType.scala}
@@ -472,7 +376,7 @@ While this is a potentially serious bug, it turns out that
 \texttt{checkResult} is only ever called inside a constructor call for
 a number type which contains the intended range check, see lines
 32-35. The \texttt{checkResult} function thus can, and should, be
-removed entirely. The bitcoin-s developers have acknowledged the bug
+removed entirely. The Bitcoin-S developers have acknowledged the bug
 and we submitted a pull request to fix it \cite{BitcoinS:pull565}.
 
 % For further development, this raises the question: if the goal of the
@@ -482,9 +386,10 @@ and we submitted a pull request to fix it \cite{BitcoinS:pull565}.
 % type and to add it in exactly those places where it happens in Bitcoin
 % Core.
 
-\paragraph{Transforming the Code.} We now turn to the list of Scala
+\paragraph{Rewriting the Code.} We now turn to the list of Scala
 features used by the extracted code which are not supported by
-Stainless and how to transform the code into the supported fragment.
+Stainless and how to rewrite the code in the supported fragment.
+
 All transformations are \emph{equivalent} in the sense that if the
 addition-with-zero property holds for the transformed code, then it
 also holds for the code before the transformation.
@@ -583,7 +488,7 @@ transformed into the supported fragment, we can finally write our
 specification, shown in Figure~\ref{fig:spec}, and verify it with
 Stainless, as the output in Figure~\ref{fig:result} shows.
 
-The original bitcoin-s code we started from, the extracted code, and
+The original Bitcoin-S code we started from, the extracted code, and
 the finally verified code are available in our GitHub repository \cite{verification:github}.
 
 \begin{figure}
@@ -606,7 +511,7 @@ We are happy to see some friendly green verifier output. However,
 apart from the bugs we found, the main conclusion from this work is
 that we had to non-trivially transform even a very small portion of
 the code in order to verify it. At the moment, it is unrealistic to
-routinely formally verify properties as part of the bitcoin-s
+routinely formally verify properties as part of the Bitcoin-S
 development process. However, Stainless development has already
 progressed (e.g.\ type members are supported in recent versions) and
 continues to do so (e.g. self-referential type bounds are on the
@@ -615,13 +520,13 @@ easy to support, like the message parameter in the require
 function. Some other features presumably require more substantial
 work, like bitwise operations on integer types.
 
-On the other hand, bitcoin-s uses features that might not be supported
+On the other hand, Bitcoin-S uses features that might not be supported
 even by future Stainless versions, such as calls to Java code. Here
-the bitcoin-s code can hopefully be adapted to accommodate formal
+the Bitcoin-S code can hopefully be adapted to accommodate formal
 verification.
 
 From our results we conclude that formal verification of bitcoin
-libraries in general and bitcoin-s in particular is a worthwhile
+libraries in general and Bitcoin-S in particular is a worthwhile
 endeavour. We are looking forward to verifying more substantial parts
 of the code in future work.
 
