@@ -519,27 +519,30 @@ the finally verified code are available in our GitHub repository \cite{verificat
 \section{Conclusion and Future Work}
 
 We are happy to see some friendly green verifier output. However,
-apart from the bugs we found, the main conclusion from this work is
-that we had to non-trivially transform even a very small portion of
-the code in order to verify it. At the moment, it is unrealistic to
-routinely formally verify properties as part of the Bitcoin-S
-development process. However, Stainless development has already
-progressed (e.g.\ type members are supported in recent versions) and
-continues to do so (e.g. self-referential type bounds are on the
-roadmap). Some missing features that we identified are presumably very
-easy to support, like the message parameter in the require
-function. Some other features presumably require more substantial
-work, like bitwise operations on integer types.
+apart from the bugs we found, the main conclusion of this work is that
+we had to non-trivially transform even a very small portion of the
+code (70 lines) in order to verify it. And that was true even though
+the code was purely functional to begin with. At the moment, it is
+probably unrealistic to routinely formally verify properties as part
+of the Bitcoin-S development process. However, Stainless development
+has already progressed (e.g.\ type members are supported in recent
+versions) and continues to do so (e.g. self-referential type bounds
+are on the roadmap). Some missing features that we identified are
+presumably very easy to support, like the message parameter in the
+require function. Some other features presumably require more
+substantial work, like bitwise operations on integer types.
 
 On the other hand, Bitcoin-S uses features that might not be supported
-even by future Stainless versions, such as calls to Java code. Here
-the Bitcoin-S code can hopefully be adapted to accommodate formal
-verification.
+even by future Stainless versions, such as calls to Java code.
 
-From our results we conclude that formal verification of bitcoin
-libraries in general and Bitcoin-S in particular is a worthwhile
-endeavour. We are looking forward to verifying more substantial parts
-of the code in future work.
+Given our experience, the best route towards integrating verification
+into the Bitcoin-S development process would be to re-implement parts
+of the library in Pure Scala. We would split the library into a
+\emph{verified} and \emph{non-verified} part, and use Stainless only
+on the \emph{verified} part. It is then both a technical but also a
+political question how much code, if any, can be moved to the
+\emph{verified} part. That is an interesting direction for future
+work.
 
 \appendix
 
