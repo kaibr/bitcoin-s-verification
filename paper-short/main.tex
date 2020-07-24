@@ -44,22 +44,24 @@
 
 %\category{} %optional, e.g. invited paper
 
-\relatedversion{A full version of the paper is available at
-  \url{https://github.com/kaibr/bitcoin-s-verification/blob/master/paper/paper.pdf}.}
+% \relatedversion{A full version of the paper is available at
+%   \url{https://github.com/kaibr/bitcoin-s-verification/blob/master/paper/paper.pdf}.}
 
 % \supplement{}
 % optional, e.g. related research data, source code, ... hosted on a repository like zenodo, figshare, GitHub, ...
 
-%\funding{(Optional) general funding statement
-% \dots}%optional, to capture a funding statement, which applies to all authors. Please enter author specific funding statements as fifth argument of the \author macro.
+% \funding{(Optional) general funding statement
+% \dots}%optional, to capture a funding statement, which applies to all authors.
+%Please enter author specific funding statements as fifth argument of the \author macro.
 
 %\acknowledgements{I want to thank \dots}%optional
 
 \nolinenumbers %uncomment to disable line numbering
 
-%\hideOASIcs  %uncomment to remove references to OASIcs series (logo, DOI, ...), e.g. when preparing a pre-final version to be uploaded to arXiv or another public repository
+% \hideOASIcs %uncomment to remove references to OASIcs series (logo, DOI, ...),
+% e.g. when preparing a pre-final version to be uploaded to arXiv or another public repository
 
-%Editor-only macros:: begin (do not touch as author)%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%Editor-only macros:: begin (do not touch as author)%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \EventEditors{John Q. Open and Joan R. Access}
 \EventNoEds{2}
 \EventLongTitle{42nd Conference on Very Important Topics (CVIT 2016)}
@@ -71,7 +73,7 @@
 \EventLogo{}
 \SeriesVolume{42}
 \ArticleNo{23}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \usepackage{listings, color}
 
@@ -156,8 +158,8 @@ specifications written in the programming language itself
 proving correctness. Counterexamples are immediately useful to
 programmers, which can not be said about correctness proofs.
 
-The example in Figure~\ref{fig:factorial} adapted from the Stainless
-documentation \cite{Stainless:documentation} shows how the verifier is
+The example in Figure~\ref{fig:factorial} is adapted from the Stainless
+documentation \cite{Stainless:documentation} and shows how the verifier is
 used. Note how a precondition is specified using \texttt{require} and
 a postcondition using \texttt{ensuring}. Our function does not satisfy
 the specification. An overflow in the 32-bit integer type leads to a
@@ -195,9 +197,9 @@ classes, case classes and case objects, objects for grouping classes
 and functions, boolean expressions with short-circuit interpretation,
 generics with invariant type parameters, pattern matching, local and
 anonymous classes and more.  In addition to Pure Scala Stainless also
-supports some imperative features, such as using a (mutable) variable
-in a local scope of a function and while loops. They turn out not to
-be relevant for our current work.
+supports some imperative features, such as while loops and using a
+(mutable) variable in a local scope of a function. They turn out not
+to be relevant for our current work.
 
 What will turn out to be more relevant for us are the Scala features
 which Stainless does not support, such as: inheritance by objects,
@@ -211,14 +213,14 @@ operations while the \texttt{BigInt} type in Stainless does not.
 
 \paragraph{Outline and Properties to Verify.} In the next section we
 try to verify the property that a regular (non-coinbase) transaction
-can not generate new coins. We call it the \emph{no-inflation
-  property}. Trying to verify it, we uncover and fix a bug in the
+can not generate new coins. We call it the \emph{No-Inflation
+  Property}. Trying to verify it, we uncover and fix a bug in the
 Bitcoin-S library. We then find that there is too much code involved
 that lies outside of the supported fragment to currently make this
 verification feasible. So we turn to a simpler property to verify. The
 simplest possible property we can think of is the fact that adding
 zero satoshis to a given amount of satoshis yields the given amount of
-satoshis. We call it the \emph{addition-with-zero property} and we try
+satoshis. We call it the \emph{Addition-With-Zero Property} and we try
 to verify it in Section~3. Here as well we see that a significant part
 of the code lies outside of the supported fragment. We rewrite it
 until we arrive at code that we successfully verify. In that process
@@ -227,13 +229,23 @@ we find and fix a second bug in Bitcoin-S.
 
 \section{The No-Inflation Property}
 
+\paragraph{An Attempt at Verification.} Naively trying Stainless on
+the entire Bitcoin-S codebase results in many errors -- as was to be
+expected. We tried to extract only the code relevant to the
+No-Inflation Property and to verify that. However, even the extracted
+code has more than 1500 lines and liberally uses Scala features
+outside of the supported fragment. We started to rewrite the code in
+the supported fragment, but quickly realized that a better approach is
+to first verify a simpler property depending on less code and later
+come back to the No-Inflation Property with more experience. However,
+during the process of trying to rewrite the code, we found a bug in
+the \texttt{checkTransaction} function shown in
+Figure~\ref{fig:checktrans}.
 
-The \texttt{checkTransaction} function shown in
-Figure~\ref{fig:checktrans} is crucial for the verification of the
-no-inflation property. Given a transaction it returns true if some
-basic checks succeed, otherwise false. For example, one of those
-checks is that both the list of inputs and list of outputs need to be
-non-empty.
+\paragraph{A Bug in the checkTransaction Function.} Given a
+transaction the function returns true if some basic checks succeed,
+otherwise false. For example, one of those checks is that both the
+list of inputs and list of outputs need to be non-empty.
 
 
 \begin{figure}
@@ -275,9 +287,18 @@ def checkTransaction(transaction: Transaction): Boolean = {
   \label{fig:checktrans}
 \end{figure}
 
+\begin{figure}
+\begin{lstlisting}[style=scala, firstnumber=15]
+  val prevOutputs = transaction.inputs.map(_.previousOutput)
+  val noDuplicateInputs = 
+    prevOutputs.distinct.size == prevOutputs.size
+\end{lstlisting}
+  \caption{Bug Fix}
+  \label{fig:bugfix1}
+\end{figure}
 
-\paragraph{A Bug in the checkTransaction Function.} Note lines 15-17
-in Figure~\ref{fig:checktrans}. Here, the value
+
+Note particularly lines 15-17.  Here, the value
 \texttt{prevOutputTxIds} gathers a list of all transaction identifiers
 referenced by the inputs of the current transaction. If the size of
 this list is the same as the size of this list with duplicates
@@ -292,34 +313,18 @@ identifiers. Note that \texttt{TransactionOutPoint} is a case class
 and thus its notion of equality is just what we need: equality of of
 both the transaction identifier and the output index.
 
-Specifically, we replace lines 15-17 as follows:
-\begin{lstlisting}[style=scala, firstnumber=15]
-  val prevOutputs = transaction.inputs.map(_.previousOutput)
-  val noDuplicateInputs = 
-    prevOutputs.distinct.size == prevOutputs.size
-\end{lstlisting}
+Specifically, we replace lines 15-17 as shown in
+Figure~\ref{fig:bugfix1}. We submitted this fix together with a
+corresponding unit test to the Bitcoin-S project in a pull request,
+which has been merged \cite{BitcoinS:pull435}.
 
-
-We submitted this fix together with a corresponding unit test to the
-Bitcoin-S project in a pull request, which has been merged
-\cite{BitcoinS:pull435}.
-
-
-\paragraph{An Attempt at Verification.} Naively trying Stainless on
-the entire Bitcoin-S codebase results in many errors -- as was to be
-expected. We tried to extract only the code relevant to the
-no-inflation-property and to verify that. However, even the extracted
-code has more than 1500 lines and liberally uses Scala features
-outside of the supported fragment. We tried to transform the code into
-the supported fragment, but quickly realized that a better approach is
-to first verify a simpler property depending on less code and later
-come back to the no-inflation property with more experience. So we now
-turn to the addition-with-zero property.
+We now turn to the much simpler Addition-With-Zero Property.
 
 
 
 
-\section{The Addition-with-Zero Property}
+
+\section{The Addition-With-Zero Property}
 
 It is of course a crucial property we are verifying here: if zero
 satoshis were credited to your account, you would not want your
@@ -329,7 +334,7 @@ the addition of two satoshi amounts in Bitcoin-S is non-trivial. The
 reason for that is a peculiarity of consensus code: agreement with the
 majority is the only relevant notion of correctness. The most widely
 used bitcoin implementation by far is the reference implementation
-Bitcoin Core, written in C++. For consensus code, Bitcoin-S has thus
+Bitcoin Core, written in C++. For consensus code, Bitcoin-S thus has
 little choice but to be in strict agreement with the reference
 implementation. To achieve that, it implements C-like data types in
 Scala and then implements functionality using those C-like data
@@ -377,37 +382,38 @@ While this is a potentially serious bug, it turns out that
 a number type which contains the intended range check, see lines
 32-35. The \texttt{checkResult} function thus can, and should, be
 removed entirely. The Bitcoin-S developers have acknowledged the bug
-and we submitted a pull request to fix it \cite{BitcoinS:pull565}.
+and we submitted a pull request to fix it, which has been merged
+\cite{BitcoinS:pull565}.
 
-% For further development, this raises the question: if the goal of the
-% \texttt{Int64} type is to emulate \texttt{int64\_t} then why does it
-% prevent overflows? To achieve strict agreement with Bitcoin Core, a
-% better approach might be to remove overflow checking from the data
-% type and to add it in exactly those places where it happens in Bitcoin
-% Core.
+For further development of Bitcoin-S, this raises a question. If the
+goal of the \texttt{Int64} type is to emulate \texttt{int64\_t} then
+why does it prevent overflows? To achieve strict agreement with
+Bitcoin Core, a better approach might be to remove overflow checking
+from the data type and to add it in exactly those places where it
+happens in Bitcoin Core.
 
 \paragraph{Rewriting the Code.} We now turn to the list of Scala
 features used by the extracted code which are not supported by
 Stainless and how to rewrite the code in the supported fragment.
 
-All transformations are \emph{equivalent} in the sense that if the
-addition-with-zero property holds for the transformed code, then it
-also holds for the code before the transformation.
+All code changes are \emph{equivalent} in the (admittedly narrow)
+sense that if the Addition-With-Zero Property holds for the rewritten
+code, then it also holds for the original code.
 
 \paragraph{Inheriting Objects.} In both files we have objects
 extending the BaseNumbers trait, on lines 30 and 23 respectively,
 which Stainless does not support. We simply turn those objects into
-case objects. That transformation is equivalent: case objects have
-various additional properties (for example, being serializable) but
-none of our code depends on the absence of those.
+case objects. That code is equivalent: case objects have various
+additional properties (for example, being serializable) but none of
+our code depends on the absence of those.
 
 \paragraph{Abstract Type Members.} In CurrencyUnits.scala on line 6
 there is an abstract type that is not supported. Note that we can not
 simply replace it with a (supported) type parameter since the
 CurrencyUnit class uses one of its implementing classes:
-Satoshis. Since the Satoshis class overrides \texttt{A} with \texttt{Int64} anyway, we
-just remove the abstract type declaration and replace \texttt{A} by \texttt{Int64}
-everywhere.
+Satoshis. Since the Satoshis class overrides \texttt{A} with
+\texttt{Int64} anyway, we just remove the abstract type declaration
+and replace \texttt{A} by \texttt{Int64} everywhere.
 
 \paragraph{Non-Literal BigInt Constructor Argument.} In
 CurrencyUnits.scala on line 18 the BigInt constructor is called with a
@@ -432,8 +438,9 @@ itself. Stainless does not currently support such self-referential
 type boundaries. We opened an issue \cite{Stainless:issue519} on the
 Stainless repository and the developers have targeted version 0.4 to
 support self-referential type boundaries. Since our code only uses
-Number with type parameter \texttt{T} instantiated to \texttt{Int64}, we just remove the
-type parameter declaration and replace all its occurrences by \texttt{Int64}.
+Number with type parameter \texttt{T} instantiated to \texttt{Int64},
+we just remove the type parameter declaration and replace all its
+occurrences by \texttt{Int64}.
 
 \paragraph{Missing Member \texttt{bigInteger} in BigInt.} In
 NumberType on line 6 there is a reference to \texttt{bigInteger}. The
@@ -450,17 +457,18 @@ anymore, so we just remove it.
 \paragraph{Type Members.} In NumberType.scala there is a type member
 on line 4. Our version of Stainless (0.1) does not support type
 members. We just remove the declaration and replace all occurrences of
-\texttt{A} with \texttt{BigInt}, since \texttt{A} is never overwritten in an implementing class.
-Note that in the meantime Stainless has implemented support for type
-members \cite{Stainless:pull470}. Since version 0.2 verification
-should succeed without this change.
+\texttt{A} with \texttt{BigInt}, since \texttt{A} is never overwritten
+in an implementing class.  Note that in the meantime Stainless has
+implemented support for type members \cite{Stainless:pull470}. Since
+version 0.2 verification should succeed without this change.
 
 
 \paragraph{Missing Bitwise-And Method on BigInt.} Contrary to Scala
-\texttt{BigInt}, the Stainless \texttt{BigInt} class does not support bitwise
-operations, in particular not the \&-method used in NumberType.scala
-on line 13. However, as described above, the \texttt{checkResult} function is
-both broken and redundant, so we remove it and all calls to it.
+\texttt{BigInt}, the Stainless \texttt{BigInt} class does not support
+bitwise operations, in particular not the \&-method used in
+NumberType.scala on line 13. However, as described above, the
+\texttt{checkResult} function is both broken and redundant, so we
+remove it and all calls to it.
 
 \paragraph{Inner Class in Case Object.} We have inner classes in
 NumberType.scala on line 31 and in CurrencyUnits.scala on line
@@ -483,16 +491,19 @@ constructor with a literal string argument,
 e.g. \texttt{BigInt("-9223...5808")}.
 
 
-\paragraph{The Specification.} Now that all our code has been
-transformed into the supported fragment, we can finally write our
-specification, shown in Figure~\ref{fig:spec}, and verify it with
-Stainless, as the output in Figure~\ref{fig:result} shows.
+\paragraph{The Specification.} Now that all our code is in the
+supported fragment, we can finally write our specification. We add a
+postcondition to the +-method of the \texttt{CurrencyUnit}-class
+(Figure~\ref{fig:currencyunits}, lines 9-11) resulting in
+Figure~\ref{fig:spec}. We successfully verify it with Stainless, as
+the output in Figure~\ref{fig:result} shows.
 
 The original Bitcoin-S code we started from, the extracted code, and
 the finally verified code are available in our GitHub repository \cite{verification:github}.
 
 \begin{figure}
-\lstinputlisting[style=scala, firstline=9, lastline=12, firstnumber=9]{../code/addition/src/main/scala/verified/currency/CurrencyUnits.scala}
+  \lstinputlisting[style=scala, firstline=9, lastline=12,
+  firstnumber=9]{../code/addition/src/main/scala/verified/currency/CurrencyUnits.scala}
 \caption{Addition function with specification}
 \label{fig:spec}
 \end{figure}
@@ -500,7 +511,7 @@ the finally verified code are available in our GitHub repository \cite{verificat
 \begin{figure}
 	\centering
 		\includegraphics[width=\textwidth]{result_output}
-	\caption{Stainless output for the transformed code}
+	\caption{Stainless output for the rewritten code}
   \label{fig:result}
 \end{figure}
 
