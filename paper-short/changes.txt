@@ -1,0 +1,96 @@
+
+
+
+----------------------- REVIEW 2 ---------------------
+
+
+### 1. Introduction
+
+> I would like to suggest to improve the management of the expectations
+> of the reader. This could, e.g., be achieved by clearly stating if
+> this paper aims for demonstrating an idea using a specific case study
+> or by stating that a generic approach is presented. As mentioned
+> earlier, the paper is, in its current from, in the first category.
+
+
+Absolutely. We now stress in the introduction that this is work a case study in
+applying the Stainless verifier to existing real-world code.
+
+
+> The explanation of the source code could be improved by adding
+> references to line numbers (e.g., to avoid the need to hit CTRL-F to
+> find utxo).
+
+This seems to refer to source code that has been cut from the final
+(short) version.
+
+>The formal specification of the invariant (Fig 3. line 27-30) lacks
+>  a detailed explanation.
+
+We added some more explanation.
+
+> The paper would benefit a lot from a systematic description of the
+> necessary code transformation that enables the actual
+> verification. This should also include a discussion in what sense
+> this transformation preserves the properties to be verified (i.e.,
+> does the transformation ensure that a transformed code contains a
+> specific class of bugs if and only if the original source code
+> contained such a bug type).
+
+We replaced the word "transformation" by "rewrite" to suggest that
+we're only rewriting this particular instance of code and are not
+aiming at systematic general "code transformations".
+
+Our "transformations" only work for the given code. They would not
+work in general. For example, if an object has vars (mutable state) it
+cannot be turned into a case object. (In our case it luckily does not
+contain vars.) Another example, the calls to the bitwise-and function
+(&) can only be removed, because in our case the relevant checks
+happen elsewhere. They can not be removed in general, of course.
+
+We don't think that the code changes can be generalized in such a way
+that they can be usefully applied to other code, and we hopefully
+don't give the impression that we do.
+
+
+>### 4. Conclusion and Future Work
+
+> This section could be improved a lot. I am sure readers would be
+> interested in learning about the required effort and which tasks
+> required the most effort. Moreover, an expert judgement to what extend
+> such a verification might be less effort using a future version of
+> Stainless supporting a larger fragment of Scala (also discussing,
+> which are the most important features that are currently not
+> supported?) as well as the faithfulness of the code transformation
+> would make this section much stronger.
+
+We added some more discussion -- however, please note that the effort
+is hard to quantify and potential future effort even more so.
+
+
+----------------------- REVIEW 3 ---------------------
+
+> One concern is that the code snippets occupy about 4
+> pages. Some parts of the code are probably not essential and could be
+> used, for instance, for explaining the verification conditions.
+
+We cut material (mostly source code and some explanation of Bitcoin-S)
+to go from 12 to 9 pages.
+
+> p. 1. The following sentence needs clarification: "Counterexamples
+> are useful to programmers while correctness proofs are not --
+> correctness is obvious or does not hold, and often both at the same
+> time".
+
+We rewrote the sentence for clarity (it was a joke :) ).
+
+> p.7. This sentence is not clear: "The reason for that is a
+> peculiarity of consensus code: agreement with the majority is more
+> important than correctness, whatever correctness might mean."
+
+Rewrote the sentence for clarity.
+ 
+
+
+
+
