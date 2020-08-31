@@ -1,0 +1,102 @@
+\begin{thebibliography}{10}
+
+\bibitem{DBLP:conf/pldi/BlancK15}
+R{\'{e}}gis Blanc and Viktor Kuncak.
+\newblock Sound reasoning about integral data types with a reusable {SMT}
+  solver interface.
+\newblock In Haller and Miller \cite{DBLP:conf/pldi/2015scala}, pages 35--40.
+\newblock \href {https://doi.org/10.1145/2774975.2774980}
+  {\path{doi:10.1145/2774975.2774980}}.
+
+\bibitem{DBLP:conf/ecoop/BlancKKS13}
+R{\'{e}}gis Blanc, Viktor Kuncak, Etienne Kneuss, and Philippe Suter.
+\newblock An overview of the leon verification system: verification by
+  translation to recursive functions.
+\newblock In {\em Proceedings of the 4th Workshop on Scala, SCALA@ECOOP 2013,
+  Montpellier, France, July 2, 2013}, pages 1:1--1:10. {ACM}, 2013.
+\newblock \href {https://doi.org/10.1145/2489837.2489838}
+  {\path{doi:10.1145/2489837.2489838}}.
+
+\bibitem{Stainless:issue519}
+Ramon Boss.
+\newblock Issue 519: Unknown type parameter type {T} in self referencing
+  generic.
+\newblock Accessed 2019-06-27.
+\newblock URL: \url{https://github.com/epfl-lara/stainless/issues/519}.
+
+\bibitem{BitcoinS:pull565}
+Ramon Boss.
+\newblock Remove redundant function checkresult.
+\newblock Accessed 2019-07-03.
+\newblock URL: \url{https://github.com/bitcoin-s/bitcoin-s/pull/565}.
+
+\bibitem{BitcoinS:pull435}
+Ramon Boss.
+\newblock Transaction can reference two different outputs of the same previous
+  transaction.
+\newblock Accessed 2019-06-19.
+\newblock URL: \url{https://github.com/bitcoin-s/bitcoin-s/pull/435}.
+
+\bibitem{verification:github}
+Ramon Boss, Kai Brünnler, and Anna Doukmak.
+\newblock The bitcoin-s-verification repository.
+\newblock Accessed 2019-07-06.
+\newblock URL: \url{https://github.com/kaibr/bitcoin-s-verification}.
+
+\bibitem{DBLP:conf/pldi/2015scala}
+Philipp Haller and Heather Miller, editors.
+\newblock {\em Proceedings of the 6th {ACM} {SIGPLAN} Symposium on Scala,
+  Scala@PLDI 2015, Portland, OR, USA, June 15-17, 2015}. {ACM}, 2015.
+
+\bibitem{Stainless:documentation}
+{LARA Lab, École Polytechnique Fédérale de Lausanne}.
+\newblock {Stainless documentation}.
+\newblock Accessed 2019-06-19.
+\newblock URL: \url{https://epfl-lara.github.io/stainless/}.
+
+\bibitem{java:bigint}
+{Oracle and/or its affiliates}.
+\newblock {Class BigInteger}.
+\newblock Accessed 2019-07-03.
+\newblock URL:
+  \url{https://docs.oracle.com/javase/8/docs/api/java/math/BigInteger.html}.
+
+\bibitem{cve201817144}
+Jimmy Song.
+\newblock {Bitcoin Core Bug CVE-2018–17144: An Analysis}.
+\newblock Accessed 2019-06-20.
+\newblock URL:
+  \url{https://hackernoon.com/bitcoin-core-bug-cve-2018-17144-an-analysis-f80d9d373362}.
+
+\bibitem{BitcoinS:website}
+{Suredbits \& the bitcoin-s developers}.
+\newblock The bitcoin-s website.
+\newblock Accessed 2019-06-19.
+\newblock URL: \url{https://bitcoin-s.org}.
+
+\bibitem{BitcoinS:github}
+{The bitcoin-s developers}.
+\newblock The bitcoin-s repository.
+\newblock Accessed 2019-06-19.
+\newblock URL: \url{https://github.com/bitcoin-s}.
+
+\bibitem{Stainless:pull470}
+{The Stainless developers}.
+\newblock Type aliases, type members, and dependent function types.
+\newblock Accessed 2019-06-27.
+\newblock URL: \url{https://github.com/epfl-lara/stainless/pull/470}.
+
+\bibitem{DBLP:conf/pldi/VoirolKK15}
+Nicolas Voirol, Etienne Kneuss, and Viktor Kuncak.
+\newblock Counter-example complete verification for higher-order functions.
+\newblock In Haller and Miller \cite{DBLP:conf/pldi/2015scala}, pages 18--29.
+\newblock \href {https://doi.org/10.1145/2774975.2774978}
+  {\path{doi:10.1145/2774975.2774978}}.
+
+\bibitem{wikipedia:twocomp}
+{Wikipedia contributors}.
+\newblock Two's complement.
+\newblock Accessed 2019-07-03.
+\newblock URL: \url{https://en.wikipedia.org/wiki/Two\%27s_complement}.
+
+\end{thebibliography}
