@@ -28,7 +28,7 @@ sealed abstract class Satoshis extends CurrencyUnit {
 }
 
 case object Satoshis extends BaseNumbers[Satoshis] {
-  val zero = Satoshis(Int64.zero)
+  lazy val zero = Satoshis(Int64.zero)
 
   def apply(int64: Int64): Satoshis = SatoshisImpl(int64)
 }
