@@ -1,10 +1,10 @@
 package verifiedall.number
 
 sealed abstract class Number {
-  protected def underlying: BigInt
+  type A = BigInt
+  protected def underlying: A
   def toBigInt: BigInt = underlying
-  def apply: BigInt => Int64
-
+  def apply: A => Int64
   def +(num: Int64): Int64 = {
     require(Int64.isInRange(underlying + num.underlying))
     apply(underlying + num.underlying)
@@ -14,7 +14,7 @@ sealed abstract class Number {
 sealed abstract class SignedNumber extends Number
 
 sealed abstract class Int64 extends SignedNumber {
-  override def apply: BigInt => Int64 = num => {
+  override def apply: A => Int64 = num => {
     require(Int64.isInRange(num))
     Int64(num)
   }
