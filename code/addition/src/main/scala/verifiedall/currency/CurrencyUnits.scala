@@ -4,6 +4,7 @@ import verifiedall.number.{BaseNumbers, Int64}
 import stainless.lang._
 
 sealed abstract class CurrencyUnit {
+  type A
   def satoshis: Satoshis
 
   def ==(c: CurrencyUnit): Boolean = satoshis == c.satoshis
@@ -18,6 +19,7 @@ sealed abstract class CurrencyUnit {
 }
 
 sealed abstract class Satoshis extends CurrencyUnit {
+  override type A = Int64
   override def satoshis: Satoshis = this
 
   def toBigInt: BigInt = underlying.toBigInt
