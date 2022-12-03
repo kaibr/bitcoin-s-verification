@@ -110,7 +110,7 @@
 
 % The default bold(bx) is too wide
 % Choose a nicer narrower bold
-\DeclareFontSeriesDefault[rm]{bf}{b}
+%\DeclareFontSeriesDefault[rm]{bf}{b}
 
 
 \begin{document}
@@ -343,13 +343,13 @@ satoshis, is implemented using the class \texttt{Int64} which aims to
 represent the C-type \texttt{int64\_t}.
 
 \begin{figure}
-\lstinputlisting[style=scala]{../code/addition/src/main/scala/extracted/number/NumberType.scala}
+\lstinputlisting[style=scala]{code/extracted/number/NumberType.scala}
   \caption{Extracted Code from NumberType.scala}
   \label{fig:numbertype}
 \end{figure}
 
 \begin{figure}
-\lstinputlisting[style=scala]{../code/addition/src/main/scala/extracted/currency/CurrencyUnits.scala}
+\lstinputlisting[style=scala]{code/extracted/currency/CurrencyUnits.scala}
   \caption{Extracted Code from CurrencyUnits.scala}
   \label{fig:currencyunits}
 \end{figure}
@@ -503,7 +503,7 @@ the finally verified code are available in our GitHub repository \cite{verificat
 
 \begin{figure}
   \lstinputlisting[style=scala, firstline=9, lastline=12,
-  firstnumber=9]{../code/addition/src/main/scala/verified/currency/CurrencyUnits.scala}
+  firstnumber=9]{code/verified/currency/CurrencyUnits.scala}
 \caption{Addition function with specification}
 \label{fig:spec}
 \end{figure}
